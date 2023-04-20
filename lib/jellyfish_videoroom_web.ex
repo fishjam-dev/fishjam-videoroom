@@ -39,8 +39,9 @@ defmodule JellyfishVideoroomWeb do
   def controller do
     quote do
       use Phoenix.Controller,
-        formats: [:html, :json],
-        layouts: [html: JellyfishVideoroomWeb.Layouts]
+        formats: [:html, :json]
+
+      # layouts: [html: JellyfishVideoroomWeb.Layouts]
 
       import Plug.Conn
       import JellyfishVideoroomWeb.Gettext

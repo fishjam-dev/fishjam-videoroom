@@ -3,17 +3,19 @@ defmodule JellyfishVideoroomWeb.Router do
 
   pipeline :browser do
     plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
+    # plug :fetch_session
+    # plug :fetch_live_flash
     # plug :put_root_layout, {JellyfishVideoroomWeb.Layouts, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    # plug :protect_from_forgery
+    # plug :put_secure_browser_headers
   end
 
   scope "/", JellyfishVideoroomWeb do
     pipe_through :browser
 
     get "/", PageController, :index
+
+    get "/*path", PageController, :index
   end
 
   # Other scopes may use custom stacks.

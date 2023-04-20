@@ -34,7 +34,7 @@ config :esbuild,
   version: "0.17.11",
   default: [
     args:
-      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+      ~w(src/index.tsx --bundle --target=es2017 --outfile=../priv/static/assets/app.js --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
@@ -46,7 +46,7 @@ config :tailwind,
     args: ~w(
       --config=tailwind.config.js
       --input=css/app.css
-      --output=../priv/static/assets/app.css
+      --output=../priv/static/assets/css/app.css
     ),
     cd: Path.expand("../assets", __DIR__)
   ]

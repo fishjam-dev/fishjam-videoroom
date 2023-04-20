@@ -1,32 +1,25 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
-      </a>
-      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
-        v<%= Application.spec(:phoenix, :vsn) %>
-      </p>
-    </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
-        @elixirphoenix
-      </a>
-      <a href="https://github.com/phoenixframework/phoenix" class="hover:text-zinc-700">
-        GitHub
-      </a>
-      <a
-        href="https://hexdocs.pm/phoenix/overview.html"
-        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
-      >
-        Get Started <span aria-hidden="true">&rarr;</span>
-      </a>
-    </div>
-  </div>
-</header>
-<main class="px-4 py-20 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-2xl">
-    <.flash_group flash={@flash} />
-    <%= @inner_content %>
-  </div>
-</main>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Membrane Videoroom WebRTC demo</title>
+    <link rel="stylesheet" href={static_path(@conn, "/assets/css/app.css")} />
+    <link rel="stylesheet" href={~p"/assets/css/app.css"} />
+    <link rel="icon" type="image/svg+xml" href={~p"/svg/favicon.svg"} />
+    <link rel="icon" type="image/png" href={~p"/svg/favicon.svg"} />
+  </head>
+
+  <body class="h-[100dvh] relative">
+      <main role="main h-screen">
+        <%= @inner_content %>
+      </main>
+      <div>
+        <label class="absolute text-brand-dark-blue-500 text-xl bottom-5 left-3 invisible md:visible">Version: <%= "version placeholder" %></label>
+      </div>
+  </body>
+</html>

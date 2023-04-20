@@ -26,7 +26,15 @@ config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
   secret_key_base: "3OpO+3+rRCbNqZ7Sks+gijlpIbFiP1H9n8fNvoEm113cJYsZgAjvTFHQOQV8KGFE",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]},
+    npx: [
+      "tailwindcss",
+      "--input=css/app.css",
+      "--output=../priv/static/assets/css/app.css",
+      "--postcss",
+      "--watch",
+      cd: Path.expand("../assets", __DIR__)
+    ]
   ]
 
 # ## SSL Support
