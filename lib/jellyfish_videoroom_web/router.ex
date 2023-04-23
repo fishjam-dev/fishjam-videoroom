@@ -15,7 +15,7 @@ defmodule JellyfishVideoroomWeb.Router do
 
     get "/", PageController, :index
 
-    get "/*path", PageController, :index
+    get "/room/:room_id", RoomControler, :index
   end
 
   # Other scopes may use custom stacks.

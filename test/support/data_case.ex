@@ -32,14 +32,18 @@ defmodule JellyfishVideoroom.DataCase do
     :ok
   end
 
+  @spec setup_sandbox(nil | maybe_improper_list | map) :: :ok
   @doc """
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(JellyfishVideoroom.Repo, shared: not tags[:async])
+    pid =
+      Ecto.Adapters.SQL.Sandbox.start_owner!(JellyfishVideoroom.Repo, shared: not tags[:async])
+
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
   end
 
+  @spec errors_on(Ecto.Changeset.t()) :: %{optional(atom) => list}
   @doc """
   A helper that transforms changeset errors into a map of messages.
 
@@ -50,7 +54,7 @@ defmodule JellyfishVideoroom.DataCase do
   """
   def errors_on(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
-      Regex.replace(~r"%{(\w+)}", message, fn _, key ->
+      Regex.replace(~r"%{(\w+)}", message, fn _match, key ->
         opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
       end)
     end)

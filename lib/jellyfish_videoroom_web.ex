@@ -17,6 +17,8 @@ defmodule JellyfishVideoroomWeb do
   those modules here.
   """
 
+  # credo:disable-for-this-file
+
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
   def router do
@@ -44,7 +46,6 @@ defmodule JellyfishVideoroomWeb do
       # layouts: [html: JellyfishVideoroomWeb.Layouts]
 
       import Plug.Conn
-      import JellyfishVideoroomWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -84,9 +85,6 @@ defmodule JellyfishVideoroomWeb do
     quote do
       # HTML escaping functionality
       import Phoenix.HTML
-      # Core UI components and translation
-      import JellyfishVideoroomWeb.CoreComponents
-      import JellyfishVideoroomWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

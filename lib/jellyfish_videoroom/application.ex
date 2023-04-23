@@ -8,8 +8,6 @@ defmodule JellyfishVideoroom.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the Telemetry supervisor
-      JellyfishVideoroomWeb.Telemetry,
       # Start the Ecto repository
       JellyfishVideoroom.Repo,
       # Start the PubSub system
