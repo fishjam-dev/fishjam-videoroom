@@ -3,6 +3,38 @@ orbs:
   elixir: membraneframework/elixir@1
 
 jobs:
+  test_with_db:
+    docker:
+      - image: membraneframeworklabs/docker_membrane:latest
+        environment:
+          MIX_ENV: test
+
+      - image: cimg/postgres:15.2
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+
+    steps:
+      - checkout
+      - run:
+          command: mkdir -p priv
+          name: Ensure priv dir exists
+      - elixir/get_mix_deps
+      - elixir/use_build_cache:
+          env: test
+      - run:
+          command: mix deps.compile
+          name: Ensure native deps are compiled
+      - run:
+          command: mix ecto.create
+          name: Create test database
+      - run:
+          command: mix ecto.migrate
+          name: Migrate database schema
+      - run:
+          command: mix test --warnings-as-errors
+          name: Run all tests
+
   lint_frontend:
     working_directory: ~/jellyfish_videoroom/assets
     docker:
@@ -38,8 +70,7 @@ workflows:
     jobs:
       - elixir/build_test:
           cache-version: 2
-      - elixir/test:
-          cache-version: 2
+      - test_with_db
       - elixir/lint:
           cache-version: 2
           docs: false
