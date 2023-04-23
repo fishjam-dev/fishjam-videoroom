@@ -1,20 +1,36 @@
 version: 2.1
 orbs:
   elixir: membraneframework/elixir@1
-  codecov: codecov/codecov@3.2.4
 
 jobs:
-  test:
+  lint_frontend:
+    working_directory: ~/jellyfish_videoroom/assets
     docker:
-      - image: membraneframeworklabs/docker_membrane:latest
-        environment:
-          MIX_ENV: test
+      - image: cimg/node:18.14.2
 
     steps:
-      - checkout
-      - run: mix deps.get
-      - run: mix coveralls.json --warnings-as-errors
-      - codecov/upload
+      - checkout:
+          path: ~/jellyfish_videoroom
+      - restore_cache:
+          keys:
+            - npm-deps-{{ checksum "package-lock.json" }}
+            - npm-deps-
+      - run:
+          command: npm ci
+          name: Install front-end dependencies
+      - save_cache:
+          key: npm-deps-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+      - run:
+          command: npm run format:check
+          name: Run prettier on front-end
+      - run:
+          command: npm run typing:check
+          name: Run typescript typechecking on front-end
+      - run:
+          command: npm run lint:check
+          name: Run linter on front-end
 
 workflows:
   version: 2
@@ -22,7 +38,9 @@ workflows:
     jobs:
       - elixir/build_test:
           cache-version: 2
-      - test
+      - elixir/test:
+          cache-version: 2
       - elixir/lint:
           cache-version: 2
           docs: false
+      - lint_frontend

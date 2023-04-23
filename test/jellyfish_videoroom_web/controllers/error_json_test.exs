@@ -2,7 +2,9 @@ defmodule JellyfishVideoroomWeb.ErrorJSONTest do
   use JellyfishVideoroomWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert JellyfishVideoroomWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert JellyfishVideoroomWeb.ErrorJSON.render("404.json", %{}) == %{
+             errors: %{detail: "Not Found"}
+           }
   end
 
   test "renders 500" do
