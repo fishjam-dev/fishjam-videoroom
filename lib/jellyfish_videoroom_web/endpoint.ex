@@ -7,7 +7,7 @@ defmodule JellyfishVideoroomWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_jellyfish_videoroom_key",
-    signing_salt: "kTrd+tCc",
+    signing_salt: "h7Xl8mm4",
     same_site: "Lax"
   ]
 
@@ -26,8 +26,6 @@ defmodule JellyfishVideoroomWeb.Endpoint do
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do
-    socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
-    plug Phoenix.LiveReloader
     plug Phoenix.CodeReloader
     plug Phoenix.Ecto.CheckRepoStatus, otp_app: :jellyfish_videoroom
   end

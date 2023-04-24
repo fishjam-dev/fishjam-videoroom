@@ -23,19 +23,8 @@ config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "3OpO+3+rRCbNqZ7Sks+gijlpIbFiP1H9n8fNvoEm113cJYsZgAjvTFHQOQV8KGFE",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]},
-    npx: [
-      "tailwindcss",
-      "--input=css/app.css",
-      "--output=../priv/static/assets/css/app.css",
-      "--postcss",
-      "--watch",
-      cd: Path.expand("../assets", __DIR__)
-    ]
-  ]
+  secret_key_base: "Ovvgkm2prqt9EuqBAuHVGRtJj35AcVVnwSkk3dcTmZYZ9Gfigrg1bOSokrung9aT",
+  watchers: []
 
 # ## SSL Support
 #
@@ -59,15 +48,6 @@ config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
 # If desired, both `http:` and `https:` keys can be
 # configured to run both http and https servers on
 # different ports.
-
-# Watch static and templates for browser reloading.
-config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"lib/jellyfish_videoroom_web/(controllers|live|components)/.*(ex|heex)$"
-    ]
-  ]
 
 # Enable dev routes for dashboard and mailbox
 config :jellyfish_videoroom, dev_routes: true

@@ -1,27 +1,13 @@
 defmodule JellyfishVideoroomWeb.Router do
   use JellyfishVideoroomWeb, :router
 
-  pipeline :browser do
-    plug :accepts, ["html"]
-    # plug :fetch_session
-    # plug :fetch_live_flash
-    # plug :put_root_layout, {JellyfishVideoroomWeb.Layouts, :root}
-    # plug :protect_from_forgery
-    # plug :put_secure_browser_headers
+  pipeline :api do
+    plug :accepts, ["json"]
   end
 
-  scope "/", JellyfishVideoroomWeb do
-    pipe_through :browser
-
-    get "/", PageController, :index
-
-    get "/room/:room_id", RoomControler, :index
+  scope "/api", JellyfishVideoroomWeb do
+    pipe_through :api
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", JellyfishVideoroomWeb do
-  #   pipe_through :api
-  # end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:jellyfish_videoroom, :dev_routes) do
@@ -33,7 +19,7 @@ defmodule JellyfishVideoroomWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through :browser
+      pipe_through [:fetch_session, :protect_from_forgery]
 
       live_dashboard "/dashboard", metrics: JellyfishVideoroomWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview

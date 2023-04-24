@@ -17,7 +17,7 @@ config :jellyfish_videoroom, JellyfishVideoroom.Repo,
 # you can enable the server option below.
 config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "Sjx6CmrDFprAS7D7bTeraVWMmBEMEZ8EcG/8jJ7ucaihhBO74qx8IhN7lKiKgZ1E",
+  secret_key_base: "ZARcyCI5SXpckH0BXnmeifEvUBnxxyqIR6PZDcmHKOUH3EbUHCeep0pdjXLYYdSq",
   server: false
 
 # In test we don't send emails.

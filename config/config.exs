@@ -14,11 +14,11 @@ config :jellyfish_videoroom,
 config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
-    formats: [html: JellyfishVideoroomWeb.ErrorHTML, json: JellyfishVideoroomWeb.ErrorJSON],
+    formats: [json: JellyfishVideoroomWeb.ErrorJSON],
     layout: false
   ],
   pubsub_server: JellyfishVideoroom.PubSub,
-  live_view: [signing_salt: "4BJXYU9I"]
+  live_view: [signing_salt: "qiQmVeXX"]
 
 # Configures the mailer
 #
@@ -28,28 +28,6 @@ config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
 config :jellyfish_videoroom, JellyfishVideoroom.Mailer, adapter: Swoosh.Adapters.Local
-
-# Configure esbuild (the version is required)
-config :esbuild,
-  version: "0.17.11",
-  default: [
-    args:
-      ~w(src/index.tsx --bundle --target=es2017 --outfile=../priv/static/assets/app.js --external:/images/*),
-    cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
-  ]
-
-# Configure tailwind (the version is required)
-config :tailwind,
-  version: "3.2.7",
-  default: [
-    args: ~w(
-      --config=tailwind.config.js
-      --input=css/app.css
-      --output=../priv/static/assets/css/app.css
-    ),
-    cd: Path.expand("../assets", __DIR__)
-  ]
 
 # Configures Elixir's Logger
 config :logger, :console,
