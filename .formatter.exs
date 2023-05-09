@@ -1,5 +1,8 @@
 [
-  import_deps: [:ecto, :ecto_sql, :phoenix],
-  subdirectories: ["priv/*/migrations"],
-  inputs: ["*.{ex,exs}", "{config,lib,test}/**/*.{ex,exs}", "priv/*/seeds.exs"]
+  inputs: [
+    "{lib,test,config}/**/*.{ex,exs}",
+    ".formatter.exs",
+    "*.exs"
+  ],
+  import_deps: [:membrane_core, :phoenix]
 ]

@@ -10,8 +10,6 @@ defmodule JellyfishVideoroom.Application do
     children = [
       # Start the Telemetry supervisor
       JellyfishVideoroomWeb.Telemetry,
-      # Start the Ecto repository
-      JellyfishVideoroom.Repo,
       # Start the PubSub system
       {Phoenix.PubSub, name: JellyfishVideoroom.PubSub},
       # Start Finch

@@ -7,9 +7,6 @@
 # General application configuration
 import Config
 
-config :jellyfish_videoroom,
-  ecto_repos: [JellyfishVideoroom.Repo]
-
 # Configures the endpoint
 config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
   url: [host: "localhost"],
