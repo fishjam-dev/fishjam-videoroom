@@ -77,21 +77,7 @@ defmodule JellyfishVideoroom.MixProject do
   defp aliases do
     [
       setup: ["deps.get"],
-      test: test_task(),
       "api.spec": ["openapi.spec.yaml --spec JellyfishVideoroomWeb.ApiSpec"]
     ]
-  end
-
-  defp test_task() do
-    ci? = System.get_env("CI") == "true"
-
-    [
-      "ecto.create --quiet",
-      "ecto.migrate --quiet",
-      unless(ci?, do: "docker start"),
-      "test",
-      unless(ci?, do: "docker stop")
-    ]
-    |> Enum.filter(& &1)
   end
 end

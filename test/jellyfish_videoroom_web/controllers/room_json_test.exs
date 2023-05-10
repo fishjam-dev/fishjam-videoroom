@@ -25,15 +25,28 @@ defmodule JellyfishVideoroomWeb.RoomJsonTest do
     })
   end
 
+  setup_all _ctx do
+    on_exit(fn ->
+      client = Jellyfish.Client.new()
+
+      {:ok, rooms} = JellyfishRoom.get_all(client)
+
+      Enum.each(rooms, fn room ->
+        JellyfishRoom.delete(client, room.id)
+      end)
+    end)
+  end
+
   test "Room creates when peer joins and closes when it leaves", %{conn: conn, client: client} do
     token = add_peer(conn)
     peer = join_room(token)
-    assert {:ok, [%JellyfishRoom{peers: peers, id: _id}]} = JellyfishRoom.get_all(client)
+    assert {:ok, [%JellyfishRoom{peers: peers, id: jf_room_id}]} = JellyfishRoom.get_all(client)
     assert length(peers) == 1
 
     leave_room(peer)
-    assert {:error, reason} = JellyfishRoom.get(client, @room_id)
-    assert String.contains?(reason, "#{@room_id} does not exist")
+    Process.sleep(@api_latency)
+    assert {:error, reason} = JellyfishRoom.get(client, jf_room_id)
+    assert String.contains?(reason, "#{jf_room_id} does not exist")
   end
 
   test "Two peers join the same room", %{conn: conn, client: client} do
@@ -46,8 +59,8 @@ defmodule JellyfishVideoroomWeb.RoomJsonTest do
     assert {:ok, [%JellyfishRoom{peers: peers, id: _id}]} = JellyfishRoom.get_all(client)
     assert length(peers) == 2
 
-    Process.sleep(@api_latency)
     leave_room(peer1)
+    Process.sleep(@api_latency)
     assert {:ok, [%JellyfishRoom{peers: peers, id: _id}]} = JellyfishRoom.get_all(client)
     assert length(peers) == 1
 
@@ -61,12 +74,12 @@ defmodule JellyfishVideoroomWeb.RoomJsonTest do
 
     token = add_peer(conn)
     peer = join_room(token, async: true)
-    leave_room(peer, async: true)
 
     assert_receive {:jellyfish, {:peer_connected, room_id, peer_id}}, @api_latency
     assert_receive {:jellyfish, {:peer_disconnected, ^room_id, ^peer_id}}, @api_latency
     assert_receive {:jellyfish, {:peer_connected, _room_id, _peer_id}}, @api_latency
 
+    Process.sleep(@api_latency)
     assert {:ok, [%JellyfishRoom{peers: peers, id: _id}]} = JellyfishRoom.get_all(client)
     assert length(peers) == 1
 

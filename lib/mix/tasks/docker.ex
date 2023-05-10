@@ -18,7 +18,6 @@ defmodule Mix.Tasks.Docker do
         stop()
         update()
         start()
-        Process.sleep(1000)
 
       "stop" ->
         stop()
