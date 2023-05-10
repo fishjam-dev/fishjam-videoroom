@@ -1,4 +1,8 @@
 defmodule Mix.Tasks.Docker do
+  @moduledoc """
+  A task for starting Jellyfish in docker,
+  e.g. for local development or testing.
+  """
   use Mix.Task
 
   @turn_port_range "50000-50100"

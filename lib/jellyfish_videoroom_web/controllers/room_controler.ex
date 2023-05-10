@@ -5,6 +5,7 @@ defmodule JellyfishVideoroomWeb.RoomController do
 
   action_fallback JellyfishWeb.FallbackController
 
+  @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     {:ok, token} = JellyfishClient.join_room(id)
 

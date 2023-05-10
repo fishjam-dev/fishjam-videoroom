@@ -1,14 +1,17 @@
 defmodule JellyfishVideoroom.JellyfishClient do
+  @moduledoc false
   use GenServer
 
   alias Jellyfish.Room, as: JellyfishRoom
 
   # Client
 
+  @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
+  @spec join_room(any, any) :: any
   def join_room(id, opts \\ [max_peers: nil]) do
     GenServer.call(__MODULE__, {:join_room, id, opts})
   end

@@ -1,6 +1,11 @@
 defmodule JellyfishVideoroom.Test.Peer do
+  @moduledoc false
+
+  # A module mocking the websocket connection from a WebRTC peer
+
   use WebSockex
 
+  @spec start_link(binary | WebSockex.Conn.t(), any) :: {:ok, pid}
   def start_link(url, token) do
     connect(url, token)
   end

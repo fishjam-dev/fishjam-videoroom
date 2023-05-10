@@ -7,6 +7,7 @@ defmodule JellyfishVideoroomWeb.FallbackController do
   use JellyfishVideoroomWeb, :controller
 
   # This clause handles errors returned by Ecto's insert/update/delete.
+  @spec call(Plug.Conn.t(), {:error, any()}) :: Plug.Conn.t()
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:unprocessable_entity)
