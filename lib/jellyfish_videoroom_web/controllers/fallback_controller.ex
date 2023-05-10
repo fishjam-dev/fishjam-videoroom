@@ -7,6 +7,8 @@ defmodule JellyfishVideoroomWeb.FallbackController do
   use JellyfishVideoroomWeb, :controller
 
   # This clause is an example of how to handle resources that cannot be found.
+
+  @spec call(Plug.Conn.t(), tuple()) :: Plug.Conn.t()
   def call(conn, {:error, :not_found}) do
     conn
     |> put_status(:not_found)

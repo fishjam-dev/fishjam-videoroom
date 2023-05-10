@@ -3,6 +3,10 @@ defmodule JellyfishVideoroom.JellyfishClient do
   use GenServer
 
   alias Jellyfish.Room, as: JellyfishRoom
+  alias JellyfishVideoroom.Rooms
+  alias JellyfishVideoroom.Rooms.Room
+
+  @peer_timeout 60 * 1000
 
   # Client
 
@@ -24,26 +28,31 @@ defmodule JellyfishVideoroom.JellyfishClient do
     {:ok, notifier} = Jellyfish.Notifier.start()
     Process.monitor(notifier)
 
-    {:ok, %{client: client, notifier: notifier, rooms: []}}
+    {:ok, %{client: client, notifier: notifier, rooms: Rooms.new()}}
   end
 
   @impl true
   def handle_call({:join_room, id, opts}, _from, state) do
-    {jellyfish_room_id, state} =
-      case Enum.find(state.rooms, fn {room_id, _jf_id} -> id == room_id end) do
-        {_id, jellyfish_room_id} ->
-          {jellyfish_room_id, state}
+    room =
+      case Rooms.fetch_by_id(state.rooms, id) do
+        {:ok, room} ->
+          room
 
-        nil ->
-          {:ok, jellyfish_room} = Jellyfish.Room.create(state.client, max_peers: opts[:max_peers])
+        :error ->
+          {:ok, jf_room} = Jellyfish.Room.create(state.client, max_peers: opts[:max_peers])
 
-          rooms = [{id, jellyfish_room.id} | state.rooms]
-          {jellyfish_room.id, %{state | rooms: rooms}}
+          %Room{
+            id: id,
+            jf_id: jf_room.id,
+            peers: %{},
+            peer_timeout: @peer_timeout
+          }
       end
 
-    {:ok, _peer, token} = JellyfishRoom.add_peer(state.client, jellyfish_room_id, "webrtc")
+    {:ok, peer, token} = JellyfishRoom.add_peer(state.client, room.jf_id, Jellyfish.Peer.WebRTC)
+    rooms = Rooms.add_peer(state.rooms, room, peer)
 
-    {:reply, {:ok, token}, state}
+    {:reply, {:ok, token}, %{state | rooms: rooms}}
   end
 
   @impl true
@@ -52,7 +61,11 @@ defmodule JellyfishVideoroom.JellyfishClient do
       case notification do
         {:peer_disconnected, jf_room_id, peer_id} ->
           JellyfishRoom.delete_peer(state.client, jf_room_id, peer_id)
-          maybe_remove_room(jf_room_id, state)
+
+          {:ok, room} = Rooms.fetch_by_jf_id(state.rooms, jf_room_id)
+          rooms = Rooms.delete_peer(state.rooms, room, peer_id)
+
+          maybe_remove_room(room, %{state | rooms: rooms})
 
         _notification ->
           state
@@ -61,15 +74,13 @@ defmodule JellyfishVideoroom.JellyfishClient do
     {:noreply, state}
   end
 
-  defp maybe_remove_room(jellyfish_room_id, state) do
-    {:ok, jellyfish_room} = JellyfishRoom.get(state.client, jellyfish_room_id)
+  defp maybe_remove_room(room, state) do
+    {:ok, jf_room} = JellyfishRoom.get(state.client, room.jf_id)
 
-    if Enum.empty?(jellyfish_room.peers) do
-      JellyfishRoom.delete(state.client, jellyfish_room_id)
+    if Enum.empty?(jf_room.peers) do
+      JellyfishRoom.delete(state.client, room.jf_id)
 
-      rooms =
-        Enum.filter(state.rooms, fn {_id, jf_room_id} -> jf_room_id != jellyfish_room_id end)
-
+      rooms = Rooms.delete(state.rooms, room)
       %{state | rooms: rooms}
     else
       state

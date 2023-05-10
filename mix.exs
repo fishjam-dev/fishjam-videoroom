@@ -45,9 +45,7 @@ defmodule JellyfishVideoroom.MixProject do
       {:ymlr, "~> 3.0"},
 
       # Jellyfish deps
-      # {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"},
-      {:jellyfish_server_sdk,
-       github: "jellyfish-dev/server_sdk_elixir", branch: "fix-missing-notifications"},
+      {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"},
 
       # Test
       {:websockex, "~> 0.4.3"}
