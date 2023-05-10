@@ -32,8 +32,6 @@ defmodule JellyfishVideoroom.JellyfishClient do
           {jellyfish_room_id, state}
 
         nil ->
-          IO.inspect("no room, creating")
-
           {:ok, jellyfish_room} = Jellyfish.Room.create(state.client, max_peers: 3)
 
           rooms = [{id, jellyfish_room.id} | state.rooms]

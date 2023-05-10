@@ -8,7 +8,7 @@ defmodule JellyfishVideoroomWeb.Router do
   scope "/", JellyfishVideoroomWeb do
     pipe_through :api
 
-    resources "/room/", RoomController
+    resources "/room/", RoomController, only: [:show]
   end
 
   # Enable LiveDashboard in development

@@ -69,6 +69,11 @@ defmodule JellyfishVideoroom.MixProject do
   defp aliases do
     [
       setup: ["deps.get"]
+      test: [
+        "docker start",
+        "test",
+        "docker stop"
+      ]
     ]
   end
 end
