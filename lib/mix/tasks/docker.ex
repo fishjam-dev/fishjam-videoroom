@@ -2,6 +2,7 @@ defmodule Mix.Tasks.Docker do
   use Mix.Task
 
   @turn_port_range "50000-50100"
+  @image "ghcr.io/jellyfish-dev/jellyfish:latest"
 
   @impl Mix.Task
   def run(args) do
@@ -10,13 +11,20 @@ defmodule Mix.Tasks.Docker do
     case command do
       "start" ->
         stop()
+        update()
         start()
         Process.sleep(1000)
 
       "stop" ->
         stop()
-        Process.sleep(1000)
     end
+  end
+
+  defp update() do
+    System.cmd("docker", [
+      "pull",
+      @image
+    ])
   end
 
   defp start() do
@@ -31,7 +39,7 @@ defmodule Mix.Tasks.Docker do
       ".env-test",
       "--name",
       "jellyfish",
-      "ghcr.io/jellyfish-dev/jellyfish:latest"
+      @image
     ])
   end
 
