@@ -8,10 +8,11 @@ jobs:
       - image: membraneframeworklabs/docker_membrane:latest
         environment:
           MIX_ENV: test
-          SERVER_API_TOKEN: development
-          SECRET_KEY_BASE: secret
 
-      - image: ghcr.io/jellyfish-dev/jellyfish:latest      
+      - image: ghcr.io/jellyfish-dev/jellyfish:latest   
+        environment:  
+          SERVER_API_TOKEN: development
+          SECRET_KEY_BASE: secret 
 
     steps:
       - checkout
