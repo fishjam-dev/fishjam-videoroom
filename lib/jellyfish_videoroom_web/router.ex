@@ -5,7 +5,7 @@ defmodule JellyfishVideoroomWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", JellyfishVideoroomWeb do
+  scope "/api", JellyfishVideoroomWeb do
     pipe_through :api
 
     resources "/room/", RoomController, only: [:show]

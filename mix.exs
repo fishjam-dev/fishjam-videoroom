@@ -43,7 +43,12 @@ defmodule JellyfishVideoroom.MixProject do
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
 
       # Jellyfish deps
-      {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"}
+      # {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"},
+      {:jellyfish_server_sdk,
+       github: "jellyfish-dev/server_sdk_elixir", branch: "fix-missing-notifications"},
+
+      # Test
+      {:websockex, "~> 0.4.3"}
     ]
   end
 

@@ -2,7 +2,8 @@ defmodule Mix.Tasks.Docker do
   use Mix.Task
 
   @turn_port_range "50000-50100"
-  @image "ghcr.io/jellyfish-dev/jellyfish:latest"
+  # @image "ghcr.io/jellyfish-dev/jellyfish:latest"
+  @image "jellyfish-0.1.0"
 
   @impl Mix.Task
   def run(args) do
