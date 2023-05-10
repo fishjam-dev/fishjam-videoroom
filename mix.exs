@@ -41,6 +41,8 @@ defmodule JellyfishVideoroom.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
+      {:open_api_spex, "~> 3.16"},
+      {:ymlr, "~> 3.0"},
 
       # Jellyfish deps
       # {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"},
@@ -75,7 +77,8 @@ defmodule JellyfishVideoroom.MixProject do
   defp aliases do
     [
       setup: ["deps.get"],
-      test: test_task()
+      test: test_task(),
+      "api.spec": ["openapi.spec.yaml --spec JellyfishVideoroomWeb.ApiSpec"]
     ]
   end
 

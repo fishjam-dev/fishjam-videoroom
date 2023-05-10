@@ -1,7 +1,33 @@
 defmodule JellyfishVideoroomWeb.RoomController do
   use JellyfishVideoroomWeb, :controller
+  use OpenApiSpex.ControllerSpecs
 
-  alias JellyfishVideoroom.{JellyfishClient}
+  alias JellyfishVideoroomWeb.ApiSpec.Token
+  alias JellyfishVideoroom.JellyfishClient
+  alias OpenApiSpex.Schema
+
+  tags [:room]
+
+  operation(:show,
+    summary: "Join a room",
+    description: "Create a new peer in a room and get its token",
+    operationId: "RoomController.Show",
+    parameters: [
+      room_id: [
+        in: :path,
+        description: "Room ID",
+        type: :string
+      ]
+    ],
+    request_body: {
+      "Room params",
+      "application/json",
+      %Schema{}
+    },
+    responses: [
+      ok: {"Room response", "application/json", Token}
+    ]
+  )
 
   action_fallback JellyfishWeb.FallbackController
 
