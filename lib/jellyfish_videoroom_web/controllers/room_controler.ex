@@ -2,8 +2,8 @@ defmodule JellyfishVideoroomWeb.RoomController do
   use JellyfishVideoroomWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
-  alias JellyfishVideoroomWeb.ApiSpec.Token
   alias JellyfishVideoroom.JellyfishClient
+  alias JellyfishVideoroomWeb.ApiSpec.Token
   alias OpenApiSpex.Schema
 
   tags [:room]
