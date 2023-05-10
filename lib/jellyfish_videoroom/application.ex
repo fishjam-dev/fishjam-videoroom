@@ -12,8 +12,6 @@ defmodule JellyfishVideoroom.Application do
       JellyfishVideoroomWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: JellyfishVideoroom.PubSub},
-      # Start Finch
-      {Finch, name: JellyfishVideoroom.Finch},
       # Start the Endpoint (http/https)
       JellyfishVideoroomWeb.Endpoint
       # Start a worker by calling: JellyfishVideoroom.Worker.start_link(arg)
