@@ -1,12 +1,12 @@
-defmodule JellyfishVideoroomWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :jellyfish_videoroom
+defmodule VideoroomWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :videoroom
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
     store: :cookie,
-    key: "_jellyfish_videoroom_key",
+    key: "_videoroom_key",
     signing_salt: "h7Xl8mm4",
     same_site: "Lax"
   ]
@@ -19,9 +19,9 @@ defmodule JellyfishVideoroomWeb.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
-    from: :jellyfish_videoroom,
+    from: :videoroom,
     gzip: false,
-    only: JellyfishVideoroomWeb.static_paths()
+    only: VideoroomWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
@@ -44,5 +44,5 @@ defmodule JellyfishVideoroomWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug JellyfishVideoroomWeb.Router
+  plug VideoroomWeb.Router
 end

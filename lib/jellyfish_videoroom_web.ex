@@ -1,12 +1,12 @@
-defmodule JellyfishVideoroomWeb do
+defmodule VideoroomWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, components, channels, and so on.
 
   This can be used in your application as:
 
-      use JellyfishVideoroomWeb, :controller
-      use JellyfishVideoroomWeb, :html
+      use VideoroomWeb, :controller
+      use VideoroomWeb, :html
 
   The definitions below will be executed for every controller,
   component, etc, so keep them short and clean, focused
@@ -51,9 +51,9 @@ defmodule JellyfishVideoroomWeb do
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
-        endpoint: JellyfishVideoroomWeb.Endpoint,
-        router: JellyfishVideoroomWeb.Router,
-        statics: JellyfishVideoroomWeb.static_paths()
+        endpoint: VideoroomWeb.Endpoint,
+        router: VideoroomWeb.Router,
+        statics: VideoroomWeb.static_paths()
     end
   end
 

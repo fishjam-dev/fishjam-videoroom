@@ -1,4 +1,4 @@
-# JellyfishVideoroom
+# Videoroom
 
 Start the Jellyfish Videoroom locally:
 
