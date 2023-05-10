@@ -31,7 +31,7 @@ defmodule Mix.Tasks.Docker do
       ".env-test",
       "--name",
       "jellyfish",
-      "jellyfish-0.1.0"
+      "ghcr.io/jellyfish-dev/jellyfish:latest"
     ])
   end
 
