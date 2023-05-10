@@ -1,6 +1,6 @@
 # Videoroom
 
-Start the Jellyfish Videoroom locally:
+Start the Videoroom locally:
 
   * Run `mix setup` to install and setup dependencies
   * Start Phoenix server with `mix phx.server` or inside IEx with `iex -S mix phx.server`
