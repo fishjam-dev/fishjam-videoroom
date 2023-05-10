@@ -40,7 +40,10 @@ defmodule JellyfishVideoroom.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
-      {:dialyxir, ">= 0.0.0", only: :dev, runtime: false}
+      {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
+
+      # Jellyfish deps
+      {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"}
     ]
   end
 
