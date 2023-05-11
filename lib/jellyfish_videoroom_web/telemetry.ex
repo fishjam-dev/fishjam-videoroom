@@ -1,4 +1,4 @@
-defmodule JellyfishVideoroomWeb.Telemetry do
+defmodule VideoroomWeb.Telemetry do
   @moduledoc false
   use Supervisor
   import Telemetry.Metrics
@@ -66,7 +66,7 @@ defmodule JellyfishVideoroomWeb.Telemetry do
     [
       # A module, function and arguments to be invoked periodically.
       # This function must call :telemetry.execute/3 and a metric must be added above.
-      # {JellyfishVideoroomWeb, :count_users, []}
+      # {VideoroomWeb, :count_users, []}
     ]
   end
 end

@@ -1,5 +1,5 @@
-defmodule JellyfishVideoroomWeb.PageController do
-  use JellyfishVideoroomWeb, :controller
+defmodule VideoroomWeb.PageController do
+  use VideoroomWeb, :controller
 
   @spec index(Plug.Conn.t(), any) :: Plug.Conn.t()
   def index(conn, _params) do
