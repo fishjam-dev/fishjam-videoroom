@@ -32,9 +32,9 @@ defmodule Videoroom.JellyfishClient do
   end
 
   @impl true
-  def handle_call({:join_room, id, opts}, _from, state) do
+  def handle_call({:join_room, name, opts}, _from, state) do
     room =
-      case Rooms.fetch_by_id(state.rooms, id) do
+      case Rooms.fetch_by_name(state.rooms, name) do
         {:ok, room} ->
           room
 
@@ -42,7 +42,7 @@ defmodule Videoroom.JellyfishClient do
           {:ok, jf_room} = Jellyfish.Room.create(state.client, max_peers: opts[:max_peers])
 
           %Room{
-            id: id,
+            name: name,
             jf_id: jf_room.id,
             peers: %{},
             peer_timeout: @peer_timeout
@@ -62,7 +62,7 @@ defmodule Videoroom.JellyfishClient do
     state =
       case type do
         type when type in [:peer_disconnected, :peer_crashed] ->
-          {type, jf_room_id, peer_id} = notification
+          {_type, jf_room_id, peer_id} = notification
           JellyfishRoom.delete_peer(state.client, jf_room_id, peer_id)
 
           {:ok, room} = Rooms.fetch_by_jf_id(state.rooms, jf_room_id)

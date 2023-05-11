@@ -24,9 +24,9 @@ defmodule Videoroom.Rooms do
     Map.fetch(rooms.data, jf_id)
   end
 
-  @spec fetch_by_id(t, binary()) :: {:ok, Room.t()} | :error
-  def fetch_by_id(rooms, id) do
-    with {:ok, jf_id} <- Map.fetch(rooms.id_map, id) do
+  @spec fetch_by_name(t, binary()) :: {:ok, Room.t()} | :error
+  def fetch_by_name(rooms, name) do
+    with {:ok, jf_id} <- Map.fetch(rooms.id_map, name) do
       fetch_by_jf_id(rooms, jf_id)
     else
       :error ->
@@ -37,7 +37,7 @@ defmodule Videoroom.Rooms do
   @spec put(t, Room.t()) :: t
   def put(rooms, room) do
     %__MODULE__{
-      id_map: Map.put(rooms.id_map, room.id, room.jf_id),
+      id_map: Map.put(rooms.id_map, room.name, room.jf_id),
       data: Map.put(rooms.data, room.jf_id, room)
     }
   end
@@ -45,7 +45,7 @@ defmodule Videoroom.Rooms do
   @spec delete(t, Room.t()) :: t
   def delete(rooms, room) do
     %__MODULE__{
-      id_map: Map.delete(rooms.id_map, room.id),
+      id_map: Map.delete(rooms.id_map, room.name),
       data: Map.delete(rooms.data, room.jf_id)
     }
   end

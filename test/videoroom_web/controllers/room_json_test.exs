@@ -5,7 +5,7 @@ defmodule VideoroomWeb.RoomJsonTest do
   alias Videoroom.Test.Peer
 
   @ws_url "ws://localhost:4000/socket/peer/websocket"
-  @room_id "TestRoom"
+  @room_name "MeinRoom"
   @api_latency 400
 
   setup context do
@@ -87,7 +87,7 @@ defmodule VideoroomWeb.RoomJsonTest do
   end
 
   defp add_peer(conn) do
-    conn = get(conn, ~p"/api/room/#{@room_id}")
+    conn = get(conn, ~p"/api/room/#{@room_name}")
     assert(%{"token" => token} = json_response(conn, 200)["data"])
     token
   end

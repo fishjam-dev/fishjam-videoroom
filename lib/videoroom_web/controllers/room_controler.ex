@@ -13,9 +13,9 @@ defmodule VideoroomWeb.RoomController do
     description: "Create a new peer in a room and get its token",
     operationId: "RoomController.Show",
     parameters: [
-      room_id: [
+      room_name: [
         in: :path,
-        description: "Room ID",
+        description: "Room name",
         type: :string
       ]
     ],
@@ -32,8 +32,8 @@ defmodule VideoroomWeb.RoomController do
   action_fallback VideoroomWeb.FallbackController
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def show(conn, %{"id" => id}) do
-    {:ok, token} = JellyfishClient.join_room(id)
+  def show(conn, %{"id" => name}) do
+    {:ok, token} = JellyfishClient.join_room(name)
 
     conn
     |> put_resp_content_type("application/json")

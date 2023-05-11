@@ -2,12 +2,12 @@ defmodule Videoroom.Rooms.Room do
   @moduledoc false
   alias Videoroom.Peer
 
-  @enforce_keys [:id, :jf_id, :peers, :peer_timeout]
+  @enforce_keys [:name, :jf_id, :peers, :peer_timeout]
 
   defstruct @enforce_keys
 
   @type t :: %__MODULE__{
-          id: binary(),
+          name: binary(),
           jf_id: binary(),
           peers: %{binary() => any()},
           peer_timeout: integer()
