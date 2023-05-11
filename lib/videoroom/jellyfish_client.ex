@@ -57,15 +57,24 @@ defmodule Videoroom.JellyfishClient do
 
   @impl true
   def handle_info({:jellyfish, notification}, state) do
+    type = elem(notification, 0)
+
     state =
-      case notification do
-        {:peer_disconnected, jf_room_id, peer_id} ->
+      case type do
+        type when type in [:peer_disconnected, :peer_crashed] ->
+          {type, jf_room_id, peer_id} = notification
           JellyfishRoom.delete_peer(state.client, jf_room_id, peer_id)
 
           {:ok, room} = Rooms.fetch_by_jf_id(state.rooms, jf_room_id)
           rooms = Rooms.delete_peer(state.rooms, room, peer_id)
 
           maybe_remove_room(room, %{state | rooms: rooms})
+
+        :room_crashed ->
+          jf_room_id = elem(notification, 1)
+          {:ok, room} = Rooms.fetch_by_jf_id(state.rooms, jf_room_id)
+          rooms = Rooms.delete(state.rooms, room)
+          %{state | rooms: rooms}
 
         _notification ->
           state
