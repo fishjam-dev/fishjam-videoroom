@@ -8,13 +8,13 @@
 import Config
 
 # Configures the endpoint
-config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
+config :videoroom, VideoroomWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
-    formats: [json: JellyfishVideoroomWeb.ErrorJSON],
+    formats: [json: VideoroomWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: JellyfishVideoroom.PubSub,
+  pubsub_server: Videoroom.PubSub,
   live_view: [signing_salt: "qiQmVeXX"]
 
 config :jellyfish_server_sdk,

@@ -1,10 +1,10 @@
-defmodule JellyfishVideoroomWeb.RoomController do
-  use JellyfishVideoroomWeb, :controller
+defmodule VideoroomWeb.RoomController do
+  use VideoroomWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
-  alias JellyfishVideoroom.JellyfishClient
-  alias JellyfishVideoroomWeb.ApiSpec.Token
   alias OpenApiSpex.Schema
+  alias Videoroom.JellyfishClient
+  alias VideoroomWeb.ApiSpec.Token
 
   tags [:room]
 
@@ -29,7 +29,7 @@ defmodule JellyfishVideoroomWeb.RoomController do
     ]
   )
 
-  action_fallback JellyfishWeb.FallbackController
+  action_fallback VideoroomWeb.FallbackController
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do

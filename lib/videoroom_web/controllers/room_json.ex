@@ -1,4 +1,4 @@
-defmodule JellyfishVideoroomWeb.RoomJSON do
+defmodule VideoroomWeb.RoomJSON do
   @moduledoc false
 
   @spec show(map()) :: %{data: map()}

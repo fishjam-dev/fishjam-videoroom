@@ -1,4 +1,4 @@
-defmodule JellyfishVideoroom.Peer do
+defmodule Videoroom.Peer do
   @moduledoc false
   @enforce_keys [:id, :time_created]
 

@@ -6,7 +6,7 @@ import Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with esbuild to bundle .js and .css sources.
-config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
+config :videoroom, VideoroomWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4002],
@@ -40,7 +40,7 @@ config :jellyfish_videoroom, JellyfishVideoroomWeb.Endpoint,
 # different ports.
 
 # Enable dev routes for dashboard and mailbox
-config :jellyfish_videoroom, dev_routes: true
+config :videoroom, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

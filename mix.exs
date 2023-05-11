@@ -1,9 +1,9 @@
-defmodule JellyfishVideoroom.MixProject do
+defmodule Videoroom.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :jellyfish_videoroom,
+      app: :videoroom,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,7 +19,7 @@ defmodule JellyfishVideoroom.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {JellyfishVideoroom.Application, []},
+      mod: {Videoroom.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -75,7 +75,7 @@ defmodule JellyfishVideoroom.MixProject do
   defp aliases do
     [
       setup: ["deps.get"],
-      "api.spec": ["openapi.spec.yaml --spec JellyfishVideoroomWeb.ApiSpec"]
+      "api.spec": ["openapi.spec.yaml --spec VideoroomWeb.ApiSpec"]
     ]
   end
 end

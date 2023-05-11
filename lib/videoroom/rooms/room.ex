@@ -1,6 +1,6 @@
-defmodule JellyfishVideoroom.Rooms.Room do
+defmodule Videoroom.Rooms.Room do
   @moduledoc false
-  alias JellyfishVideoroom.Peer
+  alias Videoroom.Peer
 
   @enforce_keys [:id, :jf_id, :peers, :peer_timeout]
 

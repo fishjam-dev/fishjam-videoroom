@@ -1,18 +1,18 @@
-defmodule JellyfishVideoroomWeb.Router do
-  use JellyfishVideoroomWeb, :router
+defmodule VideoroomWeb.Router do
+  use VideoroomWeb, :router
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/api", JellyfishVideoroomWeb do
+  scope "/api", VideoroomWeb do
     pipe_through :api
 
     resources "/room/", RoomController, only: [:show]
   end
 
   # Enable LiveDashboard in development
-  if Application.compile_env(:jellyfish_videoroom, :dev_routes) do
+  if Application.compile_env(:videoroom, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
     # it behind authentication and allow only admins to access it.
     # If your application does not have an admins-only section yet,
@@ -23,7 +23,7 @@ defmodule JellyfishVideoroomWeb.Router do
     scope "/dev" do
       pipe_through [:fetch_session, :protect_from_forgery]
 
-      live_dashboard "/dashboard", metrics: JellyfishVideoroomWeb.Telemetry
+      live_dashboard "/dashboard", metrics: VideoroomWeb.Telemetry
     end
   end
 end

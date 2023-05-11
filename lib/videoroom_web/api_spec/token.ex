@@ -1,4 +1,4 @@
-defmodule JellyfishVideoroomWeb.ApiSpec.Token do
+defmodule VideoroomWeb.ApiSpec.Token do
   @moduledoc false
 
   require OpenApiSpex

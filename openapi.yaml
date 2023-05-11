@@ -7,7 +7,7 @@ components:
       example: SFMyNTY.g2gDdAAhiOL4CdsaboT9-jtMzhoI
       title: PeerToken
       type: string
-      x-struct: Elixir.JellyfishVideoroomWeb.ApiSpec.Token
+      x-struct: Elixir.VideoroomWeb.ApiSpec.Token
 info:
   title: Jellyfish Videoroom
   version: 0.1.0
@@ -17,7 +17,7 @@ paths:
     get:
       callbacks: {}
       description: Create a new peer in a room and get its token
-      operationId: JellyfishVideoroomWeb.RoomController.show
+      operationId: VideoroomWeb.RoomController.show
       parameters:
         - description: Room ID
           in: path

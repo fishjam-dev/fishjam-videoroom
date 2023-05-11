@@ -1,4 +1,4 @@
-defmodule JellyfishVideoroom.Test.Peer do
+defmodule Videoroom.Test.Peer do
   @moduledoc false
 
   # A module mocking the websocket connection from a WebRTC peer

@@ -1,8 +1,8 @@
-defmodule JellyfishVideoroomWeb.RoomJsonTest do
-  use JellyfishVideoroomWeb.ConnCase, async: false
+defmodule VideoroomWeb.RoomJsonTest do
+  use VideoroomWeb.ConnCase, async: false
 
   alias Jellyfish.Room, as: JellyfishRoom
-  alias JellyfishVideoroom.Test.Peer
+  alias Videoroom.Test.Peer
 
   @ws_url "ws://localhost:4000/socket/peer/websocket"
   @room_id "TestRoom"

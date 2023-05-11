@@ -1,6 +1,6 @@
-defmodule JellyfishVideoroom.Rooms do
+defmodule Videoroom.Rooms do
   @moduledoc false
-  alias JellyfishVideoroom.Rooms.Room
+  alias Videoroom.Rooms.Room
 
   @enforce_keys [:id_map, :data]
 
@@ -11,7 +11,7 @@ defmodule JellyfishVideoroom.Rooms do
           data: %{binary() => Room.t()}
         }
 
-  @spec new :: JellyfishVideoroom.Rooms.t()
+  @spec new :: Videoroom.Rooms.t()
   def new() do
     %__MODULE__{
       id_map: %{},

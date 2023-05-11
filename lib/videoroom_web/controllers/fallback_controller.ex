@@ -1,10 +1,10 @@
-defmodule JellyfishVideoroomWeb.FallbackController do
+defmodule VideoroomWeb.FallbackController do
   @moduledoc """
   Translates controller action results into valid `Plug.Conn` responses.
 
   See `Phoenix.Controller.action_fallback/1` for more details.
   """
-  use JellyfishVideoroomWeb, :controller
+  use VideoroomWeb, :controller
 
   # This clause is an example of how to handle resources that cannot be found.
 
@@ -12,7 +12,7 @@ defmodule JellyfishVideoroomWeb.FallbackController do
   def call(conn, {:error, :not_found}) do
     conn
     |> put_status(:not_found)
-    |> put_view(html: JellyfishVideoroomWeb.ErrorHTML, json: JellyfishVideoroomWeb.ErrorJSON)
+    |> put_view(html: VideoroomWeb.ErrorHTML, json: VideoroomWeb.ErrorJSON)
     |> render(:"404")
   end
 end

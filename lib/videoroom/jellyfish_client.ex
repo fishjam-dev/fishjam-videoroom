@@ -1,10 +1,10 @@
-defmodule JellyfishVideoroom.JellyfishClient do
+defmodule Videoroom.JellyfishClient do
   @moduledoc false
   use GenServer
 
   alias Jellyfish.Room, as: JellyfishRoom
-  alias JellyfishVideoroom.Rooms
-  alias JellyfishVideoroom.Rooms.Room
+  alias Videoroom.Rooms
+  alias Videoroom.Rooms.Room
 
   @peer_timeout 60 * 1000
 

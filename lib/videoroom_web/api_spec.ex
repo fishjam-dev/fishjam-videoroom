@@ -1,4 +1,4 @@
-defmodule JellyfishVideoroomWeb.ApiSpec do
+defmodule VideoroomWeb.ApiSpec do
   @moduledoc false
   @behaviour OpenApiSpex.OpenApi
 
@@ -10,13 +10,13 @@ defmodule JellyfishVideoroomWeb.ApiSpec do
   def spec() do
     %OpenApiSpex.OpenApi{
       info: %Info{
-        title: "Jellyfish Videoroom",
+        title: "Videoroom",
         version: "0.1.0"
       },
       servers: [
-        Server.from_endpoint(JellyfishVideoroomWeb.Endpoint)
+        Server.from_endpoint(VideoroomWeb.Endpoint)
       ],
-      paths: Paths.from_router(JellyfishVideoroomWeb.Router)
+      paths: Paths.from_router(VideoroomWeb.Router)
     }
     |> OpenApiSpex.resolve_schema_modules()
   end
@@ -28,6 +28,6 @@ defmodule JellyfishVideoroomWeb.ApiSpec do
 
   @spec error(String.t()) :: {String.t(), String.t(), module()}
   def error(description) do
-    {description, "application/json", JellyfishVideoroomWeb.ApiSpec.Error}
+    {description, "application/json", VideoroomWeb.ApiSpec.Error}
   end
 end
