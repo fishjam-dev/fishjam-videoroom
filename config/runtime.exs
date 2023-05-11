@@ -48,18 +48,21 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  jellyfish_ip =
+    System.get_env("JELLYFISH_IP") ||
+      raise "Environment variable JELLYFISH_IP is missing."
+
+  jellyfish_port =
+    System.get_env("JELLYFISH_PORT") ||
+      raise "Environment variable JELLYFISH_PORT is missing."
+
   config :jellyfish_server_sdk,
-    jellyfish_ip = System.get_env("JELLYFISH_IP") ||
-      raise "Environment variable JELLYFISH_IP is missing.",
-
-    jellyfish_port = System.get_env("JELLYFISH_PORT") ||
-      raise "Environment variable JELLYFISH_PORT is missing.",
-
-    server_address: "#{jellyfish_ip}:#{jellyfish_port}"
-    server_api_token: System.get_env("JELLYFISH_API_TOKEN") ||
-      raise """
-      Environment variable JELLYFISH_API_TOKEN is missing.
-      """,
+    server_address: "#{jellyfish_ip}:#{jellyfish_port}",
+    server_api_token:
+      System.get_env("JELLYFISH_API_TOKEN") ||
+        raise("""
+        Environment variable JELLYFISH_API_TOKEN is missing.
+        """)
 
   # ## SSL Support
   #

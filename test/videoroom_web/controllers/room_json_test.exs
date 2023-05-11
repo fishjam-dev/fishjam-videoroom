@@ -3,6 +3,7 @@ defmodule VideoroomWeb.RoomJsonTest do
 
   alias Jellyfish.Room, as: JellyfishRoom
   alias Videoroom.Test.Peer
+  alias Jellyfish.Server.ControlMessage.{PeerConnected, PeerDisconnected}
 
   @ws_url "ws://localhost:4000/socket/peer/websocket"
   @room_name "MeinRoom"
@@ -75,9 +76,12 @@ defmodule VideoroomWeb.RoomJsonTest do
     token = add_peer(conn)
     peer = join_room(token, async: true)
 
-    assert_receive {:jellyfish, {:peer_connected, room_id, peer_id}}, @api_latency
-    assert_receive {:jellyfish, {:peer_disconnected, ^room_id, ^peer_id}}, @api_latency
-    assert_receive {:jellyfish, {:peer_connected, _room_id, _peer_id}}, @api_latency
+    assert_receive {:jellyfish, %PeerConnected{room_id: room_id, peer_id: peer_id}}, @api_latency
+
+    assert_receive {:jellyfish, %PeerDisconnected{room_id: ^room_id, peer_id: ^peer_id}},
+                   @api_latency
+
+    assert_receive {:jellyfish, %PeerConnected{}}, @api_latency
 
     Process.sleep(@api_latency)
     assert {:ok, [%JellyfishRoom{peers: peers, id: _id}]} = JellyfishRoom.get_all(client)
@@ -96,7 +100,7 @@ defmodule VideoroomWeb.RoomJsonTest do
     {:ok, peer} = Peer.start_link(@ws_url, token)
 
     unless async?,
-      do: assert_receive({:jellyfish, {:peer_connected, _room_id, _peer_id}}, @api_latency)
+      do: assert_receive({:jellyfish, %PeerConnected{}}, @api_latency)
 
     peer
   end
@@ -105,6 +109,6 @@ defmodule VideoroomWeb.RoomJsonTest do
     send(peer, :terminate)
 
     unless async?,
-      do: assert_receive({:jellyfish, {:peer_disconnected, _room_id, _peer_id}}, @api_latency)
+      do: assert_receive({:jellyfish, %PeerDisconnected{}}, @api_latency)
   end
 end

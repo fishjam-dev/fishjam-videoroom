@@ -2,6 +2,10 @@ defmodule Videoroom.JellyfishClient do
   @moduledoc false
   use GenServer
 
+  alias Jellyfish.Server.ControlMessage.RoomCrashed
+  alias Jellyfish.Server.ControlMessage.PeerDisconnected
+  alias Jellyfish.Server.ControlMessage.PeerCrashed
+
   alias Jellyfish.Room, as: JellyfishRoom
   alias Videoroom.Rooms
   alias Videoroom.Rooms.Room
@@ -36,6 +40,7 @@ defmodule Videoroom.JellyfishClient do
     room =
       case Rooms.fetch_by_name(state.rooms, name) do
         {:ok, room} ->
+          Jellyfish.Room.get(state.client, room.jf_id)
           room
 
         :error ->
@@ -57,12 +62,10 @@ defmodule Videoroom.JellyfishClient do
 
   @impl true
   def handle_info({:jellyfish, notification}, state) do
-    type = elem(notification, 0)
-
     state =
-      case type do
-        type when type in [:peer_disconnected, :peer_crashed] ->
-          {_type, jf_room_id, peer_id} = notification
+      case notification do
+        %type{} when type in [PeerDisconnected, PeerCrashed] ->
+          %{room_id: jf_room_id, peer_id: peer_id} = notification
           JellyfishRoom.delete_peer(state.client, jf_room_id, peer_id)
 
           {:ok, room} = Rooms.fetch_by_jf_id(state.rooms, jf_room_id)
@@ -70,13 +73,12 @@ defmodule Videoroom.JellyfishClient do
 
           maybe_remove_room(room, %{state | rooms: rooms})
 
-        :room_crashed ->
-          jf_room_id = elem(notification, 1)
+        %RoomCrashed{room_id: jf_room_id} ->
           {:ok, room} = Rooms.fetch_by_jf_id(state.rooms, jf_room_id)
           rooms = Rooms.delete(state.rooms, room)
           %{state | rooms: rooms}
 
-        _notification ->
+        _other ->
           state
       end
 
