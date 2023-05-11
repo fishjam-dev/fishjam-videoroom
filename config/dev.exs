@@ -16,6 +16,10 @@ config :videoroom, VideoroomWeb.Endpoint,
   secret_key_base: "Ovvgkm2prqt9EuqBAuHVGRtJj35AcVVnwSkk3dcTmZYZ9Gfigrg1bOSokrung9aT",
   watchers: []
 
+config :jellyfish_server_sdk,
+  server_address: "localhost:4000",
+  server_api_token: "development"
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

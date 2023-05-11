@@ -17,10 +17,6 @@ config :videoroom, VideoroomWeb.Endpoint,
   pubsub_server: Videoroom.PubSub,
   live_view: [signing_salt: "qiQmVeXX"]
 
-config :jellyfish_server_sdk,
-  server_address: "localhost:4000",
-  server_api_token: "development"
-
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

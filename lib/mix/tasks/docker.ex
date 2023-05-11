@@ -40,7 +40,7 @@ defmodule Mix.Tasks.Docker do
       "-p",
       "4000:4000/tcp",
       "--env-file",
-      ".env-test",
+      ".jellyfish-test-env",
       "--name",
       "jellyfish",
       @image
