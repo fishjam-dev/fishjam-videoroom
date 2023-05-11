@@ -43,6 +43,7 @@ defmodule JellyfishVideoroom.MixProject do
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:open_api_spex, "~> 3.16"},
       {:ymlr, "~> 3.0"},
+      {:cors_plug, "~> 3.0"},
 
       # Jellyfish deps
       {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"},
