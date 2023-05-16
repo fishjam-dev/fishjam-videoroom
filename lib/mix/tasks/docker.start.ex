@@ -6,8 +6,7 @@ defmodule Mix.Tasks.Docker.Start do
   use Mix.Task
 
   @turn_port_range "50000-50100"
-  # @image "ghcr.io/jellyfish-dev/jellyfish:latest"
-  @image "jellyfish-0.1.0"
+  @image "ghcr.io/jellyfish-dev/jellyfish:latest"
   @container_name "jellyfish"
 
   @impl Mix.Task

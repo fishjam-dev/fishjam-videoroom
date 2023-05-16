@@ -75,7 +75,8 @@ defmodule Videoroom.MixProject do
   defp aliases do
     [
       setup: ["deps.get"],
-      "api.spec": ["openapi.spec.yaml --spec VideoroomWeb.ApiSpec"]
+      "api.spec": ["openapi.spec.yaml --spec VideoroomWeb.ApiSpec"],
+      "docker.restart": ["docker.stop", "docker.start"]
     ]
   end
 end
