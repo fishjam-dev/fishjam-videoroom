@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Docker.Stop do
   def run(args) do
     case args do
       [] -> remove()
-      _ -> Mix.raise("Invalid arguments, expected: mix docker.stop")
+      _args -> Mix.raise("Invalid arguments, expected: mix docker.stop")
     end
   end
 

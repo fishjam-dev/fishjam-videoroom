@@ -2,9 +2,9 @@ defmodule Videoroom.JellyfishClient do
   @moduledoc false
   use GenServer
 
-  alias Jellyfish.Server.ControlMessage.RoomCrashed
-  alias Jellyfish.Server.ControlMessage.PeerDisconnected
   alias Jellyfish.Server.ControlMessage.PeerCrashed
+  alias Jellyfish.Server.ControlMessage.PeerDisconnected
+  alias Jellyfish.Server.ControlMessage.RoomCrashed
 
   alias Jellyfish.Room, as: JellyfishRoom
   alias Videoroom.Rooms

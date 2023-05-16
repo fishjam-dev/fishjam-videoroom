@@ -14,7 +14,7 @@ defmodule Mix.Tasks.Docker.Start do
   def run(args) do
     case args do
       [] -> general()
-      _ -> Mix.raise("Invalid arguments, expected: mix docker.start")
+      _args -> Mix.raise("Invalid arguments, expected: mix docker.start")
     end
   end
 
