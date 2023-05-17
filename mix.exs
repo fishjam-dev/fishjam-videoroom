@@ -25,7 +25,7 @@ defmodule Videoroom.MixProject do
   end
 
   # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(env) when env in [:test, :integration_test], do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
@@ -39,6 +39,16 @@ defmodule Videoroom.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
+      {:open_api_spex, "~> 3.16"},
+      {:ymlr, "~> 3.0"},
+
+      # Jellyfish deps
+      {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"},
+
+      # Test
+      {:divo, "~> 1.3.1", only: [:test, :integration_test]},
+
+      # Dev
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false}
     ]
@@ -65,7 +75,11 @@ defmodule Videoroom.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get"]
+      setup: ["deps.get"],
+      integration_test: [
+        "cmd docker pull ghcr.io/jellyfish-dev/jellyfish:latest",
+        "cmd docker-compose -f docker-compose-integration.yaml run test"
+      ]
     ]
   end
 end
