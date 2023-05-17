@@ -8,7 +8,7 @@ config :videoroom, VideoroomWeb.Endpoint,
   server: false
 
 config :jellyfish_server_sdk,
-  server_address: "localhost:4000",
+  server_address: "localhost:5002",
   server_api_token: "development"
 
 config :videoroom,

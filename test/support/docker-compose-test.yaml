@@ -7,7 +7,7 @@ services:
     restart: on-failure
     healthcheck:
       test: >
-        curl --fail -H "authorization: Bearer development" http://localhost:4000/room || exit 1
+        curl --fail -H "authorization: Bearer development" http://localhost:5002/room || exit 1
       interval: 3s
       retries: 30
       timeout: 2s
@@ -18,7 +18,7 @@ services:
       INTEGRATED_TURN_PORT_RANGE: "50000-65355"
       INTEGRATED_TCP_TURN_PORT: "49999"
       SERVER_API_TOKEN: "development"
-      PORT: 4000
+      PORT: 5002
       SECRET_KEY_BASE: "super-secret-key"
     ports:
-      - "4000:4000"
+      - "5002:5002"
