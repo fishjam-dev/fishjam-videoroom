@@ -3,7 +3,7 @@ version: "3"
 services:
   test:
     image: elixir:latest
-    command: bash -c "cd app/ && mix local.hex --force && mix local.rebar rebar3 --force && mix deps.get && mix test --warnings-as-errors"
+    command: bash -c "cd app/ && mix local.hex --force && mix local.rebar --force && mix deps.get && mix test --warnings-as-errors"
     environment:
       - MIX_ENV=integration_test
     volumes:
