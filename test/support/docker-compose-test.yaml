@@ -15,11 +15,11 @@ services:
       VIRTUAL_HOST: "localhost"
       USE_INTEGRATED_TURN: "true"
       INTEGRATED_TURN_IP: "${INTEGRATED_TURN_IP:-127.0.0.1}"
-      INTEGRATED_TURN_PORT_RANGE: "50000-50050"
+      INTEGRATED_TURN_PORT_RANGE: "50000-50100"
       INTEGRATED_TCP_TURN_PORT: "49999"
       SERVER_API_TOKEN: "development"
       PORT: 5002
       SECRET_KEY_BASE: "super-secret-key"
     ports:
       - "5002:5002"
-      - "50000-50050:50000-50050/udp"
+      - "50000-50100:50000-50100/udp"

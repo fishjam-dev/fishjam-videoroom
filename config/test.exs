@@ -12,7 +12,7 @@ config :jellyfish_server_sdk,
   server_api_token: "development"
 
 config :videoroom,
-  divo: "docker-compose-dev.yaml",
+  divo: "test/support/docker-compose-test.yaml",
   divo_wait: [dwell: 1500, max_tries: 50]
 
 config :logger, level: :info
