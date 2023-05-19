@@ -12,7 +12,7 @@ Running the Videoroom requires connecting to an instance of [Jellyfish Server](h
 
 When running locally, you can start an instance of Jellyfish inside docker using docker compose.
 ```
-docker compose -f docker-compose-dev.yaml up
+INTEGRATED_TURN_IP=<your ip in local network> docker compose -f docker-compose-dev.yaml up
 ```
 
 Now you can start the Videoroom:
