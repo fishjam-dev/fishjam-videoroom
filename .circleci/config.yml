@@ -27,4 +27,3 @@ workflows:
       - elixir/lint:
           cache-version: 2
           docs: false
-

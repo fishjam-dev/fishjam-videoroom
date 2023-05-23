@@ -43,18 +43,23 @@ defmodule Videoroom.MixProject do
       # Jellyfish deps
       {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"},
 
-      # Test
-      {:divo, "~> 1.3.1", only: [:test, :integration_test]},
-
       # Dev
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
-      {:dialyxir, ">= 0.0.0", only: :dev, runtime: false}
+      {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
+      {:open_api_spex, "~> 3.16"},
+      {:ymlr, "~> 3.0"},
+      {:cors_plug, "~> 3.0"},
+
+      # Test
+      {:websockex, "~> 0.4.3"},
+      {:divo, "~> 1.3.1", only: [:test, :integration_test]}
     ]
   end
 
   defp dialyzer() do
     opts = [
-      flags: [:error_handling]
+      flags: [:error_handling],
+      plt_add_apps: [:mix]
     ]
 
     if System.get_env("CI") == "true" do
@@ -74,6 +79,7 @@ defmodule Videoroom.MixProject do
   defp aliases do
     [
       setup: ["deps.get"],
+      "api.spec": ["openapi.spec.yaml --spec VideoroomWeb.ApiSpec"],
       integration_test: [
         "cmd docker compose -f docker-compose-integration.yaml pull",
         "cmd docker compose -f docker-compose-integration.yaml run test"
