@@ -15,7 +15,7 @@ jobs:
     executor: machine_executor_amd64
     steps:
       - checkout
-      - run: docker-compose -f docker-compose-integration.yaml run test
+      - run: docker compose -f docker-compose-integration.yaml run test
 
 workflows:
   version: 2

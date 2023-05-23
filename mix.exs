@@ -39,8 +39,6 @@ defmodule Videoroom.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:open_api_spex, "~> 3.16"},
-      {:ymlr, "~> 3.0"},
 
       # Jellyfish deps
       {:jellyfish_server_sdk, github: "jellyfish-dev/server_sdk_elixir"},
@@ -77,8 +75,8 @@ defmodule Videoroom.MixProject do
     [
       setup: ["deps.get"],
       integration_test: [
-        "cmd docker pull ghcr.io/jellyfish-dev/jellyfish:latest",
-        "cmd docker-compose -f docker-compose-integration.yaml run test"
+        "cmd docker compose -f docker-compose-integration.yaml pull",
+        "cmd docker compose -f docker-compose-integration.yaml run test"
       ]
     ]
   end
