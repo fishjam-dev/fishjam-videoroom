@@ -23,4 +23,5 @@ services:
       SECRET_KEY_BASE: "super-secret-key"
     ports:
       - "5002:5002"
+      - "49999:49999"
       - "50000-50050:50000-50050/udp"
