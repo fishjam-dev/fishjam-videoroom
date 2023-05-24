@@ -76,7 +76,8 @@ defmodule Videoroom.MixProject do
       setup: ["deps.get"],
       integration_test: [
         "cmd docker compose -f docker-compose-integration.yaml pull",
-        # Runs only the `test` container and removes all containers when it finishes
+        # We use `run test` instead of `up` command as containers will be cleaned-up
+        # when the test service ends, which is not a case when running with `up`.
         "cmd docker compose -f docker-compose-integration.yaml run test"
       ]
     ]
