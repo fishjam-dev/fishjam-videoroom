@@ -23,6 +23,15 @@ Now you can start the Videoroom:
 
 TODO
 
+## Tests
+
+We use [Divo](https://hexdocs.pm/divo/readme.html) in tests, which is responsible for starting docker containers.
+
+When running locally run tests using `mix test`, which starts Jellyfish in a container.
+
+On CI both Jellyfish and the tests are run inside docker. If needed, e.g. when the tests are failing on the CI, but not locally you can simulate those conditions with `mix integration_test`.
+
+
 ## Copyright and License
 
 Copyright 2020, [Software Mansion](https://swmansion.com/?utm_source=git&utm_medium=readme&utm_campaign=membrane_template_plugin)
