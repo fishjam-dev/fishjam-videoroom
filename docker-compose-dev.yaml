@@ -9,7 +9,7 @@ services:
       test: >
         curl --fail -H "authorization: Bearer development" http://localhost:5002/room || exit 1
       interval: 3s
-      retries: 10
+      retries: 2
       timeout: 2s
       start_period: 30s
     environment:
