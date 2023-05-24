@@ -7,8 +7,15 @@ config :videoroom, VideoroomWeb.Endpoint,
   secret_key_base: "ZARcyCI5SXpckH0BXnmeifEvUBnxxyqIR6PZDcmHKOUH3EbUHCeep0pdjXLYYdSq",
   server: false
 
-# Print only warnings and errors during test
-config :logger, level: :warning
+config :jellyfish_server_sdk,
+  server_address: "localhost:5002",
+  server_api_token: "development"
+
+config :videoroom,
+  divo: "docker-compose-integration.yaml",
+  divo_wait: [dwell: 1500, max_tries: 50]
+
+config :logger, level: :info
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
