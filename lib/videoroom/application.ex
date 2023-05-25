@@ -12,8 +12,9 @@ defmodule Videoroom.Application do
     children = [
       # Start the Telemetry supervisor
       VideoroomWeb.Telemetry,
-      # Start the Jellyfish connection process
-      JellyfishClient,
+      # Start the MeetingManager
+      {Registry, keys: :unique, name: Videoroom.Registry},
+      {DynamicSupervisor, restart: :transient, name: Videoroom.MeetingSupervisor},
       # Start the PubSub system
       {Phoenix.PubSub, name: Videoroom.PubSub},
       # Start the Endpoint (http/https)
