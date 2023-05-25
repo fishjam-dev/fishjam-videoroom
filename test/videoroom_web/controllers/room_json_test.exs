@@ -8,7 +8,6 @@ defmodule VideoroomWeb.RoomJsonTest do
   @url Application.compile_env!(:jellyfish_server_sdk, :server_address)
   @peer_url "ws://#{@url}/socket/peer/websocket"
 
-  @room_name "MeinRoom"
   @api_latency 400
 
   setup context do
@@ -19,6 +18,7 @@ defmodule VideoroomWeb.RoomJsonTest do
 
     on_exit(fn ->
       Process.sleep(@api_latency)
+      assert {:ok, []} = Room.get_all(client)
     end)
 
     context
@@ -58,6 +58,20 @@ defmodule VideoroomWeb.RoomJsonTest do
     leave_room(peer2)
   end
 
+  test "Two rooms at the same time", %{conn: conn, client: client} do
+    token1 = add_peer(conn)
+    token2 = add_peer(conn, "SecondRoom")
+
+    peer1 = join_room(token1)
+    peer2 = join_room(token2)
+
+    assert {:ok, rooms} = Room.get_all(client)
+    assert length(rooms) == 2
+
+    leave_room(peer1)
+    leave_room(peer2)
+  end
+
   test "Peer joins and leaves in quick succession", %{conn: conn, client: client} do
     token1 = add_peer(conn)
     peer1 = join_room(token1, async: true)
@@ -80,8 +94,8 @@ defmodule VideoroomWeb.RoomJsonTest do
     leave_room(peer2)
   end
 
-  defp add_peer(conn) do
-    conn = get(conn, ~p"/api/room/#{@room_name}")
+  defp add_peer(conn, room_name \\ "MeinRoom") do
+    conn = get(conn, ~p"/api/room/#{room_name}")
     assert(%{"token" => token} = json_response(conn, 200)["data"])
 
     token

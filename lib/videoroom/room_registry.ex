@@ -24,7 +24,7 @@ defmodule Videoroom.RoomRegistry do
   defp ensure_exists() do
     case :ets.whereis(@room_table) do
       :undefined ->
-        :ets.new(@room_table, [:named_table, :set])
+        :ets.new(@room_table, [:named_table, :set, :public])
 
       _ref ->
         :ok
