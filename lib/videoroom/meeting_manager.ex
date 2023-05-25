@@ -7,9 +7,13 @@ defmodule Videoroom.MeetingManager do
 
   @spec add_peer(binary()) :: {:ok, binary()}
   def add_peer(room_name) do
-    child = {Meeting, [name: room_name]}
+    child_spec = %{
+      id: Meeting,
+      start: {Meeting, :start_link, [[name: room_name]]},
+      restart: :transient
+    }
 
-    case DynamicSupervisor.start_child(MeetingSupervisor, child) do
+    case DynamicSupervisor.start_child(MeetingSupervisor, child_spec) do
       {:ok, meeting} ->
         meeting
 

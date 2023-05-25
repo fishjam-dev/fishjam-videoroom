@@ -6,9 +6,9 @@ defmodule Videoroom.Meeting do
 
   require Logger
 
-  alias Jellyfish.Server.ControlMessage.PeerCrashed
-  alias Jellyfish.Server.ControlMessage.PeerDisconnected
-  alias Jellyfish.Server.ControlMessage.RoomCrashed
+  alias Jellyfish.ServerMessage.PeerCrashed
+  alias Jellyfish.ServerMessage.PeerDisconnected
+  alias Jellyfish.ServerMessage.RoomCrashed
 
   alias Jellyfish.Room
   alias Videoroom.RoomRegistry
@@ -37,7 +37,7 @@ defmodule Videoroom.Meeting do
          {:ok, room} <- find_or_create_room(client, args) do
       Process.monitor(notifier)
 
-      {:ok, %{client: client, notifier: notifier, room_id: room.id}}
+      {:ok, %{client: client, notifier: notifier, name: args[:name], room_id: room.id}}
     else
       {:error, reason} ->
         raise("Failed to create room, reason: #{inspect(reason)}")
@@ -58,17 +58,23 @@ defmodule Videoroom.Meeting do
 
   @impl true
   def handle_call({:add_peer}, _from, state) do
-    {:ok, _peer, token} = Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC)
-    {:reply, {:ok, token}, state}
+    case Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC) do
+      {:ok, _peer, token} ->
+        {:reply, {:ok, token}, state}
+
+      _error ->
+        {:stop, :normal, state}
+    end
   end
 
   @impl true
   def handle_info({:jellyfish, notification}, state) do
     case notification do
       %type{} when type in [PeerDisconnected, PeerCrashed] ->
-        %{room_id: room_id, peer_id: _peer_id} = notification
+        %{room_id: room_id, peer_id: peer_id} = notification
 
-        room = Room.get(state.client, room_id)
+        Room.delete_peer(state.client, room_id, peer_id)
+        {:ok, room} = Room.get(state.client, room_id)
 
         if Enum.empty?(room.peers) do
           {:stop, :normal, state}
@@ -91,11 +97,10 @@ defmodule Videoroom.Meeting do
   end
 
   @impl true
-  def terminate(:normal, _state) do
-    # close jf_room
-    # remove mapping from room registry
+  def terminate(:normal, state) do
+    Room.delete(state.client, state.room_id)
+    RoomRegistry.delete(state.room_id)
   end
 
-  def terminate(_reason, _state) do
-  end
+  def terminate(_reason, _state), do: nil
 end

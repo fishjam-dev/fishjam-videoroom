@@ -5,6 +5,9 @@ defmodule Videoroom.Test.Peer do
 
   use WebSockex
 
+  alias Jellyfish.PeerMessage
+  alias Jellyfish.PeerMessage.AuthRequest
+
   @spec start_link(binary | WebSockex.Conn.t(), any) :: {:ok, pid}
   def start_link(url, token) do
     connect(url, token)
@@ -21,12 +24,11 @@ defmodule Videoroom.Test.Peer do
   end
 
   defp connect(url, token) do
-    auth_msg =
-      %{type: "controlMessage", data: %{type: "authRequest", token: token}}
-      |> Jason.encode!()
+    auth_request =
+      %PeerMessage{content: {:auth_request, %AuthRequest{token: token}}} |> PeerMessage.encode()
 
-    {:ok, client} = WebSockex.start_link(url, __MODULE__, %{peer_id: nil})
-    :ok = WebSockex.send_frame(client, {:text, auth_msg})
+    {:ok, client} = WebSockex.start_link(url, __MODULE__, [])
+    :ok = WebSockex.send_frame(client, {:binary, auth_request})
 
     {:ok, client}
   end
