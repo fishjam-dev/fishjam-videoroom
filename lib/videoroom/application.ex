@@ -5,8 +5,6 @@ defmodule Videoroom.Application do
 
   use Application
 
-  alias Videoroom.JellyfishClient
-
   @impl true
   def start(_type, _args) do
     children = [
