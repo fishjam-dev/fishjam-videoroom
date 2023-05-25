@@ -1,11 +1,11 @@
 defmodule VideoroomWeb.RoomJsonTest do
   use VideoroomWeb.ConnCase, async: false
 
-  alias Jellyfish.Room, as: JellyfishRoom
+  alias Jellyfish.Room
   alias Videoroom.Test.Peer
-  alias Jellyfish.Server.ControlMessage.{PeerConnected, PeerDisconnected}
+  alias Jellyfish.ServerMessage.{PeerConnected, PeerDisconnected}
 
-  @url if Mix.env() == :integration_test, do: "jellyfish:4000", else: "localhost:4000"
+  @url Application.compile_env!(:jellyfish_server_sdk, :server_address)
   @peer_url "ws://#{@url}/socket/peer/websocket"
 
   @room_name "MeinRoom"
@@ -15,7 +15,7 @@ defmodule VideoroomWeb.RoomJsonTest do
     client = Jellyfish.Client.new()
     {:ok, notifier} = Jellyfish.Notifier.start()
 
-    assert {:ok, []} = JellyfishRoom.get_all(client)
+    assert {:ok, []} = Room.get_all(client)
 
     on_exit(fn ->
       Process.sleep(@api_latency)
@@ -28,27 +28,15 @@ defmodule VideoroomWeb.RoomJsonTest do
     })
   end
 
-  setup_all _ctx do
-    on_exit(fn ->
-      client = Jellyfish.Client.new()
-
-      {:ok, rooms} = JellyfishRoom.get_all(client)
-
-      Enum.each(rooms, fn room ->
-        JellyfishRoom.delete(client, room.id)
-      end)
-    end)
-  end
-
   test "Room creates when peer joins and closes when it leaves", %{conn: conn, client: client} do
     token = add_peer(conn)
     peer = join_room(token)
-    assert {:ok, [%JellyfishRoom{peers: peers, id: jf_room_id}]} = JellyfishRoom.get_all(client)
+    assert {:ok, [%Room{peers: peers, id: jf_room_id}]} = Room.get_all(client)
     assert length(peers) == 1
 
     leave_room(peer)
     Process.sleep(@api_latency)
-    assert {:error, reason} = JellyfishRoom.get(client, jf_room_id)
+    assert {:error, reason} = Room.get(client, jf_room_id)
     assert String.contains?(reason, "#{jf_room_id} does not exist")
   end
 
@@ -59,12 +47,12 @@ defmodule VideoroomWeb.RoomJsonTest do
     peer1 = join_room(token1)
     peer2 = join_room(token2)
 
-    assert {:ok, [%JellyfishRoom{peers: peers, id: _id}]} = JellyfishRoom.get_all(client)
+    assert {:ok, [%Room{peers: peers, id: _id}]} = Room.get_all(client)
     assert length(peers) == 2
 
     leave_room(peer1)
     Process.sleep(@api_latency)
-    assert {:ok, [%JellyfishRoom{peers: peers, id: _id}]} = JellyfishRoom.get_all(client)
+    assert {:ok, [%Room{peers: peers, id: _id}]} = Room.get_all(client)
     assert length(peers) == 1
 
     leave_room(peer2)
@@ -86,7 +74,7 @@ defmodule VideoroomWeb.RoomJsonTest do
     assert_receive {:jellyfish, %PeerConnected{}}, @api_latency
 
     Process.sleep(@api_latency)
-    assert {:ok, [%JellyfishRoom{peers: peers, id: _id}]} = JellyfishRoom.get_all(client)
+    assert {:ok, [%Room{peers: peers, id: _id}]} = Room.get_all(client)
     assert length(peers) == 1
 
     leave_room(peer2)

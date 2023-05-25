@@ -3,8 +3,9 @@ defmodule VideoroomWeb.RoomController do
   use OpenApiSpex.ControllerSpecs
 
   alias OpenApiSpex.Schema
-  alias Videoroom.JellyfishClient
   alias VideoroomWeb.ApiSpec.Token
+
+  alias Videoroom.MeetingManager
 
   tags [:room]
 
@@ -33,7 +34,7 @@ defmodule VideoroomWeb.RoomController do
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => name}) do
-    {:ok, token} = JellyfishClient.join_room(name)
+    {:ok, token} = MeetingManager.add_peer(name)
 
     conn
     |> put_resp_content_type("application/json")

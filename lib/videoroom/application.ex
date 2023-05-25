@@ -5,15 +5,14 @@ defmodule Videoroom.Application do
 
   use Application
 
-  alias Videoroom.JellyfishClient
-
   @impl true
   def start(_type, _args) do
     children = [
       # Start the Telemetry supervisor
       VideoroomWeb.Telemetry,
-      # Start the Jellyfish connection process
-      JellyfishClient,
+      # Start the MeetingManager
+      {Registry, keys: :unique, name: Videoroom.Registry},
+      {DynamicSupervisor, name: Videoroom.MeetingSupervisor},
       # Start the PubSub system
       {Phoenix.PubSub, name: Videoroom.PubSub},
       # Start the Endpoint (http/https)

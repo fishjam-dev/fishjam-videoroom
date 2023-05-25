@@ -82,6 +82,8 @@ defmodule Videoroom.MixProject do
       "api.spec": ["openapi.spec.yaml --spec VideoroomWeb.ApiSpec"],
       integration_test: [
         "cmd docker compose -f docker-compose-integration.yaml pull",
+        # We use `run test` instead of `up` command as containers will be cleaned-up
+        # when the test service ends, which is not a case when running with `up`.
         "cmd docker compose -f docker-compose-integration.yaml run test"
       ]
     ]

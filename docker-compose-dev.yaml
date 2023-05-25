@@ -9,13 +9,14 @@ services:
       test: >
         curl --fail -H "authorization: Bearer development" http://localhost:5002/room || exit 1
       interval: 3s
-      retries: 10
+      retries: 2
       timeout: 2s
       start_period: 30s
     environment:
       VIRTUAL_HOST: "localhost"
       USE_INTEGRATED_TURN: "true"
       INTEGRATED_TURN_IP: "${INTEGRATED_TURN_IP:-127.0.0.1}"
+      INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
       INTEGRATED_TURN_PORT_RANGE: "50000-50050"
       INTEGRATED_TCP_TURN_PORT: "49999"
       SERVER_API_TOKEN: "development"
@@ -23,4 +24,5 @@ services:
       SECRET_KEY_BASE: "super-secret-key"
     ports:
       - "5002:5002"
+      - "49999:49999"
       - "50000-50050:50000-50050/udp"
