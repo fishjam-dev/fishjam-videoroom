@@ -10,10 +10,9 @@ defmodule Videoroom.Application do
     children = [
       # Start the Telemetry supervisor
       VideoroomWeb.Telemetry,
-      # Start the MeetingManager
-      {Registry, keys: :unique, name: Videoroom.Registry},
       # Create ETS table for Jellyfish Rooms
       Videoroom.RoomRegistry,
+      {Registry, keys: :unique, name: Videoroom.Registry},
       {DynamicSupervisor, name: Videoroom.MeetingSupervisor},
       # Start the PubSub system
       {Phoenix.PubSub, name: Videoroom.PubSub},
