@@ -12,6 +12,8 @@ defmodule Videoroom.Application do
       VideoroomWeb.Telemetry,
       # Start the MeetingManager
       {Registry, keys: :unique, name: Videoroom.Registry},
+      # Create ETS table for Jellyfish Rooms
+      Videoroom.RoomRegistry,
       {DynamicSupervisor, name: Videoroom.MeetingSupervisor},
       # Start the PubSub system
       {Phoenix.PubSub, name: Videoroom.PubSub},

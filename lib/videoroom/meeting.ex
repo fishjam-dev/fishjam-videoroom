@@ -68,7 +68,26 @@ defmodule Videoroom.Meeting do
   end
 
   @impl true
-  def handle_info({:jellyfish, notification}, state) do
+  def handle_info({:jellyfish, %type{} = notification}, state)
+      when type in [PeerDisconnected, PeerCrashed, RoomCrashed] do
+    if notification.room_id == state.room_id do
+      handle_notification(notification, state)
+    else
+      {:noreply, state}
+    end
+  end
+
+  def handle_info({:jellyfish, _notification}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
+    if pid == state.notifier do
+      raise("Connection to jellyfish closed!")
+    end
+  end
+
+  defp handle_notification(notification, state) do
     case notification do
       %type{} when type in [PeerDisconnected, PeerCrashed] ->
         %{room_id: room_id, peer_id: peer_id} = notification
@@ -87,12 +106,6 @@ defmodule Videoroom.Meeting do
 
       _other ->
         {:noreply, state}
-    end
-  end
-
-  def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
-    if pid == state.notifier do
-      raise("Connection to jellyfish closed!")
     end
   end
 
