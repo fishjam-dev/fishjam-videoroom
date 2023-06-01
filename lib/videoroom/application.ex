@@ -7,11 +7,11 @@ defmodule Videoroom.Application do
 
   @impl true
   def start(_type, _args) do
+    :ets.new(:room_table, [:named_table, :set, :public])
+
     children = [
       # Start the Telemetry supervisor
       VideoroomWeb.Telemetry,
-      # Create ETS table for Jellyfish Rooms
-      Videoroom.RoomRegistry,
       # Registry and Supervisor, which manage Meetings
       {Registry, keys: :unique, name: Videoroom.Registry},
       {DynamicSupervisor, name: Videoroom.MeetingSupervisor},

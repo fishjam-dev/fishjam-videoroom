@@ -1,6 +1,6 @@
 defmodule Videoroom.Meeting do
   @moduledoc """
-  A Module responsible for handling a room
+  A Module responsible for handling a room.
   """
   use GenServer
 
@@ -9,7 +9,8 @@ defmodule Videoroom.Meeting do
   alias Jellyfish.ServerMessage.RoomCrashed
 
   alias Jellyfish.Room
-  alias Videoroom.RoomRegistry
+
+  @room_table :room_table
 
   # Api
 
@@ -45,14 +46,14 @@ defmodule Videoroom.Meeting do
   defp find_or_create_room(client, opts) do
     name = opts[:name]
 
-    with [{^name, room_id}] <- RoomRegistry.lookup(name),
+    with [{^name, room_id}] <- :ets.lookup(@room_table, name),
          {:ok, room} <- Room.get(client, room_id) do
       {:ok, room}
     else
       _error ->
         case Room.create(client, max_peers: opts[:max_peers]) do
           {:ok, room} ->
-            RoomRegistry.insert_new(name, room.id)
+            :ets.insert_new(@room_table, {name, room.id})
             {:ok, room}
 
           error ->
@@ -92,29 +93,27 @@ defmodule Videoroom.Meeting do
     end
   end
 
-  defp handle_notification(notification, state) do
-    case notification do
-      %type{} when type in [PeerDisconnected, PeerCrashed] ->
-        %{room_id: room_id, peer_id: peer_id} = notification
+  defp handle_notification(%type{} = notification, state)
+       when type in [PeerDisconnected, PeerCrashed] do
+    %{room_id: room_id, peer_id: peer_id} = notification
+    Room.delete_peer(state.client, room_id, peer_id)
+    {:ok, room} = Room.get(state.client, room_id)
 
-        Room.delete_peer(state.client, room_id, peer_id)
-        {:ok, room} = Room.get(state.client, room_id)
-
-        if Enum.empty?(room.peers) do
-          {:stop, :normal, state}
-        else
-          {:noreply, state}
-        end
-
-      %RoomCrashed{room_id: _room_id} ->
-        {:stop, :normal, state}
+    if Enum.empty?(room.peers) do
+      {:stop, :normal, state}
+    else
+      {:noreply, state}
     end
+  end
+
+  defp handle_notification(%RoomCrashed{}, state) do
+    {:stop, :normal, state}
   end
 
   @impl true
   def terminate(:normal, state) do
     Room.delete(state.client, state.room_id)
-    RoomRegistry.delete(state.room_id)
+    :ets.delete(@room_table, state.name)
   end
 
   def terminate(_reason, _state), do: nil

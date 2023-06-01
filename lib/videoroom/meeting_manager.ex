@@ -1,6 +1,6 @@
 defmodule Videoroom.MeetingManager do
   @moduledoc """
-  Module providing functions for interacting with Meetings
+  Module providing functions for interacting with `Videoroom.Meeting`s.
   """
   alias Videoroom.Meeting
   alias Videoroom.MeetingSupervisor
