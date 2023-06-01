@@ -19,9 +19,13 @@ Now you can start the Videoroom:
   * Run `mix setup` to install and setup dependencies
   * Start Phoenix server with `mix phx.server`
 
-## Usage
 
-TODO
+When running in production you must specify the address of the Jellyfish, as well as the authentication token via the environment variables:
+```
+JELLYFISH_IP=<IP_ADDRESS>
+JELLYFISH_PORT=<PORT>
+JELLYFISH_API_TOKEN=<TOKEN>
+```
 
 ## Tests
 

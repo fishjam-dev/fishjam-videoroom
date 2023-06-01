@@ -2,6 +2,12 @@
 components:
   responses: {}
   schemas:
+    Error:
+      description: Error message
+      example: Failed to add peer
+      title: Error
+      type: string
+      x-struct: Elixir.Videorom.ApiSpec.Error
     PeerToken:
       description: Peer token used for authorizing websocket connection to the Jellyfish Server
       example: SFMyNTY.g2gDdAAhiOL4CdsaboT9-jtMzhoI
@@ -38,6 +44,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PeerToken'
           description: Room response
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
       summary: Join a room
       tags:
         - room

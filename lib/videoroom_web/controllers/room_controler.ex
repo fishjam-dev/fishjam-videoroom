@@ -4,6 +4,7 @@ defmodule VideoroomWeb.RoomController do
 
   alias OpenApiSpex.Schema
   alias VideoroomWeb.ApiSpec.Token
+  alias Videorom.ApiSpec.Error
 
   alias Videoroom.MeetingManager
 
@@ -26,7 +27,8 @@ defmodule VideoroomWeb.RoomController do
       %Schema{}
     },
     responses: [
-      ok: {"Room response", "application/json", Token}
+      ok: {"Room response", "application/json", Token},
+      service_unavailable: {"Error", "application/json", Error}
     ]
   )
 
@@ -34,10 +36,14 @@ defmodule VideoroomWeb.RoomController do
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => name}) do
-    {:ok, token} = MeetingManager.add_peer(name)
+    case MeetingManager.add_peer(name) do
+      {:ok, token} ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> render("show.json", token: token)
 
-    conn
-    |> put_resp_content_type("application/json")
-    |> render("show.json", token: token)
+      {:error, reason} ->
+        conn |> resp(503, inspect(reason))
+    end
   end
 end

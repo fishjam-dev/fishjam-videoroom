@@ -9,7 +9,8 @@ defmodule Videoroom.MeetingManager do
   def add_peer(room_name) do
     child_spec = %{
       id: Meeting,
-      start: {Meeting, :start_link, [[name: room_name]]},
+      # `max_peers` = nil creates a room without limit
+      start: {Meeting, :start_link, [[name: room_name, max_peers: nil]]},
       restart: :transient
     }
 

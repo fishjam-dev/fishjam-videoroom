@@ -4,8 +4,6 @@ defmodule Videoroom.Meeting do
   """
   use GenServer
 
-  require Logger
-
   alias Jellyfish.ServerMessage.PeerCrashed
   alias Jellyfish.ServerMessage.PeerDisconnected
   alias Jellyfish.ServerMessage.RoomCrashed
@@ -40,19 +38,26 @@ defmodule Videoroom.Meeting do
       {:ok, %{client: client, notifier: notifier, name: args[:name], room_id: room.id}}
     else
       {:error, reason} ->
-        raise("Failed to create room, reason: #{inspect(reason)}")
+        raise("Failed to create a meeting, reason: #{inspect(reason)}")
     end
   end
 
   defp find_or_create_room(client, opts) do
-    with [{_name, room_id}] <- RoomRegistry.lookup(opts[:name]),
+    name = opts[:name]
+
+    with [{^name, room_id}] <- RoomRegistry.lookup(name),
          {:ok, room} <- Room.get(client, room_id) do
       {:ok, room}
     else
       _error ->
-        {:ok, room} = Room.create(client, max_peers: opts[:max_peers])
-        RoomRegistry.insert_new(opts[:name], room.id)
-        {:ok, room}
+        case Room.create(client, max_peers: opts[:max_peers]) do
+          {:ok, room} ->
+            RoomRegistry.insert_new(name, room.id)
+            {:ok, room}
+
+          error ->
+            error
+        end
     end
   end
 
@@ -63,7 +68,7 @@ defmodule Videoroom.Meeting do
         {:reply, {:ok, token}, state}
 
       _error ->
-        {:stop, :normal, state}
+        {:reply, {:error, "Failed to add peer"}, state}
     end
   end
 
