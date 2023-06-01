@@ -108,9 +108,6 @@ defmodule Videoroom.Meeting do
 
       %RoomCrashed{room_id: _room_id} ->
         {:stop, :normal, state}
-
-      _other ->
-        {:noreply, state}
     end
   end
 
