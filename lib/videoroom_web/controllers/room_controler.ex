@@ -3,8 +3,8 @@ defmodule VideoroomWeb.RoomController do
   use OpenApiSpex.ControllerSpecs
 
   alias OpenApiSpex.Schema
-  alias VideoroomWeb.ApiSpec.Token
   alias Videorom.ApiSpec.Error
+  alias VideoroomWeb.ApiSpec.Token
 
   alias Videoroom.MeetingManager
 

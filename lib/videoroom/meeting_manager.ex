@@ -5,7 +5,7 @@ defmodule Videoroom.MeetingManager do
   alias Videoroom.Meeting
   alias Videoroom.MeetingSupervisor
 
-  @spec add_peer(binary()) :: {:ok, binary()}
+  @spec add_peer(binary()) :: {:ok, binary()} | {:error, binary()}
   def add_peer(room_name) do
     child_spec = %{
       id: Meeting,

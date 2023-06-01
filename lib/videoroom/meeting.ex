@@ -20,7 +20,7 @@ defmodule Videoroom.Meeting do
     )
   end
 
-  @spec add_peer(pid()) :: {:ok, binary()}
+  @spec add_peer(pid()) :: {:ok, binary()} | {:error, binary()}
   def add_peer(meeting) do
     GenServer.call(meeting, {:add_peer})
   end
