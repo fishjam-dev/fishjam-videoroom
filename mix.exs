@@ -48,7 +48,6 @@ defmodule Videoroom.MixProject do
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:open_api_spex, "~> 3.16"},
       {:ymlr, "~> 3.0"},
-      {:cors_plug, "~> 3.0"},
 
       # Test
       {:websockex, "~> 0.4.3"},
