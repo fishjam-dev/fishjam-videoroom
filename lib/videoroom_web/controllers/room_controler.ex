@@ -6,7 +6,7 @@ defmodule VideoroomWeb.RoomController do
   alias Videorom.ApiSpec.Error
   alias VideoroomWeb.ApiSpec.Token
 
-  alias Videoroom.MeetingManager
+  alias Videoroom.MeetingSupervisor
 
   tags [:room]
 
@@ -36,7 +36,7 @@ defmodule VideoroomWeb.RoomController do
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => name}) do
-    case MeetingManager.add_peer(name) do
+    case MeetingSupervisor.add_peer(name) do
       {:ok, token} ->
         conn
         |> put_resp_content_type("application/json")

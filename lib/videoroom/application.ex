@@ -16,7 +16,7 @@ defmodule Videoroom.Application do
       VideoroomWeb.Telemetry,
       # Registry and Supervisor, which manage Meetings
       {Registry, keys: :unique, name: Videoroom.Registry},
-      {DynamicSupervisor, name: Videoroom.MeetingSupervisor},
+      Videoroom.MeetingSupervisor,
       # Start the PubSub system
       {Phoenix.PubSub, name: Videoroom.PubSub},
       # Start the Endpoint (http/https)

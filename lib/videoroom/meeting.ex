@@ -2,7 +2,7 @@ defmodule Videoroom.Meeting do
   @moduledoc """
   A Module responsible for handling a room.
   """
-  use GenServer
+  use GenServer, restart: :transient
 
   alias Jellyfish.ServerMessage.PeerCrashed
   alias Jellyfish.ServerMessage.PeerDisconnected
@@ -38,7 +38,7 @@ defmodule Videoroom.Meeting do
       {:ok, %{client: client, notifier: notifier, name: args[:name], room_id: room.id}}
     else
       {:error, reason} ->
-        raise("Failed to create a meeting, reason: #{inspect(reason)}")
+        raise "Failed to create a meeting, reason: #{inspect(reason)}"
     end
   end
 
