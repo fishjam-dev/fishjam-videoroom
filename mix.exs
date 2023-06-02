@@ -57,8 +57,7 @@ defmodule Videoroom.MixProject do
 
   defp dialyzer() do
     opts = [
-      flags: [:error_handling],
-      plt_add_apps: [:mix]
+      flags: [:error_handling]
     ]
 
     if System.get_env("CI") == "true" do

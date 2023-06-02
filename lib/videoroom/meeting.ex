@@ -9,8 +9,7 @@ defmodule Videoroom.Meeting do
   alias Jellyfish.ServerMessage.RoomCrashed
 
   alias Jellyfish.Room
-
-  @room_table :room_table
+  alias Videoroom.RoomRegistry
 
   # Api
 
@@ -23,7 +22,7 @@ defmodule Videoroom.Meeting do
 
   @spec add_peer(pid()) :: {:ok, binary()} | {:error, binary()}
   def add_peer(meeting) do
-    GenServer.call(meeting, {:add_peer})
+    GenServer.call(meeting, :add_peer)
   end
 
   # Callbacks
@@ -46,14 +45,14 @@ defmodule Videoroom.Meeting do
   defp find_or_create_room(client, opts) do
     name = opts[:name]
 
-    with [{^name, room_id}] <- :ets.lookup(@room_table, name),
+    with [{^name, room_id}] <- RoomRegistry.lookup(name),
          {:ok, room} <- Room.get(client, room_id) do
       {:ok, room}
     else
       _error ->
         case Room.create(client, max_peers: opts[:max_peers]) do
           {:ok, room} ->
-            :ets.insert_new(@room_table, {name, room.id})
+            RoomRegistry.insert_new(name, room.id)
             {:ok, room}
 
           error ->
@@ -63,7 +62,7 @@ defmodule Videoroom.Meeting do
   end
 
   @impl true
-  def handle_call({:add_peer}, _from, state) do
+  def handle_call(:add_peer, _from, state) do
     case Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC) do
       {:ok, _peer, token} ->
         {:reply, {:ok, token}, state}
@@ -87,10 +86,13 @@ defmodule Videoroom.Meeting do
     {:noreply, state}
   end
 
-  def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
-    if pid == state.notifier do
-      raise("Connection to jellyfish closed!")
-    end
+  def handle_info({:DOWN, _ref, :process, pid, _reason}, %{notifier: notifier})
+      when pid == notifier do
+    raise("Connection to jellyfish closed!")
+  end
+
+  def handle_info(_msg, state) do
+    {:ok, state}
   end
 
   defp handle_notification(%type{} = notification, state)
@@ -113,7 +115,7 @@ defmodule Videoroom.Meeting do
   @impl true
   def terminate(:normal, state) do
     Room.delete(state.client, state.room_id)
-    :ets.delete(@room_table, state.name)
+    RoomRegistry.delete(state.name)
   end
 
   def terminate(_reason, _state), do: nil

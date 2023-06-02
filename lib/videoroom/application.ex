@@ -3,11 +3,13 @@ defmodule Videoroom.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  alias Videoroom.RoomRegistry
+
   use Application
 
   @impl true
   def start(_type, _args) do
-    :ets.new(:room_table, [:named_table, :set, :public])
+    RoomRegistry.create()
 
     children = [
       # Start the Telemetry supervisor
