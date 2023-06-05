@@ -133,6 +133,28 @@ defmodule VideoroomWeb.RoomJsonTest do
     leave_room(peer2)
   end
 
+  test "Meeting doesn't create new Room when the Meeting crashed", %{conn: conn, client: client} do
+    token1 = add_peer(conn)
+    assert {:ok, [%Room{id: room_id}]} = Room.get_all(client)
+
+    [{meeting, _key}] = Registry.lookup(Videoroom.Registry, @default_room)
+    Process.exit(meeting, :kill)
+
+    token2 =
+      try do
+        add_peer(conn)
+      rescue
+        RuntimeError ->
+          add_peer(conn)
+      end
+
+    assert Registry.count(Videoroom.Registry) == 1
+    assert {:ok, [%Room{id: ^room_id}]} = Room.get_all(client)
+
+    # Cleanup
+    [token1, token2] |> Enum.map(&join_room/1) |> Enum.map(&leave_room/1)
+  end
+
   defp add_peer(conn, room_name \\ @default_room) do
     conn = get(conn, ~p"/api/room/#{room_name}")
     assert(%{"token" => token} = json_response(conn, 200)["data"])

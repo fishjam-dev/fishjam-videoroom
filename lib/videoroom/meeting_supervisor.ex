@@ -21,13 +21,8 @@ defmodule Videoroom.MeetingSupervisor do
     # `max_peers` = nil creates a room without limit
     args = [name: room_name, max_peers: nil]
 
-    case DynamicSupervisor.start_child(__MODULE__, {Meeting, args}) do
-      {:ok, meeting} ->
-        meeting
+    DynamicSupervisor.start_child(__MODULE__, {Meeting, args})
 
-      {:error, {:already_started, meeting}} ->
-        meeting
-    end
-    |> Meeting.add_peer()
+    Meeting.add_peer(room_name)
   end
 end

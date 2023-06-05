@@ -8,9 +8,15 @@ defmodule Videoroom.RoomRegistry do
     :ets.new(@room_table, [:named_table, :set, :public])
   end
 
-  @spec lookup(binary()) :: list({binary(), binary()})
+  @spec lookup(binary()) :: {:ok, binary()} | {:error, :unregistered}
   def lookup(name) do
-    :ets.lookup(@room_table, name)
+    case :ets.lookup(@room_table, name) do
+      [] ->
+        {:error, :unregistered}
+
+      [{^name, id}] ->
+        {:ok, id}
+    end
   end
 
   @spec insert_new(binary(), binary()) :: boolean()
