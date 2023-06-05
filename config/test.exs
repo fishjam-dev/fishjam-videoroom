@@ -15,7 +15,7 @@ config :videoroom,
   divo: "docker-compose-integration.yaml",
   divo_wait: [dwell: 1500, max_tries: 50]
 
-config :logger, level: :info
+config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime

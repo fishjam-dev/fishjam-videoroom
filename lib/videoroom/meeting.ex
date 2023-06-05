@@ -39,7 +39,7 @@ defmodule Videoroom.Meeting do
       max_peers: Keyword.get(args, :max_peers)
     }
 
-    Logger.metadata(name: args.name)
+    Logger.metadata(room_name: args.name)
 
     client = Jellyfish.Client.new()
 

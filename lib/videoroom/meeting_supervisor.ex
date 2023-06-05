@@ -7,6 +7,7 @@ defmodule Videoroom.MeetingSupervisor do
 
   alias Videoroom.Meeting
 
+  @spec start_link(any()) :: Supervisor.on_start()
   def start_link(_init_arg) do
     DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)
   end

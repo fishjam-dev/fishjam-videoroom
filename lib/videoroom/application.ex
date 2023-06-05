@@ -3,9 +3,9 @@ defmodule Videoroom.Application do
   # for more information on OTP Applications
   @moduledoc false
 
-  alias Videoroom.RoomRegistry
-
   use Application
+
+  alias Videoroom.RoomRegistry
 
   @impl true
   def start(_type, _args) do
