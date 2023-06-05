@@ -124,7 +124,7 @@ defmodule Videoroom.Meeting do
   end
 
   def handle_info(_msg, state) do
-    {:ok, state}
+    {:noreply, state}
   end
 
   defp handle_notification(%type{} = notification, state)
