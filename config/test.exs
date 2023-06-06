@@ -13,7 +13,8 @@ config :jellyfish_server_sdk,
 
 config :videoroom,
   divo: "docker-compose-integration.yaml",
-  divo_wait: [dwell: 1500, max_tries: 50]
+  divo_wait: [dwell: 1500, max_tries: 50],
+  peer_join_timeout: 500
 
 config :logger, level: :info
 

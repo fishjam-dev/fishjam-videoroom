@@ -30,14 +30,14 @@ defmodule VideoroomWeb.RoomJsonTest do
   defmacrop assert_within_timeout(
               pattern,
               lambda,
-              timeout_at \\ :erlang.monotonic_time(:millisecond) + @timeout
+              timeout \\ @timeout
             ) do
     quote generated: true do
       unquote(pattern) =
         validate_within_timeout(
           unquote(lambda),
           &match?(unquote(pattern), &1),
-          unquote(timeout_at)
+          :erlang.monotonic_time(:millisecond) + unquote(timeout)
         )
     end
   end
@@ -48,8 +48,11 @@ defmodule VideoroomWeb.RoomJsonTest do
 
     assert {:ok, []} = Room.get_all(client)
 
+    prev_env = Application.get_all_env(:videoroom)
+
     on_exit(fn ->
       assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+      Application.put_all_env([{:videoroom, prev_env}])
     end)
 
     context
@@ -149,6 +152,30 @@ defmodule VideoroomWeb.RoomJsonTest do
 
     # Cleanup
     [token1, token2] |> Enum.map(&join_room/1) |> Enum.map(&leave_room/1)
+  end
+
+  test "Room closes when no peers join within timeout", %{conn: conn, client: client} do
+    Application.put_env(:videoroom, :peer_join_timeout, 500)
+
+    _token = add_peer(conn)
+    assert {:ok, [%Room{}]} = Room.get_all(client)
+
+    assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+  end
+
+  test "Room closes when all peers leave or time out", %{conn: conn, client: client} do
+    _token = add_peer(conn)
+    token = add_peer(conn)
+
+    assert {:ok, [%Room{peers: peers}]} = Room.get_all(client)
+    assert length(peers) == 2
+
+    peer = join_room(token)
+    leave_room(peer)
+
+    assert {:ok, [%Room{peers: [_peer]}]} = Room.get_all(client)
+
+    assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
   end
 
   defp add_peer(conn, room_name \\ @default_room) do
