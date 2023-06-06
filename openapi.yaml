@@ -1,0 +1,60 @@
+---
+components:
+  responses: {}
+  schemas:
+    Error:
+      description: Error message
+      example: Failed to add peer
+      title: Error
+      type: string
+      x-struct: Elixir.Videorom.ApiSpec.Error
+    PeerToken:
+      description: Peer token used for authorizing websocket connection to the Jellyfish Server
+      example: SFMyNTY.g2gDdAAhiOL4CdsaboT9-jtMzhoI
+      title: PeerToken
+      type: string
+      x-struct: Elixir.VideoroomWeb.ApiSpec.Token
+info:
+  title: Videoroom
+  version: 0.1.0
+openapi: 3.0.0
+paths:
+  /api/room/{id}:
+    get:
+      callbacks: {}
+      description: Create a new peer in a room and get its token
+      operationId: VideoroomWeb.RoomController.show
+      parameters:
+        - description: Room name
+          in: path
+          name: room_name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        description: Room params
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeerToken'
+          description: Room response
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
+      summary: Join a room
+      tags:
+        - room
+security: []
+servers:
+  - url: http://localhost:4000
+    variables: {}
+tags: []

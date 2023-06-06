@@ -5,11 +5,18 @@ defmodule Videoroom.Application do
 
   use Application
 
+  alias Videoroom.RoomRegistry
+
   @impl true
   def start(_type, _args) do
+    RoomRegistry.create()
+
     children = [
       # Start the Telemetry supervisor
       VideoroomWeb.Telemetry,
+      # Registry and Supervisor, which manage Meetings
+      {Registry, keys: :unique, name: Videoroom.Registry},
+      Videoroom.MeetingSupervisor,
       # Start the PubSub system
       {Phoenix.PubSub, name: Videoroom.PubSub},
       # Start the Endpoint (http/https)

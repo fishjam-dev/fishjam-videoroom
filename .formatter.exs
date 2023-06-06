@@ -4,5 +4,5 @@
     ".formatter.exs",
     "*.exs"
   ],
-  import_deps: [:phoenix]
+  import_deps: [:open_api_spex, :phoenix, :protobuf]
 ]
