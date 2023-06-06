@@ -39,7 +39,6 @@ defmodule VideoroomWeb.RoomController do
     case MeetingSupervisor.add_peer(name) do
       {:ok, token} ->
         conn
-        |> put_resp_content_type("application/json")
         |> render("show.json", token: token)
 
       {:error, reason} ->

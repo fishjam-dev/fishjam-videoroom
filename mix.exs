@@ -47,7 +47,7 @@ defmodule Videoroom.MixProject do
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:open_api_spex, "~> 3.16"},
-      {:ymlr, "~> 3.0"},
+      {:ymlr, "~> 3.0", only: :dev},
 
       # Test
       {:websockex, "~> 0.4.3"},

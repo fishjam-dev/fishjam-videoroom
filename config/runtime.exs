@@ -60,9 +60,9 @@ if config_env() == :prod do
     server_address: "#{jellyfish_ip}:#{jellyfish_port}",
     server_api_token:
       System.get_env("JELLYFISH_API_TOKEN") ||
-        raise("""
+        raise """
         Environment variable JELLYFISH_API_TOKEN is missing.
-        """)
+        """
 
   # ## SSL Support
   #
