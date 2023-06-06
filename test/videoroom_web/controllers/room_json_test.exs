@@ -140,13 +140,9 @@ defmodule VideoroomWeb.RoomJsonTest do
     [{meeting, _key}] = Registry.lookup(Videoroom.Registry, @default_room)
     Process.exit(meeting, :kill)
 
-    token2 =
-      try do
-        add_peer(conn)
-      rescue
-        RuntimeError ->
-          add_peer(conn)
-      end
+    await_meeting_restart(@default_room, meeting)
+
+    token2 = add_peer(conn)
 
     assert Registry.count(Videoroom.Registry) == 1
     assert {:ok, [%Room{id: ^room_id}]} = Room.get_all(client)
@@ -176,5 +172,14 @@ defmodule VideoroomWeb.RoomJsonTest do
 
     unless async?,
       do: assert_receive({:jellyfish, %PeerDisconnected{}}, @timeout)
+  end
+
+  defp await_meeting_restart(name, prev_pid) do
+    [{pid, _key}] = Registry.lookup(Videoroom.Registry, name)
+
+    if pid == prev_pid do
+      Process.sleep(10)
+      await_meeting_restart(name, prev_pid)
+    end
   end
 end
