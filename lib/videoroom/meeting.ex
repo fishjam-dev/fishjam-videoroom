@@ -33,49 +33,41 @@ defmodule Videoroom.Meeting do
   # Callbacks
 
   @impl true
-  def init(args) do
-    args = %{
-      name: Keyword.fetch!(args, :name),
-      # No limit on the number of peers
-      max_peers: nil
-    }
-
-    Logger.metadata(room_name: args.name)
+  def init(name) do
+    Logger.metadata(room_name: name)
 
     client = Jellyfish.Client.new()
 
     with {:ok, notifier} <- Jellyfish.Notifier.start(),
-         {:ok, room} <- find_or_create_room(client, args) do
+         {:ok, room} <- find_or_create_room(client, name) do
       Process.monitor(notifier)
 
       Logger.info("Created meeting")
 
-      {:ok, %{client: client, notifier: notifier, name: args.name, room_id: room.id}}
+      {:ok, %{client: client, notifier: notifier, name: name, room_id: room.id}}
     else
       {:error, reason} ->
         raise "Failed to create a meeting, reason: #{inspect(reason)}"
     end
   end
 
-  @spec find_or_create_room(Jellyfish.Client.t(), %{name: binary(), max_peers: integer() | nil}) ::
-          {:ok, Room.t()} | {:error, atom() | binary()}
-  defp find_or_create_room(client, args) do
-    with {:ok, room_id} <- RoomRegistry.lookup(args.name),
+  defp find_or_create_room(client, name) do
+    with {:ok, room_id} <- RoomRegistry.lookup(name),
          {:ok, room} <- Room.get(client, room_id) do
       {:ok, room}
     else
       {:error, :unregistered} ->
-        create_new_room(client, args)
+        create_new_room(client, name)
 
       error ->
-        handle_room_error(error, client, args)
+        handle_room_error(error, client, name)
     end
   end
 
-  defp create_new_room(client, args) do
-    case Room.create(client, max_peers: args.max_peers) do
+  defp create_new_room(client, name) do
+    case Room.create(client) do
       {:ok, room} ->
-        RoomRegistry.insert_new(args.name, room.id)
+        RoomRegistry.insert_new(name, room.id)
         {:ok, room}
 
       error ->
@@ -83,10 +75,10 @@ defmodule Videoroom.Meeting do
     end
   end
 
-  defp handle_room_error({:error, reason} = error, client, args) do
+  defp handle_room_error({:error, reason} = error, client, name) do
     if String.contains?(reason, "does not exist") do
-      RoomRegistry.delete(args.name)
-      create_new_room(client, args)
+      RoomRegistry.delete(name)
+      create_new_room(client, name)
     else
       error
     end
