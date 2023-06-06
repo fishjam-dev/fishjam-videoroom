@@ -19,8 +19,7 @@ defmodule Videoroom.MeetingSupervisor do
 
   @spec add_peer(binary()) :: {:ok, binary()} | {:error, binary()}
   def add_peer(room_name) do
-    # `max_peers` = nil creates a room without limit
-    args = [name: room_name, max_peers: nil]
+    args = [name: room_name]
 
     DynamicSupervisor.start_child(__MODULE__, {Meeting, args})
 

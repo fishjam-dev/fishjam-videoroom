@@ -36,7 +36,7 @@ defmodule Videoroom.Meeting do
   def init(args) do
     args = %{
       name: Keyword.fetch!(args, :name),
-      max_peers: Keyword.get(args, :max_peers)
+      max_peers: nil # No limit on the number of peers
     }
 
     Logger.metadata(room_name: args.name)
@@ -56,7 +56,7 @@ defmodule Videoroom.Meeting do
     end
   end
 
-  @spec find_or_create_room(Jellyfish.Client.t(), %{name: binary(), max_peers: integer()}) ::
+  @spec find_or_create_room(Jellyfish.Client.t(), %{name: binary(), max_peers: integer() | nil}) ::
           {:ok, Room.t()} | {:error, atom() | binary()}
   defp find_or_create_room(client, args) do
     with {:ok, room_id} <- RoomRegistry.lookup(args.name),
@@ -105,24 +105,20 @@ defmodule Videoroom.Meeting do
   end
 
   @impl true
-  def handle_info({:jellyfish, %type{} = notification}, state)
+  # Handle specific notifications for the current room
+  def handle_info({:jellyfish, %type{room_id: id} = notification}, %{room_id: id} = state)
       when type in [PeerDisconnected, PeerCrashed, RoomCrashed] do
-    if notification.room_id == state.room_id do
-      Logger.info("jellyfish notification: #{inspect(notification)}")
-      handle_notification(notification, state)
-    else
-      Logger.debug("jellyfish notification: #{inspect(notification)}")
-      {:noreply, state}
-    end
+    Logger.info("jellyfish notification: #{inspect(notification)}")
+    handle_notification(notification, state)
   end
 
+  # Handle all other notifications, including ones from the other rooms
   def handle_info({:jellyfish, notification}, state) do
     Logger.debug("jellyfish notification: #{inspect(notification)}")
     {:noreply, state}
   end
 
-  def handle_info({:DOWN, _ref, :process, pid, _reason}, %{notifier: notifier})
-      when pid == notifier do
+  def handle_info({:DOWN, _ref, :process, pid, _reason}, %{notifier: pid}) do
     raise "Connection to jellyfish closed!"
   end
 
