@@ -36,7 +36,8 @@ defmodule Videoroom.Meeting do
   def init(args) do
     args = %{
       name: Keyword.fetch!(args, :name),
-      max_peers: nil # No limit on the number of peers
+      # No limit on the number of peers
+      max_peers: nil
     }
 
     Logger.metadata(room_name: args.name)
