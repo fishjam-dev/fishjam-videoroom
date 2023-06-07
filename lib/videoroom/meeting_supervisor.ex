@@ -17,7 +17,7 @@ defmodule Videoroom.MeetingSupervisor do
     DynamicSupervisor.init(init_arg)
   end
 
-  @spec add_peer(binary()) :: {:ok, binary()} | {:error, binary()}
+  @spec add_peer(Meeting.name()) :: {:ok, binary()} | {:error, binary()}
   def add_peer(room_name) do
     args = [name: room_name]
 

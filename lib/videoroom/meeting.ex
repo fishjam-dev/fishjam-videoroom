@@ -6,7 +6,7 @@ defmodule Videoroom.Meeting do
 
   require Logger
 
-  alias Jellyfish.Room
+  alias Jellyfish.{Peer, Room}
   alias Jellyfish.ServerMessage.{PeerConnected, PeerCrashed, PeerDisconnected, RoomCrashed}
 
   alias Videoroom.RoomRegistry
@@ -16,6 +16,7 @@ defmodule Videoroom.Meeting do
     :client,
     :notifier,
     :room_id,
+    :peer_timers,
     :peer_timeout
   ]
 
@@ -28,6 +29,7 @@ defmodule Videoroom.Meeting do
           client: Jellyfish.Client.t(),
           notifier: pid(),
           room_id: Jellyfish.Room.id(),
+          peer_timers: %{Jellyfish.Peer.id() => reference()},
           peer_timeout: non_neg_integer()
         }
 
@@ -38,7 +40,7 @@ defmodule Videoroom.Meeting do
     GenServer.start_link(__MODULE__, args, name: registry_id(args[:name]))
   end
 
-  @spec add_peer(binary()) :: {:ok, binary()} | {:error, binary()}
+  @spec add_peer(name()) :: {:ok, binary()} | {:error, binary()}
   def add_peer(meeting_name) do
     try do
       GenServer.call(registry_id(meeting_name), :add_peer)
@@ -60,6 +62,9 @@ defmodule Videoroom.Meeting do
          {:ok, room} <- find_or_create_room(client, name) do
       Process.monitor(notifier)
 
+      peer_timeout = Application.fetch_env!(:videoroom, :peer_join_timeout)
+      peer_timers = restore_peer_timers(room.peers, peer_timeout)
+
       Logger.info("Created meeting")
 
       {:ok,
@@ -68,7 +73,8 @@ defmodule Videoroom.Meeting do
          notifier: notifier,
          name: name,
          room_id: room.id,
-         peer_timeout: Application.fetch_env!(:videoroom, :peer_join_timeout)
+         peer_timers: peer_timers,
+         peer_timeout: peer_timeout
        }}
     else
       {:error, reason} ->
@@ -87,6 +93,23 @@ defmodule Videoroom.Meeting do
       error ->
         handle_room_error(error, client, name)
     end
+  end
+
+  defp restore_peer_timers([], _timeout), do: %{}
+
+  defp restore_peer_timers(peers, timeout) do
+    peers
+    |> Enum.map(fn %Peer{id: peer_id, status: status} ->
+      case status do
+        :connected ->
+          {peer_id, nil}
+
+        :disconnected ->
+          timer = Process.send_after(self(), {:peer_timeout, peer_id}, timeout)
+          {peer_id, timer}
+      end
+    end)
+    |> Enum.into(%{})
   end
 
   defp create_new_room(client, name) do
@@ -117,9 +140,9 @@ defmodule Videoroom.Meeting do
 
         timer = Process.send_after(self(), {:peer_timeout, peer.id}, state.peer_timeout)
 
-        RoomRegistry.put_peer(state.name, peer.id, timer)
+        peer_timers = Map.put(state.peer_timers, peer.id, timer)
 
-        {:reply, {:ok, token}, state}
+        {:reply, {:ok, token}, %{state | peer_timers: peer_timers}}
 
       _error ->
         Logger.warning("Failed to add peer")
@@ -146,15 +169,16 @@ defmodule Videoroom.Meeting do
   end
 
   def handle_info({:peer_timeout, peer_id}, state) do
+    Logger.info("Peer #{peer_id} timed out")
     delete_peer(peer_id, state)
   end
 
   defp handle_notification(%PeerConnected{peer_id: peer_id}, state) do
-    {timer, _timers} = RoomRegistry.get_and_update_peer(state.name, peer_id, fn p -> {p, nil} end)
+    {timer, peer_timers} = Map.get_and_update(state.peer_timers, peer_id, fn p -> {p, nil} end)
 
     Process.cancel_timer(timer)
 
-    {:noreply, state}
+    {:noreply, %{state | peer_timers: peer_timers}}
   end
 
   defp handle_notification(%type{peer_id: peer_id}, state)
@@ -170,7 +194,8 @@ defmodule Videoroom.Meeting do
   defp delete_peer(peer_id, state) do
     Room.delete_peer(state.client, state.room_id, peer_id)
 
-    peer_timers = RoomRegistry.delete_peer(state.name, peer_id)
+    peer_timers = Map.delete(state.peer_timers, peer_id)
+    state = %{state | peer_timers: peer_timers}
 
     if Enum.empty?(peer_timers) do
       Logger.info("Deleted meeting")

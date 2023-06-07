@@ -178,6 +178,20 @@ defmodule VideoroomWeb.RoomJsonTest do
     assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
   end
 
+  test "Peer timeout persists after crash", %{conn: conn, client: client} do
+    Application.put_env(:videoroom, :peer_join_timeout, 2000)
+
+    _token = add_peer(conn)
+
+    [{meeting, _key}] = Registry.lookup(Videoroom.Registry, @default_room)
+    Process.exit(meeting, :kill)
+
+    await_meeting_restart(@default_room, meeting)
+
+    assert {:ok, [%Room{peers: [_peer]}]} = Room.get_all(client)
+    assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+  end
+
   defp add_peer(conn, room_name \\ @default_room) do
     conn = get(conn, ~p"/api/room/#{room_name}")
     assert(%{"token" => token} = json_response(conn, 200)["data"])
