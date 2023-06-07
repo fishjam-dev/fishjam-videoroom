@@ -173,7 +173,7 @@ defmodule VideoroomWeb.RoomJsonTest do
     peer = join_room(token)
     leave_room(peer)
 
-    assert {:ok, [%Room{peers: [_peer]}]} = Room.get_all(client)
+    assert_within_timeout({:ok, [%Room{peers: [_peer]}]}, fn -> Room.get_all(client) end)
 
     assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
   end
@@ -202,11 +202,13 @@ defmodule VideoroomWeb.RoomJsonTest do
   end
 
   defp await_meeting_restart(name, prev_pid) do
-    [{pid, _key}] = Registry.lookup(Videoroom.Registry, name)
+    case Registry.lookup(Videoroom.Registry, name) do
+      [{pid, _key}] when pid != prev_pid ->
+        :ok
 
-    if pid == prev_pid do
-      Process.sleep(10)
-      await_meeting_restart(name, prev_pid)
+      _other ->
+        Process.sleep(10)
+        await_meeting_restart(name, prev_pid)
     end
   end
 end

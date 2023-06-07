@@ -6,12 +6,30 @@ defmodule Videoroom.Meeting do
 
   require Logger
 
-  alias Jellyfish.ServerMessage.PeerCrashed
-  alias Jellyfish.ServerMessage.PeerDisconnected
-  alias Jellyfish.ServerMessage.RoomCrashed
-
   alias Jellyfish.Room
+  alias Jellyfish.ServerMessage.{PeerConnected, PeerCrashed, PeerDisconnected, RoomCrashed}
+
   alias Videoroom.RoomRegistry
+
+  @enforce_keys [
+    :name,
+    :client,
+    :notifier,
+    :room_id,
+    :peer_timeout
+  ]
+
+  defstruct @enforce_keys
+
+  @type name :: binary()
+
+  @type t :: %__MODULE__{
+          name: name(),
+          client: Jellyfish.Client.t(),
+          notifier: pid(),
+          room_id: Jellyfish.Room.id(),
+          peer_timeout: non_neg_integer()
+        }
 
   # Api
 
@@ -44,7 +62,14 @@ defmodule Videoroom.Meeting do
 
       Logger.info("Created meeting")
 
-      {:ok, %{client: client, notifier: notifier, name: name, room_id: room.id}}
+      {:ok,
+       %__MODULE__{
+         client: client,
+         notifier: notifier,
+         name: name,
+         room_id: room.id,
+         peer_timeout: Application.fetch_env!(:videoroom, :peer_join_timeout)
+       }}
     else
       {:error, reason} ->
         raise "Failed to create a meeting, reason: #{inspect(reason)}"
@@ -52,7 +77,7 @@ defmodule Videoroom.Meeting do
   end
 
   defp find_or_create_room(client, name) do
-    with {:ok, room_id} <- RoomRegistry.lookup(name),
+    with {:ok, %RoomRegistry{room_id: room_id}} <- RoomRegistry.lookup(name),
          {:ok, room} <- Room.get(client, room_id) do
       {:ok, room}
     else
@@ -89,6 +114,11 @@ defmodule Videoroom.Meeting do
     case Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC) do
       {:ok, peer, token} ->
         Logger.info("Added peer #{peer.id}")
+
+        timer = Process.send_after(self(), {:peer_timeout, peer.id}, state.peer_timeout)
+
+        RoomRegistry.put_peer(state.name, peer.id, timer)
+
         {:reply, {:ok, token}, state}
 
       _error ->
@@ -100,7 +130,7 @@ defmodule Videoroom.Meeting do
   @impl true
   # Handle specific notifications for the current room
   def handle_info({:jellyfish, %type{room_id: id} = notification}, %{room_id: id} = state)
-      when type in [PeerDisconnected, PeerCrashed, RoomCrashed] do
+      when type in [PeerConnected, PeerDisconnected, PeerCrashed, RoomCrashed] do
     Logger.info("jellyfish notification: #{inspect(notification)}")
     handle_notification(notification, state)
   end
@@ -115,23 +145,39 @@ defmodule Videoroom.Meeting do
     raise "Connection to jellyfish closed!"
   end
 
-  defp handle_notification(%type{} = notification, state)
-       when type in [PeerDisconnected, PeerCrashed] do
-    %{room_id: room_id, peer_id: peer_id} = notification
-    Room.delete_peer(state.client, room_id, peer_id)
-    {:ok, room} = Room.get(state.client, room_id)
+  def handle_info({:peer_timeout, peer_id}, state) do
+    delete_peer(peer_id, state)
+  end
 
-    if Enum.empty?(room.peers) do
-      Logger.info("Deleted meeting")
-      {:stop, :normal, state}
-    else
-      {:noreply, state}
-    end
+  defp handle_notification(%PeerConnected{peer_id: peer_id}, state) do
+    {timer, _timers} = RoomRegistry.get_and_update_peer(state.name, peer_id, fn p -> {p, nil} end)
+
+    Process.cancel_timer(timer)
+
+    {:noreply, state}
+  end
+
+  defp handle_notification(%type{peer_id: peer_id}, state)
+       when type in [PeerDisconnected, PeerCrashed] do
+    delete_peer(peer_id, state)
   end
 
   defp handle_notification(%RoomCrashed{}, state) do
     Logger.warning("Room #{state.room_id} crashed")
     {:stop, :normal, state}
+  end
+
+  defp delete_peer(peer_id, state) do
+    Room.delete_peer(state.client, state.room_id, peer_id)
+
+    peer_timers = RoomRegistry.delete_peer(state.name, peer_id)
+
+    if Enum.empty?(peer_timers) do
+      Logger.info("Deleted meeting")
+      {:stop, :normal, state}
+    else
+      {:noreply, state}
+    end
   end
 
   @impl true
