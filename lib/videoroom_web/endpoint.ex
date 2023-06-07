@@ -44,5 +44,6 @@ defmodule VideoroomWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  plug CORSPlug, origin: ["http://localhost:4000"]
   plug VideoroomWeb.Router
 end
