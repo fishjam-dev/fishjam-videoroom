@@ -19,9 +19,7 @@ defmodule Videoroom.MeetingSupervisor do
 
   @spec add_peer(Meeting.name()) :: {:ok, Jellyfish.Room.peer_token()} | {:error, binary()}
   def add_peer(room_name) do
-    args = [name: room_name]
-
-    DynamicSupervisor.start_child(__MODULE__, {Meeting, args})
+    DynamicSupervisor.start_child(__MODULE__, {Meeting, room_name})
 
     Meeting.add_peer(room_name)
   end

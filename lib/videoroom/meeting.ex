@@ -35,9 +35,9 @@ defmodule Videoroom.Meeting do
 
   # Api
 
-  @spec start_link(Keyword.t()) :: GenServer.on_start()
-  def start_link(args) do
-    GenServer.start_link(__MODULE__, args, name: registry_id(args[:name]))
+  @spec start_link(name()) :: GenServer.on_start()
+  def start_link(name) do
+    GenServer.start_link(__MODULE__, name, name: registry_id(name))
   end
 
   @spec add_peer(name()) :: {:ok, Room.peer_token()} | {:error, binary()}
@@ -46,7 +46,7 @@ defmodule Videoroom.Meeting do
       GenServer.call(registry_id(meeting_name), :add_peer)
     catch
       :exit, {:noproc, _error} ->
-        {:error, "Failed to add peer"}
+        {:error, "Failed to call add peer"}
     end
   end
 
