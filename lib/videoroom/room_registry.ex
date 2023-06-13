@@ -3,15 +3,6 @@ defmodule Videoroom.RoomRegistry do
 
   alias Videoroom.Meeting
 
-  @enforce_keys [:room_id, :peer_timers]
-
-  defstruct @enforce_keys
-
-  @type t :: %__MODULE__{
-          room_id: Jellyfish.Room.id(),
-          peer_timers: %{Jellyfish.Peer.id() => reference()}
-        }
-
   @room_table :room_table
 
   @spec create() :: atom()
@@ -19,27 +10,20 @@ defmodule Videoroom.RoomRegistry do
     :ets.new(@room_table, [:named_table, :set, :public])
   end
 
-  @spec lookup(Meeting.name()) :: {:ok, t()} | {:error, :unregistered}
+  @spec lookup(Meeting.name()) :: {:ok, Jellyfish.Room.id()} | {:error, :unregistered}
   def lookup(name) do
     case :ets.lookup(@room_table, name) do
       [] ->
         {:error, :unregistered}
 
-      [{^name, table}] ->
-        {:ok, table}
+      [{^name, id}] ->
+        {:ok, id}
     end
   end
 
-  @spec insert_new(Meeting.name(), t()) :: boolean()
+  @spec insert_new(Meeting.name(), Jellyfish.Room.id()) :: boolean()
   def insert_new(name, room_id) do
-    :ets.insert_new(
-      @room_table,
-      {name,
-       %__MODULE__{
-         room_id: room_id,
-         peer_timers: %{}
-       }}
-    )
+    :ets.insert_new(@room_table, {name, room_id})
   end
 
   @spec delete(Meeting.name()) :: true

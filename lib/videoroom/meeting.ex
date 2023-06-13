@@ -83,7 +83,7 @@ defmodule Videoroom.Meeting do
   end
 
   defp find_or_create_room(client, name) do
-    with {:ok, %RoomRegistry{room_id: room_id}} <- RoomRegistry.lookup(name),
+    with {:ok, room_id} <- RoomRegistry.lookup(name),
          {:ok, room} <- Room.get(client, room_id) do
       {:ok, room}
     else

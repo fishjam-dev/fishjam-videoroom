@@ -154,42 +154,44 @@ defmodule VideoroomWeb.RoomJsonTest do
     [token1, token2] |> Enum.map(&join_room/1) |> Enum.map(&leave_room/1)
   end
 
-  test "Room closes when no peers join within timeout", %{conn: conn, client: client} do
-    Application.put_env(:videoroom, :peer_join_timeout, 500)
+  describe "Peer timeout" do
+    test "Room closes when no peers join within timeout", %{conn: conn, client: client} do
+      Application.put_env(:videoroom, :peer_join_timeout, 500)
 
-    _token = add_peer(conn)
-    assert {:ok, [%Room{}]} = Room.get_all(client)
+      _token = add_peer(conn)
+      assert {:ok, [%Room{}]} = Room.get_all(client)
 
-    assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
-  end
+      assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+    end
 
-  test "Room closes when all peers leave or time out", %{conn: conn, client: client} do
-    _token = add_peer(conn)
-    token = add_peer(conn)
+    test "Room closes when all peers leave or time out", %{conn: conn, client: client} do
+      _token = add_peer(conn)
+      token = add_peer(conn)
 
-    assert {:ok, [%Room{peers: peers}]} = Room.get_all(client)
-    assert length(peers) == 2
+      assert {:ok, [%Room{peers: peers}]} = Room.get_all(client)
+      assert length(peers) == 2
 
-    peer = join_room(token)
-    leave_room(peer)
+      peer = join_room(token)
+      leave_room(peer)
 
-    assert_within_timeout({:ok, [%Room{peers: [_peer]}]}, fn -> Room.get_all(client) end)
+      assert_within_timeout({:ok, [%Room{peers: [_peer]}]}, fn -> Room.get_all(client) end)
 
-    assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
-  end
+      assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+    end
 
-  test "Peer timeout persists after crash", %{conn: conn, client: client} do
-    Application.put_env(:videoroom, :peer_join_timeout, 2000)
+    test "Peer timeout persists after crash", %{conn: conn, client: client} do
+      Application.put_env(:videoroom, :peer_join_timeout, 2000)
 
-    _token = add_peer(conn)
+      _token = add_peer(conn)
 
-    [{meeting, _key}] = Registry.lookup(Videoroom.Registry, @default_room)
-    Process.exit(meeting, :kill)
+      [{meeting, _key}] = Registry.lookup(Videoroom.Registry, @default_room)
+      Process.exit(meeting, :kill)
 
-    await_meeting_restart(@default_room, meeting)
+      await_meeting_restart(@default_room, meeting)
 
-    assert {:ok, [%Room{peers: [_peer]}]} = Room.get_all(client)
-    assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+      assert {:ok, [%Room{peers: [_peer]}]} = Room.get_all(client)
+      assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+    end
   end
 
   defp add_peer(conn, room_name \\ @default_room) do
