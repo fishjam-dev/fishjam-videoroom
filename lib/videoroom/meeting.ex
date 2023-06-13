@@ -29,7 +29,7 @@ defmodule Videoroom.Meeting do
           client: Jellyfish.Client.t(),
           notifier: pid(),
           room_id: Jellyfish.Room.id(),
-          peer_timers: %{Jellyfish.Peer.id() => reference()},
+          peer_timers: %{Jellyfish.Peer.id() => reference() | nil},
           peer_timeout: non_neg_integer()
         }
 
@@ -95,8 +95,6 @@ defmodule Videoroom.Meeting do
     end
   end
 
-  defp restore_peer_timers([], _timeout), do: %{}
-
   defp restore_peer_timers(peers, timeout) do
     peers
     |> Enum.map(fn %Peer{id: peer_id, status: status} ->
@@ -139,7 +137,6 @@ defmodule Videoroom.Meeting do
         Logger.info("Added peer #{peer.id}")
 
         timer = Process.send_after(self(), {:peer_timeout, peer.id}, state.peer_timeout)
-
         peer_timers = Map.put(state.peer_timers, peer.id, timer)
 
         {:reply, {:ok, token}, %{state | peer_timers: peer_timers}}

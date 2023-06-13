@@ -27,6 +27,9 @@ JELLYFISH_PORT=<PORT>
 JELLYFISH_API_TOKEN=<TOKEN>
 ```
 
+Optionally, in production the `PEER_JOIN_TIMEOUT` variable can be used to limit the
+period in which a new peer must join the meeting.
+
 ## Tests
 
 We use [Divo](https://hexdocs.pm/divo/readme.html) in tests, which is responsible for starting docker containers.
