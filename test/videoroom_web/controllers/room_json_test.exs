@@ -156,8 +156,6 @@ defmodule VideoroomWeb.RoomJsonTest do
 
   describe "Peer timeout" do
     test "Room closes when no peers join within timeout", %{conn: conn, client: client} do
-      Application.put_env(:videoroom, :peer_join_timeout, 500)
-
       _token = add_peer(conn)
       assert {:ok, [%Room{}]} = Room.get_all(client)
 
@@ -175,7 +173,6 @@ defmodule VideoroomWeb.RoomJsonTest do
       leave_room(peer)
 
       assert_within_timeout({:ok, [%Room{peers: [_peer]}]}, fn -> Room.get_all(client) end)
-
       assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
     end
 

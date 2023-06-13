@@ -40,7 +40,7 @@ defmodule Videoroom.Meeting do
     GenServer.start_link(__MODULE__, args, name: registry_id(args[:name]))
   end
 
-  @spec add_peer(name()) :: {:ok, binary()} | {:error, binary()}
+  @spec add_peer(name()) :: {:ok, Room.peer_token()} | {:error, binary()}
   def add_peer(meeting_name) do
     try do
       GenServer.call(registry_id(meeting_name), :add_peer)
