@@ -11,27 +11,22 @@ defmodule Videoroom.Meeting do
 
   alias Videoroom.RoomRegistry
 
-  @enforce_keys [
-    :name,
-    :client,
-    :notifier,
-    :room_id,
-    :peer_timers,
-    :peer_timeout
-  ]
+  defmodule State do
+    @moduledoc false
 
-  defstruct @enforce_keys
+    @enforce_keys [
+      :name,
+      :client,
+      :notifier,
+      :room_id,
+      :peer_timers,
+      :peer_timeout
+    ]
+
+    defstruct @enforce_keys
+  end
 
   @type name :: binary()
-
-  @type t :: %__MODULE__{
-          name: name(),
-          client: Jellyfish.Client.t(),
-          notifier: pid(),
-          room_id: Jellyfish.Room.id(),
-          peer_timers: %{Jellyfish.Peer.id() => reference() | nil},
-          peer_timeout: non_neg_integer()
-        }
 
   # Api
 
@@ -68,7 +63,7 @@ defmodule Videoroom.Meeting do
       Logger.info("Created meeting")
 
       {:ok,
-       %__MODULE__{
+       %State{
          client: client,
          notifier: notifier,
          name: name,
@@ -97,7 +92,7 @@ defmodule Videoroom.Meeting do
 
   defp restore_peer_timers(peers, timeout) do
     peers
-    |> Enum.map(fn %Peer{id: peer_id, status: status} ->
+    |> Map.new(fn %Peer{id: peer_id, status: status} ->
       case status do
         :connected ->
           {peer_id, nil}
@@ -107,7 +102,6 @@ defmodule Videoroom.Meeting do
           {peer_id, timer}
       end
     end)
-    |> Enum.into(%{})
   end
 
   defp create_new_room(client, name) do
@@ -195,6 +189,12 @@ defmodule Videoroom.Meeting do
     state = %{state | peer_timers: peer_timers}
 
     if Enum.empty?(peer_timers) do
+      {:ok, room} = Room.get(state.client, state.room_id)
+
+      if not Enum.empty?(room.peers) do
+        Logger.error("Deleting non-empty room")
+      end
+
       Logger.info("Deleted meeting")
       {:stop, :normal, state}
     else
