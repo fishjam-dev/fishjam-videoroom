@@ -5,7 +5,7 @@
 /cover/
 
 # Assets
-/assets2/node_modules/
+/assets/node_modules/
 
 # The directory Mix downloads your dependencies sources to.
 /deps/
