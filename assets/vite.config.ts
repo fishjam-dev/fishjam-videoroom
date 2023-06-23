@@ -10,7 +10,13 @@ export default defineConfig({
     // true - listen on all addresses, including LAN and public addresses
     host: false,
     // https: true,
-    port: 4003
+    port: 4001,
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:4000",
+        changeOrigin: false
+      }
+    }
   },
   plugins: [react(),
     checker({
