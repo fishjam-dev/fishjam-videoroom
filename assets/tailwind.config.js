@@ -1,5 +1,8 @@
 module.exports = {
-  content: ["../lib/*_web/**/*.*ex", "./src/**/*.tsx"],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     flex: {
       3: "3",

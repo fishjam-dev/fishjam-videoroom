@@ -1,31 +1,50 @@
-import { useState } from 'react'
-import membraneLogo from './assets/logo.svg'
-import './App.css'
+import { FC } from "react";
+import { RouterProvider } from "react-router-dom";
+import { DeveloperInfoProvider } from "./contexts/DeveloperInfoContext";
+import { router } from "./Routes";
+import { UserProvider } from "./contexts/UserContext";
+import { ToastProvider } from "./features/shared/context/ToastContext";
+import { ModalProvider } from "./contexts/ModalContext";
+import { LocalMediaMessagesBoundary } from "./features/devices/LocalMediaMessagesBoundary";
+import { LocalPeerMediaProvider } from "./features/devices/LocalPeerMediaContext";
+import { MediaSettingsModal } from "./features/devices/MediaSettingsModal";
+import { disableSafariCache } from "./features/devices/disableSafariCache";
+import ReactModal from "react-modal";
+import './index.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+// import { JellyfishContextProvider } from "./jellifish.types";
+import { StreamingProvider } from "./features/streaming/StreamingContext";
+import { StreamingErrorBoundary } from "./features/streaming/StreamingErrorBoundary";
 
+// When returning to the videoroom page from another domain using the 'Back' button on the Safari browser,
+// the page is served from the cache, which prevents lifecycle events from being triggered.
+// As a result, the camera and microphone do not start. To resolve this issue, one simple solution is to disable the cache.
+disableSafariCache();
+ReactModal.setAppElement("#root");
+
+const App: FC = () => {
   return (
-    <>
-      <div>
-        <a href="https://react.dev" target="_blank">
-          <img src={membraneLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <UserProvider>
+      <DeveloperInfoProvider>
+        <LocalPeerMediaProvider>
+          <ToastProvider>
+            <ModalProvider>
+              <LocalMediaMessagesBoundary>
+                {/*<JellyfishContextProvider>*/}
+                <StreamingErrorBoundary>
+                  <StreamingProvider>
+                    <RouterProvider router={router} />
+                    <MediaSettingsModal />
+                  </StreamingProvider>
+                </StreamingErrorBoundary>
+                {/*</JellyfishContextProvider>*/}
+              </LocalMediaMessagesBoundary>
+            </ModalProvider>
+          </ToastProvider>
+        </LocalPeerMediaProvider>
+      </DeveloperInfoProvider>
+    </UserProvider>
+  );
+};
 
-export default App
+export default App;
