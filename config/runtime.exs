@@ -64,6 +64,9 @@ if config_env() == :prod do
         Environment variable JELLYFISH_API_TOKEN is missing.
         """)
 
+  config :videoroom,
+    peer_join_timeout: String.to_integer(System.get_env("PEER_JOIN_TIMEOUT") || "60_000")
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

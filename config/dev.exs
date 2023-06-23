@@ -44,7 +44,9 @@ config :jellyfish_server_sdk,
 # different ports.
 
 # Enable dev routes for dashboard and mailbox
-config :videoroom, dev_routes: true
+config :videoroom,
+  dev_routes: true,
+  peer_join_timeout: 60_000
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
