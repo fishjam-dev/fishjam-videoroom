@@ -1,4 +1,4 @@
-import { JellyfishClient } from "./JellyfishClient";
+import { JellyfishClient } from "@jellyfish-dev/ts-client-sdk";
 import { SimulcastConfig, TrackBandwidthLimit, TrackEncoding } from "@jellyfish-dev/membrane-webrtc-js";
 import { Dispatch } from "react";
 import { Action } from "./create";
@@ -55,6 +55,7 @@ export const createApiWrapper = <PeerMetadata, TrackMetadata>(
   },
 
   replaceTrack: (trackId, newTrack, stream, newTrackMetadata) => {
+    console.log({ name: "createApiWrapper", newTrackMetadata });
     const promise = webrtc.replaceTrack(trackId, newTrack, newTrackMetadata);
     dispatch({ type: "localReplaceTrack", trackId, newTrack, stream, newTrackMetadata });
     return promise;
@@ -80,5 +81,5 @@ export const createApiWrapper = <PeerMetadata, TrackMetadata>(
 
   setTargetTrackEncoding: (trackId, encoding) => {
     webrtc.setTargetTrackEncoding(trackId, encoding);
-  },
+  }
 });

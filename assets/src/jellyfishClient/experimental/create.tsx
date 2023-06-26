@@ -3,7 +3,7 @@ import { createStore } from "./externalState";
 import { useSelector } from "./useSelector";
 import type { Selector } from "../state.types";
 import { useMemo } from "react";
-import { Config } from "../JellyfishClient";
+import { Config } from "@jellyfish-dev/ts-client-sdk";
 
 export type CreateNoContextJellyfishClient<PeerMetadata, TrackMetadata> = {
   useConnect: () => (config: Config<PeerMetadata>) => () => void;

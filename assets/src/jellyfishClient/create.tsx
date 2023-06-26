@@ -26,7 +26,7 @@ import {
 } from "./stateMappers";
 import { createApiWrapper } from "./api";
 import { Endpoint, SimulcastConfig, TrackContext, TrackEncoding } from "@jellyfish-dev/membrane-webrtc-js";
-import { Config, JellyfishClient } from "./JellyfishClient";
+import { Config, JellyfishClient } from "@jellyfish-dev/ts-client-sdk";
 
 export type JellyfishContextProviderProps = {
   children: React.ReactNode;

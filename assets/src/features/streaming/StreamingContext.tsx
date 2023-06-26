@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import {
   MembraneStreaming,
   StreamingMode,
@@ -29,6 +29,10 @@ export const StreamingProvider = ({ children }: Props) => {
   const camera = useMembraneMediaStreaming(mode, "camera", isConnected, video.device);
   const microphone = useMembraneMediaStreaming(mode, "audio", isConnected, audio.device);
   const screenShare = useMembraneMediaStreaming(mode, "screensharing", isConnected, screenShareMedia.device);
+
+  useEffect(()=> {
+    console.log({ camera })
+  }, [camera])
 
   return <StreamingContext.Provider value={{ camera, microphone, screenShare }}>{children}</StreamingContext.Provider>;
 };

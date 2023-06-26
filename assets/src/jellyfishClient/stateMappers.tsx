@@ -290,6 +290,8 @@ export const replaceTrack =
     const prevLocalPeer = prevState.local;
     if (!prevLocalPeer) return prevState;
 
+    const prevMetadata = prevLocalPeer.tracks[trackId].metadata
+
     return {
       ...prevState,
       local: {
@@ -301,7 +303,7 @@ export const replaceTrack =
             track: newTrack,
             stream: stream,
             trackId: trackId,
-            metadata: newTrackMetadata ? { ...newTrackMetadata } : null,
+            metadata: newTrackMetadata ? { ...newTrackMetadata } : prevMetadata,
           },
         },
       },

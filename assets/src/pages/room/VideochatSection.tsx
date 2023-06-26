@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 
 import { ApiTrack, RemotePeer } from "./hooks/usePeerState";
 import { LOCAL_PEER_NAME, LOCAL_SCREEN_SHARING_ID, LOCAL_VIDEO_ID } from "./consts";
@@ -26,7 +26,7 @@ const getTrack = (tracks: ApiTrack[], type: TrackType): TrackWithId | null =>
         encodingQuality: track.encoding || null,
         metadata: track.metadata,
         isSpeaking: track.isSpeaking,
-        enabled: true,
+        enabled: true
       })
     )[0] ?? null;
 
@@ -44,7 +44,7 @@ const mapRemotePeersToMediaPlayerConfig = (peers: RemotePeer[]): PeerTileConfig[
       video: videoTrack,
       audio: audioTrack,
       streamSource: "remote",
-      isSpeaking: audioTrack?.isSpeaking ?? false,
+      isSpeaking: audioTrack?.isSpeaking ?? false
     };
   });
 };
@@ -60,7 +60,7 @@ const localPeerToScreenSharingStream = (track: TrackWithId | null): ScreenShareT
     video: track,
     peerId: track.remoteTrackId ?? "Unknown",
     displayName: LOCAL_PEER_NAME,
-    streamSource: "local",
+    streamSource: "local"
   };
 };
 
@@ -73,7 +73,7 @@ const prepareScreenSharingStreams = (
       peer.tracks.map((track) => ({
         peerId: peer.id,
         track: track,
-        peerName: peer.displayName,
+        peerName: peer.displayName
       }))
     )
     .filter((element) => element.track?.metadata?.type === "screensharing")
@@ -84,12 +84,12 @@ const prepareScreenSharingStreams = (
           stream: track.mediaStream,
           remoteTrackId: track.trackId,
           encodingQuality: track.encoding || null,
-          metadata: track.metadata,
+          metadata: track.metadata
         },
         streamSource: "local",
         mediaPlayerId: track.trackId,
         peerId: peerId,
-        displayName: peerName ?? "Unknown",
+        displayName: peerName ?? "Unknown"
       })
     );
 
@@ -104,8 +104,13 @@ export const VideochatSection: FC<Props> = ({ showSimulcast, unpinnedTilesHorizo
   const screenSharing = useSelector((state) => toLocalTrackSelector(state, "screensharing"));
   const { peerId, initials } = useSelector((state) => ({
     peerId: state?.local?.id || "Unknown",
-    initials: computeInitials(state?.local?.metadata?.name || ""),
+    initials: computeInitials(state?.local?.metadata?.name || "")
   }));
+
+  const fullState = useSelector((state) => state);
+  useEffect(() => {
+    console.log({ name: "VideochatSection", fullState });
+  }, [fullState]);
 
   const localUser: PeerTileConfig = {
     typeName: "local",
@@ -116,7 +121,7 @@ export const VideochatSection: FC<Props> = ({ showSimulcast, unpinnedTilesHorizo
     audio: audio,
     streamSource: "local",
     mediaPlayerId: LOCAL_VIDEO_ID,
-    isSpeaking: false,
+    isSpeaking: false
   };
 
   const peers: RemotePeer[] = useSelector((state) => toRemotePeerSelector(state));
@@ -129,14 +134,14 @@ export const VideochatSection: FC<Props> = ({ showSimulcast, unpinnedTilesHorizo
 
   const {
     pinnedTiles,
-    unpinnedTiles,
+    unpinnedTiles
   }: {
     pinnedTiles: MediaPlayerTileConfig[];
     unpinnedTiles: MediaPlayerTileConfig[];
   } = useMemo(
     () => ({
       pinnedTiles: allTilesConfig.filter((tile) => pinnedTilesIds.includes(tile.mediaPlayerId)),
-      unpinnedTiles: allTilesConfig.filter((tile) => unpinnedTilesIds.includes(tile.mediaPlayerId)),
+      unpinnedTiles: allTilesConfig.filter((tile) => unpinnedTilesIds.includes(tile.mediaPlayerId))
     }),
     [pinnedTilesIds, unpinnedTilesIds, allTilesConfig]
   );

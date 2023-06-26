@@ -38,6 +38,7 @@ export const useMembraneMediaStreaming = (
 
   const addTracks = useCallback(
     (stream: MediaStream) => {
+      console.log({ name: "Adding Track!", stream });
       if (!api) return;
       const tracks = type === "audio" ? stream.getAudioTracks() : stream.getVideoTracks();
       const simulcast = simulcastEnabled && type === "camera";
@@ -48,8 +49,6 @@ export const useMembraneMediaStreaming = (
         console.error({ stream, type });
         throw Error("Stream has no tracks!");
       }
-
-      console.log({ name: "simulcast", simulcast });
 
       const remoteTrackId = api.addTrack(
         track,
@@ -68,6 +67,7 @@ export const useMembraneMediaStreaming = (
 
   const replaceTrack = useCallback(
     (stream: MediaStream) => {
+      console.log({ name: "Replace Track!", stream });
       if (!api || !trackIds) return;
       const tracks = type === "audio" ? stream.getAudioTracks() : stream.getVideoTracks();
 
@@ -77,6 +77,7 @@ export const useMembraneMediaStreaming = (
         throw Error("Stream has no tracks!");
       }
 
+      console.log("Replacing!");
       api.replaceTrack(trackIds?.remoteId, track, stream);
     },
     [trackIds, type, api]

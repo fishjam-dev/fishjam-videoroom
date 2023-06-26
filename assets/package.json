@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@jellyfish-dev/membrane-webrtc-js": "github:jellyfish-dev/membrane-webrtc-js#master",
+    "@jellyfish-dev/ts-client-sdk": "file:../../ts-client-sdk",
     "axios": "^1.4.0",
     "chartist": "^1.3.0",
     "clsx": "^1.2.1",
