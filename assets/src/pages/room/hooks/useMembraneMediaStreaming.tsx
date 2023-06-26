@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { TrackType } from "../../types";
 import { TrackMetadata, useApi } from "../../../jellifish.types";
 import { Device } from "../../../features/devices/LocalPeerMediaContext";
+import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext.tsx";
+import { selectBandwidthLimit } from "../bandwidth.tsx";
 
 export type MembraneStreaming = {
   trackId: string | null;
@@ -28,8 +30,8 @@ export const useMembraneMediaStreaming = (
   const [trackIds, setTrackIds] = useState<TrackIds | null>(null);
 
   const api = useApi();
-  // const { simulcast } = useDeveloperInfo();
-  // const simulcastEnabled = simulcast.status;
+  const { simulcast } = useDeveloperInfo();
+  const simulcastEnabled = simulcast.status;
 
   const [trackMetadata, setTrackMetadata] = useState<TrackMetadata | null>(null);
   const defaultTrackMetadata = useMemo(() => ({ active: device.isEnabled, type }), [device.isEnabled, type]);
@@ -38,7 +40,7 @@ export const useMembraneMediaStreaming = (
     (stream: MediaStream) => {
       if (!api) return;
       const tracks = type === "audio" ? stream.getAudioTracks() : stream.getVideoTracks();
-      // const simulcast = simulcastEnabled && type === "camera";
+      const simulcast = simulcastEnabled && type === "camera";
 
       const track: MediaStreamTrack | undefined = tracks[0];
 
@@ -47,12 +49,14 @@ export const useMembraneMediaStreaming = (
         throw Error("Stream has no tracks!");
       }
 
+      console.log({ name: "simulcast", simulcast });
+
       const remoteTrackId = api.addTrack(
         track,
         stream,
-        defaultTrackMetadata
-        // simulcast ? { enabled: true, active_encodings: ["l", "m", "h"] } : undefined,
-        // selectBandwidthLimit(type, simulcast)
+        defaultTrackMetadata,
+        simulcast ? { enabled: true, active_encodings: ["l", "m", "h"] } : undefined,
+        selectBandwidthLimit(type, simulcast)
       );
 
       setTrackIds({ localId: track.id, remoteId: remoteTrackId });
@@ -130,6 +134,6 @@ export const useMembraneMediaStreaming = (
     addTracks,
     setActive,
     updateTrackMetadata,
-    trackMetadata,
+    trackMetadata
   };
 };

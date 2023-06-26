@@ -41,7 +41,7 @@ const VideoroomHomePage: FC = () => {
       id: "simulcast",
       onChange: toggleSimulcastCheckbox,
       status: simulcastInput,
-      disabled: true,
+      disabled: false,
     },
     {
       label: "Smart layer switching",

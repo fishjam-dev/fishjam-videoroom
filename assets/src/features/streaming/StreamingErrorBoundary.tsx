@@ -38,8 +38,8 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
       handleError(`Socket error occurred.`, "onAuthError");
     };
 
-    const onSocketClose = () => {
-      handleError(`onSocketClose`, "onSocketClose");
+    const onSocketClose = (_: Event) => {
+      handleError(`Signaling socket closed.`, "onSocketClose");
     };
 
     client.on("onSocketError", onSocketError);
@@ -73,7 +73,7 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
           id: errorMessage.id || crypto.randomUUID(),
           message: errorMessage.message,
           timeout: "INFINITY",
-          type: "error",
+          type: "error"
         });
       }
     },
