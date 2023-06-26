@@ -238,7 +238,6 @@ export class JellyfishClient<PeerMetadata, TrackMetadata> extends (EventEmitter 
     const onOpen = (event: Event) => {
       this.emit("onSocketOpen", event);
       const message = PeerMessage.encode({ authRequest: { token: config?.token } }).finish();
-      console.log({ name: "sending token", token: config.token });
       this.websocket?.send(message);
     };
 
