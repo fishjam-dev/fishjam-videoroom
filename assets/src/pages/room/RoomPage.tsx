@@ -11,6 +11,7 @@ import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext";
 import { useUser } from "../../contexts/UserContext";
 import { JELLYFISH_WEBSOCKET_URL } from "./consts";
 import { getToken } from "../../room.api";
+import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
 
 type ConnectComponentProps = {
   username: string;
@@ -19,22 +20,24 @@ type ConnectComponentProps = {
 
 const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
   const connect = useConnect();
+  const streaming = useStreaming();
 
   useEffect(() => {
-    const disconnectPromise = getToken(roomId).then((token) => {
-      return connect({
+    const disconnectCallback = getToken(roomId).then((token) =>
+      connect({
         peerMetadata: { name: username },
         token: token,
-        websocketUrl: JELLYFISH_WEBSOCKET_URL,
-      });
-    });
+        websocketUrl: JELLYFISH_WEBSOCKET_URL
+      }));
 
     return () => {
-      disconnectPromise.then((disconnect) => {
+      streaming.camera.removeTracks();
+      streaming.microphone.removeTracks();
+      streaming.screenShare.removeTracks();
+      disconnectCallback.then((disconnect) => {
         disconnect();
       });
     };
-    // todo think about it
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

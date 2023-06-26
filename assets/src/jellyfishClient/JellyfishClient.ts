@@ -6,7 +6,7 @@ import {
   SimulcastConfig,
   TrackBandwidthLimit,
   TrackContext,
-  TrackEncoding,
+  TrackEncoding
 } from "@jellyfish-dev/membrane-webrtc-js";
 import TypedEmitter from "typed-emitter";
 import { EventEmitter } from "events";
@@ -275,7 +275,7 @@ export class JellyfishClient<PeerMetadata, TrackMetadata> extends (EventEmitter 
         const data = PeerMessage.decode(uint8Array);
         if (data.authenticated !== undefined) {
           this.emit("onAuthSuccess");
-          console.log("onAuth success!")
+          console.log("onAuth success!");
           this.webrtc?.connect(peerMetadata);
         } else if (data.authRequest !== undefined) {
           console.warn("Received unexpected control message: authRequest");
