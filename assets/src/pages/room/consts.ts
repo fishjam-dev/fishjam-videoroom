@@ -36,7 +36,8 @@ export const DEFAULT_AUTOSTART_MICROPHONE_VALUE = true;
 export const DEFAULT_MANUAL_MODE_CHECKBOX_VALUE = false;
 export const DEFAULT_SMART_LAYER_SWITCHING_VALUE = false;
 
-export const JELLYFISH_WEBSOCKET_URL = "ws://localhost:4001/socket/peer/websocket";
+// videoroom_backend should return this address (host and port)
+export const JELLYFISH_WEBSOCKET_URL = "ws://localhost:5002/socket/peer/websocket";
 
 export const MAX_TILE_HEIGHT_FOR_MEDIUM_ENCODING = 600;
 export const MAX_TILE_HEIGHT_FOR_LOW_ENCODING = 250;

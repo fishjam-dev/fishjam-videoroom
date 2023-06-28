@@ -10,11 +10,11 @@ export default defineConfig({
     // true - listen on all addresses, including LAN and public addresses
     host: false,
     // https: true,
-    port: 4002,
+    port: 5005,
     strictPort: true,
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:5002",
+        target: "http://127.0.0.1:5004",
         changeOrigin: false
       }
     }
