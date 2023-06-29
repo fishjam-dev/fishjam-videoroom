@@ -1,8 +1,8 @@
 import { toPairs } from "ramda";
 import { TrackWithId } from "./pages/types";
 import { ApiTrack, RemotePeer } from "./pages/room/hooks/usePeerState";
-import { Api, State } from "./jellyfishClient";
-import { create } from "./jellyfishClient/experimental";
+import { Api, State } from "@jellyfish-dev/react-client-sdk";
+import { create } from "@jellyfish-dev/react-client-sdk/experimental";
 import { JellyfishClient } from "@jellyfish-dev/ts-client-sdk";
 
 const TrackTypeValues = ["screensharing", "camera", "audio"] as const;

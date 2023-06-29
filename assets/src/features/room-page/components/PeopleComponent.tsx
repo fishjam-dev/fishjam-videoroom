@@ -15,11 +15,6 @@ const PeopleComponent: FC = () => {
     displayName: `${state?.local?.metadata?.name} (You)` || "",
     initials: computeInitials(state?.local?.metadata?.name || ""),
   }));
-  // const localUser: PeopleListItem = {
-  //   peerId: "Unknown",
-  //   displayName: "",
-  //   initials: "",
-  // };
 
   const remoteUsers: PeopleListItem[] = useSelector((state) =>
     Object.values(state.remote || {}).map((peer) => ({
