@@ -65,7 +65,7 @@ if config_env() == :prod do
         """)
 
   config :videoroom,
-    peer_join_timeout: String.to_integer(System.get_env("PEER_JOIN_TIMEOUT") || "60_000")
+    peer_join_timeout: String.to_integer(System.get_env("PEER_JOIN_TIMEOUT") || "60000")
 
   # ## SSL Support
   #
