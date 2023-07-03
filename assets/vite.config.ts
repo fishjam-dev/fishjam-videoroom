@@ -13,7 +13,12 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       "/api": {
-        target: "http://localhost:5004",
+        target: "http://127.0.0.1:5004",
+        changeOrigin: false,
+      },
+      "/socket/peer/websocket": {
+        ws: true,
+        target: "ws://127.0.0.1:5002",
         changeOrigin: false,
       },
     },

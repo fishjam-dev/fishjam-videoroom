@@ -1,12 +1,28 @@
 version: '3'
 
 services:
+
+  reverseproxy:
+    build:
+      context: ./reverse-proxy
+      dockerfile: ./Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    env_file:
+      - .env
+    environment:
+      - NGINX_ENV=${NGINX_ENV}
+
   frontend:
     build:
       context: ./assets
       dockerfile: ./Dockerfile
-    ports:
-      - "5005:5005"
+    restart: unless-stopped
 
   backend:
     build:
@@ -14,26 +30,21 @@ services:
       dockerfile: ./Dockerfile
     environment:
       SECRET_KEY_BASE: "super-secret"
-      JELLYFISH_IP: "0.0.0.0"
+      JELLYFISH_IP: "jellyfish"
       JELLYFISH_PORT: 5002
       JELLYFISH_API_TOKEN: "development"
       PHX_SERVER: true
-    ports:
-      - "5004:5004"
+      PHX_HOST: "${DOMAIN}"
+    restart: unless-stopped
+    # ports:
+    #   - "5004:5004"
 
   jellyfish:
     image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
     container_name: jellyfish
-    restart: on-failure
-    # healthcheck:
-    #   test: >
-    #     curl --fail -H "authorization: Bearer development" http://localhost:5002/room || exit 1
-    #   interval: 3s
-    #   retries: 2
-    #   timeout: 2s
-    #   start_period: 30s
+    restart: unless-stopped
     environment:
-      VIRTUAL_HOST: "localhost"
+      VIRTUAL_HOST: "${DOMAIN}"
       USE_INTEGRATED_TURN: "true"
       INTEGRATED_TURN_IP: "${INTEGRATED_TURN_IP:-127.0.0.1}"
       INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
@@ -43,6 +54,6 @@ services:
       PORT: 5002
       SECRET_KEY_BASE: "super-secret"
     ports:
-      - "5002:5002"
+      # - "5002:5002"
       - "49999:49999"
       - "50000-50050:50000-50050/udp"

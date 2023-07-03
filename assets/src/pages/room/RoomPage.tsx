@@ -24,7 +24,6 @@ const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
 
   useEffect(() => {
     const disconnectCallback = getToken(roomId).then((token) => {
-      console.log("token", token);
       return connect({
         peerMetadata: { name: username },
         token: token,
