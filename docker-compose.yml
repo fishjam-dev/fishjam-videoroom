@@ -12,11 +12,11 @@ services:
     restart: unless-stopped
     volumes:
       - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
     env_file:
       - .env
     environment:
-      - NGINX_ENV=${NGINX_ENV}
+      - SSL_CERTIFICATE=${SSL_CERTIFICATE:-/etc/letsencrypt/live/$DOMAIN/fullchain.pem}
+      - SSL_CERTIFICATE_KEY=${SSL_CERTIFICATE_KEY:-/etc/letsencrypt/live/$DOMAIN/privkey.pem}
 
   frontend:
     build:
@@ -36,8 +36,6 @@ services:
       PHX_SERVER: true
       PHX_HOST: "${DOMAIN}"
     restart: unless-stopped
-    # ports:
-    #   - "5004:5004"
 
   jellyfish:
     image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
@@ -54,6 +52,5 @@ services:
       PORT: 5002
       SECRET_KEY_BASE: "super-secret"
     ports:
-      # - "5002:5002"
       - "49999:49999"
       - "50000-50050:50000-50050/udp"
