@@ -1,10 +1,16 @@
-worker_processes 1;
-  
-events { worker_connections 1024; }
+worker_processes auto;
+
+events { 
+  worker_connections 1024; 
+}
 
 http {
-
     sendfile on;
+
+    #define logs
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
 
     upstream docker-frontend {
       server frontend:5005;
@@ -18,40 +24,59 @@ http {
       server jellyfish:5002;
     }
 
+    server_tokens off;
+    gzip on; # Enable Gzip Compression
+    gzip_proxied any;
+    gzip_vary on;
+    gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
 
+    client_max_body_size 20M; # Set Client Max Body Size
+    server_names_hash_bucket_size 64;
 
     proxy_set_header   Host $host;
     proxy_set_header   X-Real-IP $remote_addr;
     proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header   X-Forwarded-Host $server_name;
 
-      # always redirect to https
-      server {
+    server {
         listen 80;
-        http2  on;
-
         server_name ${DOMAIN};
 
         location /.well-known/acme-challenge/ {
             root /var/www/certbot;
             include /etc/nginx/mime.types;
         }
-
+        
         location / {
             return 301 https://$host$request_uri;
         }
 
-      }
+    }
   
-    
     server {
       listen 443 ssl;
-      http2  on;
-      # use the certificates
+      http2 on;
+      
+
+      ssl_protocols TLSv1.2 TLSv1.3; # Update SSL protocols for more secure connections
+      ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM'; # Add a strong Cipher suite
+
       ssl_certificate     ${SSL_CERTIFICATE};
       ssl_certificate_key ${SSL_CERTIFICATE_KEY};
-      server_name ${DOMAIN};
 
+      ssl_session_cache shared:SSL:1m; # Optimize SSL for Performance
+      ssl_session_timeout 5m;
+
+      ssl_stapling on; # Enable OCSP Stapling
+      ssl_stapling_verify on;
+
+      add_header Strict-Transport-Security "max-age=31536000; includeSubdomains;" always; # Enable HSTS
+      add_header X-Frame-Options "SAMEORIGIN" always; # Security Headers
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header Referrer-Policy "no-referrer-when-downgrade" always;
+      add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';" always;
+      
+      server_name ${DOMAIN};
 
       location / {
           proxy_pass         http://docker-frontend;

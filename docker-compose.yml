@@ -12,14 +12,19 @@ services:
     restart: unless-stopped
     volumes:
       - ./certbot/conf:/etc/letsencrypt
+      # - ./certbot/www:/var/www/certbot # only if you want to use the webroot authenticator
     env_file:
       - .env
+    networks:
+      - jellyfish_network
 
   frontend:
     build:
       context: ./assets
       dockerfile: ./Dockerfile
     restart: unless-stopped
+    networks:
+      - jellyfish_network
 
   backend:
     build:
@@ -33,6 +38,8 @@ services:
       PHX_SERVER: true
       PHX_HOST: "${DOMAIN}"
     restart: unless-stopped
+    networks:
+      - jellyfish_network
 
   jellyfish:
     image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
@@ -51,3 +58,9 @@ services:
     ports:
       - "49999:49999"
       - "50000-50050:50000-50050/udp"
+    networks:
+      - jellyfish_network
+
+networks:
+  jellyfish_network:
+    driver: bridge
