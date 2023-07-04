@@ -32,6 +32,15 @@ JELLYFISH_API_TOKEN=<TOKEN>
 Optionally, in production the `PEER_JOIN_TIMEOUT` variable can be used to limit the
 period in which a new peer must join the meeting.
 
+## Production
+
+To run the Videoroom in production you can use the provided Docker compose file and adjust it to your needs.
+Example configuration is provided in `docker-compose.yaml` and `.env.example` files.
+
+Https connection requires SSL certificate and key files to be provided for reverse proxy.
+You can generate them for your domain using [Let's Encrypt](https://letsencrypt.org/).
+Example `cerbot` is provided in `docker-compose-certbot.yaml` file.
+
 ## Tests
 
 We use [Divo](https://hexdocs.pm/divo/readme.html) in tests, which is responsible for starting docker containers.
