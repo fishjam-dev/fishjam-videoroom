@@ -1,17 +1,28 @@
+# Determine the number of worker processes automatically
 worker_processes auto;
 
+# Events module configuration
 events { 
+  # Maximum number of simultaneous connections that can be opened by a worker process
   worker_connections 1024; 
 }
 
+# HTTP server configurations, it's the main block
 http {
+    # Enable high-performance file transfer
     sendfile on;
 
-    #define logs
+    # Route to log files. Log level is set to warn
     access_log /var/log/nginx/access.log;
-    error_log /var/log/nginx/error.log;
+    error_log /var/log/nginx/error.log warn;
 
+    # Set buffer size limits
+    client_body_buffer_size 10K;
+    client_header_buffer_size 1k;
+    client_max_body_size 8m;
+    large_client_header_buffers 2 1k;
 
+    # Upstream/Backend servers for load balancing
     upstream docker-frontend {
       server frontend:5005;
     }
@@ -24,78 +35,118 @@ http {
       server jellyfish:5002;
     }
 
+    # Turn off server signature 
     server_tokens off;
-    gzip on; # Enable Gzip Compression
+
+    # Enable gzip compression and extend it to more mime types
+    gzip on; 
     gzip_proxied any;
     gzip_vary on;
-    gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+    gzip_types text/plain text/css application/javascript application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
 
-    client_max_body_size 20M; # Set Client Max Body Size
+    # Size of the bucket for server names hash tables
     server_names_hash_bucket_size 64;
 
+    # Forward real client information to backend
     proxy_set_header   Host $host;
     proxy_set_header   X-Real-IP $remote_addr;
     proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header   X-Forwarded-Host $server_name;
 
+    # Server block for HTTP traffic
     server {
         listen 80;
         server_name ${DOMAIN};
 
+        # Validate Let's Encrypt SSL challenges
         location /.well-known/acme-challenge/ {
             root /var/www/certbot;
             include /etc/nginx/mime.types;
         }
         
+        # Redirect all traffic to HTTPS
         location / {
             return 301 https://$host$request_uri;
         }
-
     }
   
+    # Server block for HTTPS traffic
     server {
       listen 443 ssl;
       http2 on;
-      
 
-      ssl_protocols TLSv1.2 TLSv1.3; # Update SSL protocols for more secure connections
-      ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM'; # Add a strong Cipher suite
+      # Update SSL protocols for more secure connections
+      ssl_protocols TLSv1.2 TLSv1.3;
 
+      # Add a stronger Cipher suite 
+      ssl_ciphers 'HIGH:!aNULL:!MD5';
+
+      # Path to SSL certificates
       ssl_certificate     ${SSL_CERTIFICATE};
       ssl_certificate_key ${SSL_CERTIFICATE_KEY};
 
-      ssl_session_cache shared:SSL:1m; # Optimize SSL for Performance
+      # Optimize SSL for Performance
+      ssl_session_cache shared:SSL:1m;
       ssl_session_timeout 5m;
 
-      ssl_stapling on; # Enable OCSP Stapling
+      # Enable OCSP Stapling
+      ssl_stapling on;
       ssl_stapling_verify on;
 
-      add_header Strict-Transport-Security "max-age=31536000; includeSubdomains;" always; # Enable HSTS
-      add_header X-Frame-Options "SAMEORIGIN" always; # Security Headers
+      # Enable HSTS and other security headers
+      add_header Strict-Transport-Security "max-age=31536000; includeSubdomains;" always; 
+      add_header X-Frame-Options "SAMEORIGIN" always;
       add_header X-Content-Type-Options "nosniff" always;
       add_header Referrer-Policy "no-referrer-when-downgrade" always;
-      add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';" always;
+      add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline';" always;
       
       server_name ${DOMAIN};
 
+      # Cache static files
+      location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico)$ {
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass         http://docker-frontend;
+        proxy_redirect     off;
+
+        # Cache static files header settings
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+
+        # Enable HSTS and other security headers
+        add_header Strict-Transport-Security "max-age=31536000; includeSubdomains;" always; 
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "no-referrer-when-downgrade" always;
+        add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline';" always;
+      }
+
+      # Proxy request to upstream servers with keep alive settings
       location / {
+          proxy_http_version 1.1;
+          proxy_set_header Connection "";
           proxy_pass         http://docker-frontend;
           proxy_redirect     off;
       }
 
       location /api {
+          proxy_http_version 1.1;
+          proxy_set_header Connection "";
           proxy_pass         http://docker-backend/api;
           proxy_redirect     off;
       }
 
+      # WebSocket setup
       location /socket/peer/websocket {
-        proxy_pass         http://docker-jellyfish/socket/peer/websocket;
-        proxy_redirect     off;
-
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+        proxy_pass         http://docker-jellyfish/socket/peer/websocket;
+        proxy_redirect     off;
       }
+
+      
+
       
     }
 }
