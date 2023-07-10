@@ -12,14 +12,27 @@ RUN mix local.hex --force && \
 RUN mkdir /app
 RUN mkdir /dist
 
-COPY . /app
 WORKDIR /app
-
-# Fetch the application dependencies and compile the app
-RUN mix do deps.get, deps.compile, compile
 
 # Set the MIX environment
 ENV MIX_ENV=prod
+
+# The order of the following commands is important.
+# It ensures that:
+# * any changes in the `lib` directory will only trigger videoroom compilation
+# * any changes in the `config` directory will trigger both videoroom
+# and deps compilation but not deps fetching
+# * any changes in the `config/runtime.exs` won't trigger anything
+COPY mix.exs mix.lock ./
+RUN mix deps.get --only $MIX_ENV
+
+COPY config/config.exs config/${MIX_ENV}.exs config/
+RUN mix deps.compile
+
+COPY lib lib
+RUN mix compile
+
+COPY config/runtime.exs config/
 
 # Build a release and list the contents of the release directory
 RUN mix release --overwrite --path /dist
@@ -30,6 +43,9 @@ FROM hexpm/elixir:1.14.4-erlang-25.3.2-alpine-3.16.5
 
 # Install openssl
 RUN apk add --no-cache openssl ncurses-libs
+
+# Set the PORT
+ENV PORT=5004
 
 # Create an environment variable with the directory where the app is going to be installed
 ENV APP_HOME=/opt/app 

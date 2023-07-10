@@ -144,9 +144,5 @@ http {
         proxy_pass         http://docker-jellyfish/socket/peer/websocket;
         proxy_redirect     off;
       }
-
-      
-
-      
     }
 }

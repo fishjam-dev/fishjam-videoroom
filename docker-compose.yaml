@@ -1,7 +1,6 @@
 version: '3'
 
 services:
-
   reverseproxy:
     build:
       context: ./reverse-proxy
@@ -37,6 +36,7 @@ services:
       JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
       PHX_SERVER: true
       PHX_HOST: "${DOMAIN}"
+      PORT: 5004
     restart: unless-stopped
     networks:
       - jellyfish_network
@@ -55,6 +55,13 @@ services:
       SERVER_API_TOKEN: ${SERVER_API_TOKEN}
       PORT: 5002
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    healthcheck:
+      test: >
+        curl --fail -H "authorization: Bearer development" http://jellyfish:5002/room || exit 1
+      interval: 3s
+      retries: 2
+      timeout: 2s
+      start_period: 30s
     ports:
       - "49999:49999"
       - "50000-50500:50000-50500/udp"
