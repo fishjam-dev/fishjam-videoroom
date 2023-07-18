@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  reverseproxy:
+    build:
+      context: ./reverse-proxy
+      dockerfile: ./Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      # - ./certbot/www:/var/www/certbot # only if you want to use the webroot authenticator
+    env_file:
+      - .env
+    networks:
+      - jellyfish_network
+
+  frontend:
+    build:
+      context: ./assets
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+    networks:
+      - jellyfish_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      JELLYFISH_IP: "jellyfish"
+      JELLYFISH_PORT: 5002
+      JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
+      PHX_SERVER: true
+      PHX_HOST: "${DOMAIN}"
+      PORT: 5004
+    restart: unless-stopped
+    networks:
+      - jellyfish_network
+
+  jellyfish:
+    image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
+    container_name: jellyfish
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: "${DOMAIN}"
+      USE_INTEGRATED_TURN: "true"
+      INTEGRATED_TURN_IP: "${INTEGRATED_TURN_IP}"
+      INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
+      INTEGRATED_TURN_PORT_RANGE: "50000-50500"
+      INTEGRATED_TCP_TURN_PORT: "49999"
+      SERVER_API_TOKEN: ${SERVER_API_TOKEN}
+      PORT: 5002
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    healthcheck:
+      test: >
+        curl --fail -H "authorization: Bearer development" http://jellyfish:5002/room || exit 1
+      interval: 3s
+      retries: 2
+      timeout: 2s
+      start_period: 30s
+    ports:
+      - "49999:49999"
+      - "50000-50500:50000-50500/udp"
+    networks:
+      - jellyfish_network
+
+networks:
+  jellyfish_network:
+    driver: bridge

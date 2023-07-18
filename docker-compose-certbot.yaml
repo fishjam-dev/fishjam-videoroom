@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  certbot:
+    image: certbot/certbot:v2.6.0
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: certonly  -n --standalone --preferred-challenges http -d ${DOMAIN} --email ${EMAIL} -d ${DOMAIN} --agree-tos #--test-cert
+    ports:
+      - 80:80
+      - 443:443

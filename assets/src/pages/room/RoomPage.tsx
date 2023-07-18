@@ -23,12 +23,13 @@ const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
   const streaming = useStreaming();
 
   useEffect(() => {
-    const disconnectCallback = getToken(roomId).then((token) =>
-      connect({
+    const disconnectCallback = getToken(roomId).then((token) => {
+      return connect({
         peerMetadata: { name: username },
         token: token,
-        websocketUrl: JELLYFISH_WEBSOCKET_URL
-      }));
+        websocketUrl: JELLYFISH_WEBSOCKET_URL,
+      });
+    });
 
     return () => {
       streaming.camera.removeTracks();
