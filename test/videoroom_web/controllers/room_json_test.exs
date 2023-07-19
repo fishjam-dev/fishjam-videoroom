@@ -3,55 +3,25 @@ defmodule VideoroomWeb.RoomJsonTest do
 
   alias Jellyfish.Room
   alias Videoroom.Test.Peer
-  alias Jellyfish.ServerMessage.{PeerConnected, PeerDisconnected}
+  alias Jellyfish.Notification.{PeerConnected, PeerDisconnected, RoomDeleted}
 
   @url Application.compile_env!(:jellyfish_server_sdk, :server_address)
   @peer_url "ws://#{@url}/socket/peer/websocket"
-  @default_room "MeinRoom"
 
   @timeout 5000
-
-  defp validate_within_timeout(lambda, validator, timeout_at) do
-    lambda_result = lambda.()
-
-    cond do
-      validator.(lambda_result) ->
-        lambda_result
-
-      :erlang.monotonic_time(:millisecond) > timeout_at ->
-        flunk("Pattern didn't match within the timeout: #{inspect(lambda_result)}")
-
-      true ->
-        Process.sleep(10)
-        validate_within_timeout(lambda, validator, timeout_at)
-    end
-  end
-
-  defmacrop assert_within_timeout(
-              pattern,
-              lambda,
-              timeout \\ @timeout
-            ) do
-    quote generated: true do
-      unquote(pattern) =
-        validate_within_timeout(
-          unquote(lambda),
-          &match?(unquote(pattern), &1),
-          :erlang.monotonic_time(:millisecond) + unquote(timeout)
-        )
-    end
-  end
 
   setup context do
     client = Jellyfish.Client.new()
     {:ok, notifier} = Jellyfish.Notifier.start()
-
-    assert {:ok, []} = Room.get_all(client)
+    {:ok, []} = Jellyfish.Notifier.subscribe_server_notifications(notifier, :all)
 
     prev_env = Application.get_all_env(:videoroom)
 
     on_exit(fn ->
-      assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+      delete_all_rooms()
+
+      assert {:ok, []} = Room.get_all(client)
+
       Application.put_all_env([{:videoroom, prev_env}])
     end)
 
@@ -62,52 +32,54 @@ defmodule VideoroomWeb.RoomJsonTest do
     })
   end
 
+  setup_all do
+    on_exit(&delete_all_rooms/0)
+  end
+
   test "Room creates when peer joins and closes when it leaves", %{conn: conn, client: client} do
-    token = add_peer(conn)
+    {_name, token} = add_peer(conn)
     peer = join_room(token)
     assert {:ok, [%Room{peers: peers, id: jf_room_id}]} = Room.get_all(client)
     assert length(peers) == 1
 
     leave_room(peer)
-    assert_within_timeout({:error, reason}, fn -> Room.get(client, jf_room_id) end)
-
-    assert String.contains?(reason, "#{jf_room_id} does not exist")
+    assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
   end
 
   test "Two peers join the same room", %{conn: conn, client: client} do
-    token1 = add_peer(conn)
-    token2 = add_peer(conn)
+    {meeting_name, token1} = add_peer(conn)
+    {_name, token2} = add_peer(conn, meeting_name)
 
-    assert {:ok, [%Room{peers: peers, id: _id}]} = Room.get_all(client)
+    assert {:ok, [%Room{peers: peers, id: jf_room_id}]} = Room.get_all(client)
     assert length(peers) == 2
 
     peer1 = join_room(token1)
     peer2 = join_room(token2)
 
     leave_room(peer1)
-    assert_within_timeout({:ok, [%Room{peers: [_peer], id: _id}]}, fn -> Room.get_all(client) end)
 
     leave_room(peer2)
+    assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
   end
 
   test "Two rooms at the same time", %{conn: conn, client: client} do
-    second_room_name = "SecondRoom"
-
-    token1 = add_peer(conn)
-    token2 = add_peer(conn, second_room_name)
-
-    assert {:ok, rooms} = Room.get_all(client)
-    assert length(rooms) == 2
+    {first_meeting, token1} = add_peer(conn)
+    {_second_room, token2} = add_peer(conn)
 
     peer1 = join_room(token1)
     peer2 = join_room(token2)
 
+    assert {:ok, rooms} = Room.get_all(client)
+    assert length(rooms) == 2
+
     leave_room(peer2)
 
-    assert_within_timeout({:ok, [_room]}, fn -> Room.get_all(client) end)
+    assert_receive {:jellyfish, %RoomDeleted{}}, @timeout
 
-    token3 = add_peer(conn)
+    {_name, token3} = add_peer(conn, first_meeting)
     peer3 = join_room(token3)
+
+    Room.get_all(client)
 
     assert {:ok, [%Room{peers: peers}]} = Room.get_all(client)
     assert length(peers) == 2
@@ -116,93 +88,83 @@ defmodule VideoroomWeb.RoomJsonTest do
     leave_room(peer3)
   end
 
-  test "Peer joins and leaves in quick succession", %{conn: conn, client: client} do
-    token1 = add_peer(conn)
-    peer1 = join_room(token1, async: true)
+  test "Peer joins and leaves in quick succession - the same room", %{conn: conn} do
+    {meeting_name, token1} = add_peer(conn)
+    peer1 = join_room(token1)
+
+    {_name, token2} = add_peer(conn, meeting_name)
     leave_room(peer1, async: true)
 
-    token2 = add_peer(conn)
-    peer2 = join_room(token2, async: true)
-
-    assert_receive {:jellyfish, %PeerConnected{room_id: room_id, peer_id: peer_id}}, @timeout
-
-    assert_receive {:jellyfish, %PeerDisconnected{room_id: ^room_id, peer_id: ^peer_id}},
-                   @timeout
-
-    assert_receive {:jellyfish, %PeerConnected{}}, @timeout
-
-    assert_within_timeout({:ok, [%Room{peers: [_peer], id: _id}]}, fn -> Room.get_all(client) end)
+    peer2 = join_room(token2)
+    assert_receive {:jellyfish, %PeerDisconnected{}}, @timeout
 
     leave_room(peer2)
+    assert_receive {:jellyfish, %RoomDeleted{}}, @timeout
   end
 
   test "Meeting doesn't create new Room when the Meeting crashed", %{conn: conn, client: client} do
-    token1 = add_peer(conn)
+    {meeting_name, _token1} = add_peer(conn)
     assert {:ok, [%Room{id: room_id}]} = Room.get_all(client)
 
-    [{meeting, _key}] = Registry.lookup(Videoroom.Registry, @default_room)
+    [{meeting, _key}] = Registry.lookup(Videoroom.Registry, meeting_name)
     Process.exit(meeting, :kill)
 
-    await_meeting_restart(@default_room, meeting)
+    await_meeting_restart(meeting_name, meeting)
 
-    token2 = add_peer(conn)
+    {_name, _token2} = add_peer(conn, meeting_name)
 
     assert Registry.count(Videoroom.Registry) == 1
     assert {:ok, [%Room{id: ^room_id}]} = Room.get_all(client)
-
-    # Cleanup
-    [token1, token2] |> Enum.map(&join_room/1) |> Enum.map(&leave_room/1)
   end
 
   describe "Peer timeout" do
     test "Room closes when no peers join within timeout", %{conn: conn, client: client} do
-      _token = add_peer(conn)
-      assert {:ok, [%Room{}]} = Room.get_all(client)
+      {_name, _token} = add_peer(conn)
+      assert {:ok, [%Room{id: jf_room_id}]} = Room.get_all(client)
 
-      assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+      assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
     end
 
     test "Room closes when all peers leave or time out", %{conn: conn, client: client} do
-      _token = add_peer(conn)
-      token = add_peer(conn)
+      {meeting_name, _token} = add_peer(conn)
+      {_name, token} = add_peer(conn, meeting_name)
 
-      assert {:ok, [%Room{peers: peers}]} = Room.get_all(client)
+      assert {:ok, [%Room{id: jf_room_id, peers: peers}]} = Room.get_all(client)
       assert length(peers) == 2
 
       peer = join_room(token)
       leave_room(peer)
 
-      assert_within_timeout({:ok, [%Room{peers: [_peer]}]}, fn -> Room.get_all(client) end)
-      assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+      assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
     end
 
     test "Peer timeout persists after crash", %{conn: conn, client: client} do
       Application.put_env(:videoroom, :peer_join_timeout, 2000)
 
-      _token = add_peer(conn)
+      {meeting_name, _token} = add_peer(conn)
 
-      [{meeting, _key}] = Registry.lookup(Videoroom.Registry, @default_room)
+      [{meeting, _key}] = Registry.lookup(Videoroom.Registry, meeting_name)
       Process.exit(meeting, :kill)
 
-      await_meeting_restart(@default_room, meeting)
+      await_meeting_restart(meeting_name, meeting)
 
-      assert {:ok, [%Room{peers: [_peer]}]} = Room.get_all(client)
-      assert_within_timeout({:ok, []}, fn -> Room.get_all(client) end)
+      assert {:ok, [%Room{id: jf_room_id, peers: [_peer]}]} = Room.get_all(client)
+      assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
     end
   end
 
-  defp add_peer(conn, room_name \\ @default_room) do
-    conn = get(conn, ~p"/api/room/#{room_name}")
+  defp add_peer(conn, name \\ nil) do
+    name = if name, do: name, else: UUID.uuid4(:slug)
+    conn = get(conn, ~p"/api/room/#{name}")
     assert(%{"token" => token} = json_response(conn, 200)["data"])
 
-    token
+    {name, token}
   end
 
-  defp join_room(token, async? \\ false) do
+  defp join_room(token) do
     {:ok, peer} = Peer.start_link(@peer_url, token)
 
-    unless async?,
-      do: assert_receive({:jellyfish, %PeerConnected{}}, @timeout)
+    assert_receive({:jellyfish, %PeerConnected{}}, @timeout)
 
     peer
   end
@@ -223,5 +185,15 @@ defmodule VideoroomWeb.RoomJsonTest do
         Process.sleep(10)
         await_meeting_restart(name, prev_pid)
     end
+  end
+
+  defp delete_all_rooms() do
+    client = Jellyfish.Client.new()
+    {:ok, rooms} = Room.get_all(client)
+
+    rooms
+    |> Enum.each(fn room ->
+      :ok = Room.delete(client, room.id)
+    end)
   end
 end

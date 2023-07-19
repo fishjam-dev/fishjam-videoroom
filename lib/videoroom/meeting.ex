@@ -7,7 +7,7 @@ defmodule Videoroom.Meeting do
   require Logger
 
   alias Jellyfish.{Peer, Room}
-  alias Jellyfish.ServerMessage.{PeerConnected, PeerCrashed, PeerDisconnected, RoomCrashed}
+  alias Jellyfish.Notification.{PeerConnected, PeerCrashed, PeerDisconnected, RoomCrashed}
 
   alias Videoroom.RoomRegistry
 
@@ -17,7 +17,6 @@ defmodule Videoroom.Meeting do
     @enforce_keys [
       :name,
       :client,
-      :notifier,
       :room_id,
       :peer_timers,
       :peer_timeout
@@ -53,9 +52,10 @@ defmodule Videoroom.Meeting do
 
     client = Jellyfish.Client.new()
 
-    with {:ok, notifier} <- Jellyfish.Notifier.start(),
-         {:ok, room} <- find_or_create_room(client, name) do
-      Process.monitor(notifier)
+    with {:ok, %Room{id: room_id}} <- find_or_create_room(client, name),
+         {:ok, room} <-
+           Jellyfish.Notifier.subscribe_server_notifications(Jellyfish.Notifier, room_id) do
+      Process.monitor(Jellyfish.Notifier)
 
       peer_timeout = Application.fetch_env!(:videoroom, :peer_join_timeout)
       peer_timers = restore_peer_timers(room.peers, peer_timeout)
@@ -65,7 +65,6 @@ defmodule Videoroom.Meeting do
       {:ok,
        %State{
          client: client,
-         notifier: notifier,
          name: name,
          room_id: room.id,
          peer_timers: peer_timers,
@@ -142,21 +141,14 @@ defmodule Videoroom.Meeting do
   end
 
   @impl true
-  # Handle specific notifications for the current room
-  def handle_info({:jellyfish, %type{room_id: id} = notification}, %{room_id: id} = state)
-      when type in [PeerConnected, PeerDisconnected, PeerCrashed, RoomCrashed] do
+  def handle_info({:jellyfish, notification}, state) do
     Logger.info("jellyfish notification: #{inspect(notification)}")
     handle_notification(notification, state)
   end
 
-  # Handle all other notifications, including ones from the other rooms
-  def handle_info({:jellyfish, notification}, state) do
-    Logger.debug("jellyfish notification: #{inspect(notification)}")
+  def handle_info({:DOWN, _ref, :process, _notifier_pid, _reason}, state) do
+    Logger.error("Connection to jellyfish closed!")
     {:noreply, state}
-  end
-
-  def handle_info({:DOWN, _ref, :process, pid, _reason}, %{notifier: pid}) do
-    raise "Connection to jellyfish closed!"
   end
 
   def handle_info({:peer_timeout, peer_id}, state) do
@@ -182,6 +174,10 @@ defmodule Videoroom.Meeting do
     {:stop, :normal, state}
   end
 
+  defp handle_notification(_notification, state) do
+    {:noreply, state}
+  end
+
   defp delete_peer(peer_id, state) do
     Room.delete_peer(state.client, state.room_id, peer_id)
 
@@ -189,10 +185,15 @@ defmodule Videoroom.Meeting do
     state = %{state | peer_timers: peer_timers}
 
     if Enum.empty?(peer_timers) do
-      {:ok, room} = Room.get(state.client, state.room_id)
+      with {:ok, room} <- Room.get(state.client, state.room_id),
+           true <- Enum.empty?(room.peers) do
+        :ok
+      else
+        {:error, reason} ->
+          Logger.warn("Error when deleting meeting #{reason}")
 
-      if not Enum.empty?(room.peers) do
-        Logger.error("Deleting non-empty room")
+        false ->
+          Logger.error("Deleting non-empty room")
       end
 
       Logger.info("Deleted meeting")

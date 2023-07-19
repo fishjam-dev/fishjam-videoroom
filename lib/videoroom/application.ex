@@ -17,6 +17,7 @@ defmodule Videoroom.Application do
       # Registry and Supervisor, which manage Meetings
       {Registry, keys: :unique, name: Videoroom.Registry},
       Videoroom.MeetingSupervisor,
+      {Jellyfish.Notifier, name: Jellyfish.Notifier},
       # Start the PubSub system
       {Phoenix.PubSub, name: Videoroom.PubSub},
       # Start the Endpoint (http/https)
