@@ -174,7 +174,8 @@ defmodule Videoroom.Meeting do
     {:stop, :normal, state}
   end
 
-  defp handle_notification(_notification, state) do
+  defp handle_notification(notification, state) do
+    Logger.info("Notification: #{inspect(notification)}")
     {:noreply, state}
   end
 

@@ -32,10 +32,6 @@ defmodule VideoroomWeb.RoomJsonTest do
     })
   end
 
-  setup_all do
-    on_exit(&delete_all_rooms/0)
-  end
-
   test "Room creates when peer joins and closes when it leaves", %{conn: conn, client: client} do
     {_name, token} = add_peer(conn)
     peer = join_room(token)
@@ -78,8 +74,6 @@ defmodule VideoroomWeb.RoomJsonTest do
 
     {_name, token3} = add_peer(conn, first_meeting)
     peer3 = join_room(token3)
-
-    Room.get_all(client)
 
     assert {:ok, [%Room{peers: peers}]} = Room.get_all(client)
     assert length(peers) == 2
