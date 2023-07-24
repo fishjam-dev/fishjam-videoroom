@@ -55,8 +55,6 @@ defmodule Videoroom.Meeting do
     with {:ok, %Room{id: room_id}} <- find_or_create_room(client, name),
          {:ok, room} <-
            Jellyfish.Notifier.subscribe_server_notifications(Jellyfish.Notifier, room_id) do
-      Process.monitor(Jellyfish.Notifier)
-
       peer_timeout = Application.fetch_env!(:videoroom, :peer_join_timeout)
       peer_timers = restore_peer_timers(room.peers, peer_timeout)
 
@@ -144,11 +142,6 @@ defmodule Videoroom.Meeting do
   def handle_info({:jellyfish, notification}, state) do
     Logger.info("jellyfish notification: #{inspect(notification)}")
     handle_notification(notification, state)
-  end
-
-  def handle_info({:DOWN, _ref, :process, _notifier_pid, _reason}, state) do
-    Logger.error("Connection to jellyfish closed!")
-    {:noreply, state}
   end
 
   def handle_info({:peer_timeout, peer_id}, state) do
