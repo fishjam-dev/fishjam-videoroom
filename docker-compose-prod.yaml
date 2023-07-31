@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  reverseproxy:
+    build:
+      context: ./reverse-proxy
+      dockerfile: ./Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      # - ./certbot/www:/var/www/certbot # only if you want to use the webroot authenticator
+    env_file:
+      - .env
+    networks:
+      - jellyfish_network
+
+  frontend:
+    extends:
+      file: docker-compose.yaml
+      service: fronted
+    networks:
+      - jellyfish_network
+
+  backend:
+    extends:
+      file: docker-compose.yaml
+      service: backend
+    networks:
+      - jellyfish_network
+
+  jellyfish:
+    extends:
+      file: docker-compose.yaml
+      service: backend
+
+networks:
+  jellyfish_network:
+    driver: bridge

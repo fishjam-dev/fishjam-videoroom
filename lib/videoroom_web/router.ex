@@ -2,6 +2,7 @@ defmodule VideoroomWeb.Router do
   use VideoroomWeb, :router
 
   pipeline :api do
+    plug CORSPlug, origin: "http://localhost:5005"
     plug :accepts, ["json"]
   end
 

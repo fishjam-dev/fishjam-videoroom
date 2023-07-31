@@ -39,6 +39,7 @@ defmodule Videoroom.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
+      {:cors_plug, "~> 2.0"},
 
       # Jellyfish deps
       {:jellyfish_server_sdk, github: "jellyfish-dev/elixir_server_sdk"},

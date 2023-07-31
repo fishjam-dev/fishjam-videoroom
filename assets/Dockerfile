@@ -3,6 +3,16 @@
 FROM alpine:3.18 as builder
 WORKDIR '/app'
 
+
+ARG JELLYFISH_IP
+ARG JELLYFISH_PORT
+ENV VITE_JELLYFISH_IP=$JELLYFISH_IP
+ENV VITE_JELLYFISH_PORT=$JELLYFISH_PORT
+ARG BACKEND_IP
+ARG BACKEND_PORT
+ENV VITE_BACKEND_IP=$BACKEND_IP
+ENV VITE_BACKEND_PORT=$BACKEND_PORT
+
 # Install nodejs and npm
 RUN apk add --no-cache nodejs npm
 
@@ -33,13 +43,12 @@ RUN npm run build
 # Bundle static assets with nginx
 FROM nginx:1.25-alpine as production
 
-ENV NODE_ENV=production
-
 # Copy built assets from `builder` image
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Add your nginx.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx_ssl.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
 EXPOSE 5005

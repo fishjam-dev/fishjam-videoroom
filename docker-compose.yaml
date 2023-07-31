@@ -1,51 +1,12 @@
 version: '3'
 
 services:
-  reverseproxy:
-    build:
-      context: ./reverse-proxy
-      dockerfile: ./Dockerfile
-    ports:
-      - 80:80
-      - 443:443
-    restart: unless-stopped
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      # - ./certbot/www:/var/www/certbot # only if you want to use the webroot authenticator
-    env_file:
-      - .env
-    networks:
-      - jellyfish_network
-
-  frontend:
-    build:
-      context: ./assets
-      dockerfile: ./Dockerfile
-    restart: unless-stopped
-    networks:
-      - jellyfish_network
-
-  backend:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    environment:
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      JELLYFISH_IP: "jellyfish"
-      JELLYFISH_PORT: 5002
-      JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
-      PHX_SERVER: true
-      PHX_HOST: "${DOMAIN}"
-      PORT: 5004
-    restart: unless-stopped
-    networks:
-      - jellyfish_network
-
   jellyfish:
     image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
-    container_name: jellyfish
+    # image: "jellyfish_test"
     restart: unless-stopped
     environment:
+      BIND_LOCALHOST: "true"
       VIRTUAL_HOST: "${DOMAIN}"
       USE_INTEGRATED_TURN: "true"
       INTEGRATED_TURN_IP: "${INTEGRATED_TURN_IP}"
@@ -63,8 +24,47 @@ services:
       timeout: 2s
       start_period: 30s
     ports:
+      - "5002:5002"
       - "49999:49999"
       - "50000-50500:50000-50500/udp"
+    networks:
+      - jellyfish_network
+
+  frontend:
+    build:
+      context: ./assets
+      dockerfile: ./Dockerfile
+      args:
+        JELLYFISH_IP: "127.0.0.1"
+        JELLYFISH_PORT: 5002
+        BACKEND_IP: "127.0.0.1"
+        BACKEND_PORT: 5004
+    restart: unless-stopped
+    ports:
+      - "5005:5005"
+    depends_on:
+      - backend
+      - jellyfish
+    networks:
+      - jellyfish_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      JELLYFISH_IP: "jellyfish"
+      JELLYFISH_PORT: 5002
+      JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
+      PHX_SERVER: true
+      PHX_HOST: "${DOMAIN}"
+      PORT: 5004
+    restart: unless-stopped
+    ports:
+      - "5004:5004"
+    depends_on:
+      - jellyfish
     networks:
       - jellyfish_network
 
