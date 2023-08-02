@@ -16,11 +16,15 @@ services:
       - .env
     networks:
       - jellyfish_network
+    depends_on:
+      - frontend
+      - backend
+      - jellyfish
 
   frontend:
     extends:
       file: docker-compose.yaml
-      service: fronted
+      service: frontend
     networks:
       - jellyfish_network
 
@@ -34,7 +38,9 @@ services:
   jellyfish:
     extends:
       file: docker-compose.yaml
-      service: backend
+      service: jellyfish
+    networks:
+      - jellyfish_network
 
 networks:
   jellyfish_network:

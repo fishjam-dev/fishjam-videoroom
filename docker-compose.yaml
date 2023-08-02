@@ -35,9 +35,9 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
-        JELLYFISH_IP: "127.0.0.1"
+        JELLYFISH_IP: ${MACHINE_IP:-localhost}
         JELLYFISH_PORT: 5002
-        BACKEND_IP: "127.0.0.1"
+        BACKEND_IP: ${MACHINE_IP:-localhost}
         BACKEND_PORT: 5004
     restart: unless-stopped
     ports:

@@ -94,11 +94,11 @@ http {
       ssl_stapling_verify on;
 
       # Enable HSTS and other security headers
-      add_header Strict-Transport-Security "max-age=31536000; includeSubdomains;" always; 
-      add_header X-Frame-Options "SAMEORIGIN" always;
-      add_header X-Content-Type-Options "nosniff" always;
-      add_header Referrer-Policy "no-referrer-when-downgrade" always;
-      add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline';" always;
+      #add_header Strict-Transport-Security "max-age=31536000; includeSubdomains;" always; 
+      #add_header X-Frame-Options "SAMEORIGIN" always;
+      #add_header X-Content-Type-Options "nosniff" always;
+      #add_header Referrer-Policy "no-referrer-when-downgrade" always;
+      #add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline';" always;
       
       server_name ${DOMAIN};
 
@@ -114,11 +114,11 @@ http {
         add_header Cache-Control "public, no-transform";
 
         # Enable HSTS and other security headers
-        add_header Strict-Transport-Security "max-age=31536000; includeSubdomains;" always; 
-        add_header X-Frame-Options "SAMEORIGIN" always;
-        add_header X-Content-Type-Options "nosniff" always;
-        add_header Referrer-Policy "no-referrer-when-downgrade" always;
-        add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline';" always;
+        #add_header Strict-Transport-Security "max-age=31536000; includeSubdomains;" always; 
+        #add_header X-Frame-Options "SAMEORIGIN" always;
+        #add_header X-Content-Type-Options "nosniff" always;
+        #add_header Referrer-Policy "no-referrer-when-downgrade" always;
+        #add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline';" always;
       }
 
       # Proxy request to upstream servers with keep alive settings
