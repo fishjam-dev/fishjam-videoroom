@@ -10,7 +10,6 @@ export const getToken = (roomId: string) =>
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     console.log("Token:", resp?.data?.data?.token);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return resp?.data?.data?.token || "";
   });

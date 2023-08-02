@@ -3,13 +3,11 @@ version: '3'
 services:
   jellyfish:
     image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
-    # image: "jellyfish_test"
     restart: unless-stopped
     environment:
-      BIND_LOCALHOST: "true"
-      VIRTUAL_HOST: "${DOMAIN}"
+      VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$DOMAIN}"
       USE_INTEGRATED_TURN: "true"
-      INTEGRATED_TURN_IP: "${INTEGRATED_TURN_IP}"
+      INTEGRATED_TURN_IP: "${EXTERNAL_IP}"
       INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
       INTEGRATED_TURN_PORT_RANGE: "50000-50500"
       INTEGRATED_TCP_TURN_PORT: "49999"
@@ -35,10 +33,9 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
-        JELLYFISH_IP: ${MACHINE_IP:-localhost}
-        JELLYFISH_PORT: 5002
-        BACKEND_IP: ${MACHINE_IP:-localhost}
-        BACKEND_PORT: 5004
+        IS_REVERSY_PROXY_USED: ${IS_REVERSY_PROXY_USED:-false}
+        JELLYFISH_ADDRESS: ${JELLYFISH_ADDRESS:-$DOMAIN:5002}
+        BACKEND_ADDRESS: ${BACKEND_ADDRESS:-$DOMAIN:5004}
     restart: unless-stopped
     ports:
       - "5005:5005"
@@ -54,11 +51,11 @@ services:
       dockerfile: ./Dockerfile
     environment:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      JELLYFISH_IP: "jellyfish"
-      JELLYFISH_PORT: 5002
+      JELLYFISH_ADDRESS: ${JELLYFISH_ADDRESS:-jellyfish:5002}
+      SECURE_CONNECTION_JELLYFISH: ${SECURE_CONNECTION:-false}
       JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
       PHX_SERVER: true
-      PHX_HOST: "${DOMAIN}"
+      PHX_HOST: ${BACKEND_ADDRESS:-$DOMAIN}
       PORT: 5004
     restart: unless-stopped
     ports:

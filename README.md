@@ -25,8 +25,7 @@ When running the build version of the Phoenix app, you must specify the address 
 as well as the authentication token via the environment variables:
 
 ```sh
-JELLYFISH_IP=<IP_ADDRESS>
-JELLYFISH_PORT=<PORT>
+JELLYFISH_ADDRESS=`<IP_ADDRESS>:<PORT>``
 JELLYFISH_API_TOKEN=<TOKEN>
 ```
 
