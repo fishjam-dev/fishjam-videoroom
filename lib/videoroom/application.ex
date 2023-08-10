@@ -16,7 +16,7 @@ defmodule Videoroom.Application do
       VideoroomWeb.Telemetry,
       # Registry and Supervisor, which manage Meetings
       {Registry, keys: :unique, name: Videoroom.Registry},
-      Videoroom.MeetingSupervisor,
+      Videoroom.RoomService,
       {Videoroom.Notifier, name: Jellyfish.Notifier},
       # Start the PubSub system
       {Phoenix.PubSub, name: Videoroom.PubSub},

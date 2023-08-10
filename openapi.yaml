@@ -7,7 +7,7 @@ components:
       example: Failed to add peer
       title: Error
       type: string
-      x-struct: Elixir.Videorom.ApiSpec.Error
+      x-struct: Elixir.Videoroom.ApiSpec.Error
     PeerToken:
       description: Peer token used for authorizing websocket connection to the Jellyfish Server
       example: SFMyNTY.g2gDdAAhiOL4CdsaboT9-jtMzhoI
@@ -55,6 +55,6 @@ paths:
         - room
 security: []
 servers:
-  - url: http://localhost:4000
+  - url: http://localhost:5004
     variables: {}
 tags: []

@@ -3,7 +3,7 @@ defmodule VideoroomWeb.RoomJsonTest do
 
   alias Jellyfish.Room
   alias Videoroom.Test.Peer
-  alias Jellyfish.Notification.{PeerConnected, PeerDisconnected, RoomDeleted}
+  alias Jellyfish.Notification.{PeerConnected, PeerDisconnected, RoomCreated, RoomDeleted}
 
   @url Application.compile_env!(:jellyfish_server_sdk, :server_address)
   @peer_url "ws://#{@url}/socket/peer/websocket"
@@ -13,7 +13,7 @@ defmodule VideoroomWeb.RoomJsonTest do
   setup context do
     client = Jellyfish.Client.new()
     {:ok, notifier} = Jellyfish.Notifier.start()
-    {:ok, []} = Jellyfish.Notifier.subscribe_server_notifications(notifier, :all)
+    :ok = Jellyfish.Notifier.subscribe_server_notifications(notifier)
 
     prev_env = Application.get_all_env(:videoroom)
 
@@ -96,21 +96,6 @@ defmodule VideoroomWeb.RoomJsonTest do
     assert_receive {:jellyfish, %RoomDeleted{}}, @timeout
   end
 
-  test "Meeting doesn't create new Room when the Meeting crashed", %{conn: conn, client: client} do
-    {meeting_name, _token1} = add_peer(conn)
-    assert {:ok, [%Room{id: room_id}]} = Room.get_all(client)
-
-    [{meeting, _key}] = Registry.lookup(Videoroom.Registry, meeting_name)
-    Process.exit(meeting, :kill)
-
-    await_meeting_restart(meeting_name, meeting)
-
-    {_name, _token2} = add_peer(conn, meeting_name)
-
-    assert Registry.count(Videoroom.Registry) == 1
-    assert {:ok, [%Room{id: ^room_id}]} = Room.get_all(client)
-  end
-
   describe "Peer timeout" do
     test "Room closes when no peers join within timeout", %{conn: conn, client: client} do
       {_name, _token} = add_peer(conn)
@@ -129,20 +114,6 @@ defmodule VideoroomWeb.RoomJsonTest do
       peer = join_room(token)
       leave_room(peer)
 
-      assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
-    end
-
-    test "Peer timeout persists after crash", %{conn: conn, client: client} do
-      Application.put_env(:videoroom, :peer_join_timeout, 2000)
-
-      {meeting_name, _token} = add_peer(conn)
-
-      [{meeting, _key}] = Registry.lookup(Videoroom.Registry, meeting_name)
-      Process.exit(meeting, :kill)
-
-      await_meeting_restart(meeting_name, meeting)
-
-      assert {:ok, [%Room{id: jf_room_id, peers: [_peer]}]} = Room.get_all(client)
       assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
     end
   end
@@ -168,17 +139,6 @@ defmodule VideoroomWeb.RoomJsonTest do
 
     unless async?,
       do: assert_receive({:jellyfish, %PeerDisconnected{}}, @timeout)
-  end
-
-  defp await_meeting_restart(name, prev_pid) do
-    case Registry.lookup(Videoroom.Registry, name) do
-      [{pid, _key}] when pid != prev_pid ->
-        :ok
-
-      _other ->
-        Process.sleep(10)
-        await_meeting_restart(name, prev_pid)
-    end
   end
 
   defp delete_all_rooms() do

@@ -6,7 +6,7 @@ defmodule Videoroom.Meeting do
 
   require Logger
 
-  alias Jellyfish.{Peer, Room}
+  alias Jellyfish.Room
   alias Jellyfish.Notification.{PeerConnected, PeerCrashed, PeerDisconnected, RoomCrashed}
 
   alias Videoroom.RoomRegistry
@@ -52,11 +52,8 @@ defmodule Videoroom.Meeting do
 
     client = Jellyfish.Client.new()
 
-    with {:ok, %Room{id: room_id}} <- find_or_create_room(client, name),
-         {:ok, room} <-
-           Jellyfish.Notifier.subscribe_server_notifications(Jellyfish.Notifier, room_id) do
+    with {:ok, room} <- create_new_room(client, name) do
       peer_timeout = Application.fetch_env!(:videoroom, :peer_join_timeout)
-      peer_timers = restore_peer_timers(room.peers, peer_timeout)
 
       Logger.info("Created meeting")
 
@@ -65,40 +62,13 @@ defmodule Videoroom.Meeting do
          client: client,
          name: name,
          room_id: room.id,
-         peer_timers: peer_timers,
+         peer_timers: %{},
          peer_timeout: peer_timeout
        }}
     else
       {:error, reason} ->
         raise "Failed to create a meeting, reason: #{inspect(reason)}"
     end
-  end
-
-  defp find_or_create_room(client, name) do
-    with {:ok, room_id} <- RoomRegistry.lookup(name),
-         {:ok, room} <- Room.get(client, room_id) do
-      {:ok, room}
-    else
-      {:error, :unregistered} ->
-        create_new_room(client, name)
-
-      error ->
-        handle_room_error(error, client, name)
-    end
-  end
-
-  defp restore_peer_timers(peers, timeout) do
-    peers
-    |> Map.new(fn %Peer{id: peer_id, status: status} ->
-      case status do
-        :connected ->
-          {peer_id, nil}
-
-        :disconnected ->
-          timer = Process.send_after(self(), {:peer_timeout, peer_id}, timeout)
-          {peer_id, timer}
-      end
-    end)
   end
 
   defp create_new_room(client, name) do
@@ -112,15 +82,6 @@ defmodule Videoroom.Meeting do
     end
   end
 
-  defp handle_room_error({:error, reason} = error, client, name) do
-    if String.contains?(reason, "does not exist") do
-      RoomRegistry.delete(name)
-      create_new_room(client, name)
-    else
-      error
-    end
-  end
-
   @impl true
   def handle_call(:add_peer, _from, state) do
     case Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC) do
@@ -128,9 +89,9 @@ defmodule Videoroom.Meeting do
         Logger.info("Added peer #{peer.id}")
 
         timer = Process.send_after(self(), {:peer_timeout, peer.id}, state.peer_timeout)
-        peer_timers = Map.put(state.peer_timers, peer.id, timer)
+        state = put_in(state.peer_timers[peer.id], timer)
 
-        {:reply, {:ok, token}, %{state | peer_timers: peer_timers}}
+        {:reply, {:ok, token}, state}
 
       _error ->
         Logger.warning("Failed to add peer")
@@ -198,13 +159,13 @@ defmodule Videoroom.Meeting do
   end
 
   @impl true
-  def terminate(:normal, state) do
+  def terminate(reason, state) do
+    if reason != :normal do
+      Logger.warning("Meeting terminated abnormally")
+    end
+
     Room.delete(state.client, state.room_id)
     RoomRegistry.delete(state.name)
-  end
-
-  def terminate(_reason, _state) do
-    Logger.warning("Meeting crashed")
   end
 
   defp registry_id(name), do: {:via, Registry, {Videoroom.Registry, name}}

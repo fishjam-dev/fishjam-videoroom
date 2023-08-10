@@ -3,10 +3,10 @@ defmodule VideoroomWeb.RoomController do
   use OpenApiSpex.ControllerSpecs
 
   alias OpenApiSpex.Schema
-  alias Videorom.ApiSpec.Error
+  alias Videoroom.ApiSpec.Error
   alias VideoroomWeb.ApiSpec.Token
 
-  alias Videoroom.MeetingSupervisor
+  alias Videoroom.RoomService
 
   tags [:room]
 
@@ -36,7 +36,7 @@ defmodule VideoroomWeb.RoomController do
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => name}) do
-    case MeetingSupervisor.add_peer(name) do
+    case RoomService.add_peer(name) do
       {:ok, token} ->
         conn
         |> render("show.json", token: token)
