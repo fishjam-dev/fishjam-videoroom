@@ -48,8 +48,6 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  IO.inspect(System.get_env("JELLYFISH_ADDRESS"), label: :jellyfish_address)
-
   jellyfish_address =
     System.get_env("JELLYFISH_ADDRESS") ||
       raise "Environment variable JELLYFISH_ADDRESS is missing."

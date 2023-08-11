@@ -54,13 +54,10 @@ const origin_websocket_url = isProxyUsed ?
   new URL(`${protocol}://${import.meta.env.VITE_JELLYFISH_ADDRESS}`)
 origin_websocket_url.protocol = isSecure ? "wss:" : "ws:";
 
-console.log("BACKEND_URL: ", BACKEND_URL)
-console.log("WEBSOCKET_URL: ", origin_websocket_url)
 
 // @ts-ignore
 export const JELLYFISH_WEBSOCKET_URL = `${origin_websocket_url.origin}/socket/peer/websocket`;
 export const JELLYFISH_WEBSOCKET_PROTOCOL = isSecure ? "wss" : "ws";
-console.log("URL: ", JELLYFISH_WEBSOCKET_URL)
 
 export const MAX_TILE_HEIGHT_FOR_MEDIUM_ENCODING = 600;
 export const MAX_TILE_HEIGHT_FOR_LOW_ENCODING = 250;

@@ -40,8 +40,8 @@ jobs:
           hosts: ${{ secrets.SANDBOX_HOST }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
-            docker rm $(docker stop $(docker ps -a -q --filter ancestor=sandbox_backend --format="{{.ID}}"))
-            docker rm $(docker stop $(docker ps -a -q --filter ancestor=sandbox_frontend --format="{{.ID}}"))
+            docker rm $(docker stop $(docker ps -a -q --filter ancestor=main_backend --format="{{.ID}}"))
+            docker rm $(docker stop $(docker ps -a -q --filter ancestor=main_frontend --format="{{.ID}}"))
             docker rm $(docker stop $(docker ps -a -q --filter ancestor=ghcr.io/jellyfish-dev/jellyfish:edge --format="{{.ID}}"))
 
       - name: Deploy docker compose to a pre-configured server
