@@ -161,7 +161,7 @@ defmodule Videoroom.Meeting do
   @impl true
   def terminate(reason, state) do
     if reason != :normal do
-      Logger.warning("Meeting terminated abnormally")
+      Logger.warning("Meeting terminated abnormally with reason: #{reason}")
     end
 
     Room.delete(state.client, state.room_id)
