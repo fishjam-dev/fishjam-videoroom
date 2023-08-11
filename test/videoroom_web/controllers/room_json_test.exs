@@ -3,7 +3,7 @@ defmodule VideoroomWeb.RoomJsonTest do
 
   alias Jellyfish.Room
   alias Videoroom.Test.Peer
-  alias Jellyfish.Notification.{PeerConnected, PeerDisconnected, RoomCreated, RoomDeleted}
+  alias Jellyfish.Notification.{PeerConnected, PeerDisconnected, RoomDeleted}
 
   @url Application.compile_env!(:jellyfish_server_sdk, :server_address)
   @peer_url "ws://#{@url}/socket/peer/websocket"
