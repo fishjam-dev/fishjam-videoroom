@@ -47,8 +47,6 @@ export const BACKEND_URL = isProxyUsed ?
   new URL(window.location.origin) :
   new URL(`${protocol}://${import.meta.env.VITE_BACKEND_ADDRESS}`)
 
-
-
 // videoroom_backend should return this address (host and port)
 // @ts-ignore
 const origin_websocket_url = isProxyUsed ?
@@ -60,7 +58,7 @@ console.log("BACKEND_URL: ", BACKEND_URL)
 console.log("WEBSOCKET_URL: ", origin_websocket_url)
 
 // @ts-ignore
-export const JELLYFISH_WEBSOCKET_URL = `${origin_websocket_url}/socket/peer/websocket`;
+export const JELLYFISH_WEBSOCKET_URL = `${origin_websocket_url.origin}/socket/peer/websocket`;
 export const JELLYFISH_WEBSOCKET_PROTOCOL = isSecure ? "wss" : "ws";
 console.log("URL: ", JELLYFISH_WEBSOCKET_URL)
 

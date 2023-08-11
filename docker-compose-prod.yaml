@@ -24,6 +24,11 @@ services:
     extends:
       file: docker-compose.yaml
       service: frontend
+    build:
+      args:
+        IS_REVERSY_PROXY_USED: "true"
+        JELLYFISH_ADDRESS: "${DOMAIN}:5002"
+        BACKEND_ADDRESS: "${DOMAIN}:5004"
     networks:
       - jellyfish_network
 
@@ -31,6 +36,10 @@ services:
     extends:
       file: docker-compose.yaml
       service: backend
+    environment:
+      JELLYFISH_ADDRESS: jellyfish:5002
+      SECURE_CONNECTION_JELLYFISH: false
+      PHX_HOST: ${DOMAIN}
     networks:
       - jellyfish_network
 
@@ -38,6 +47,11 @@ services:
     extends:
       file: docker-compose.yaml
       service: jellyfish
+    environment:
+      VIRTUAL_HOST: "${DOMAIN}"
+      JELLYFISH_ADDRESS: jellyfish:5002
+      SECURE_CONNECTION_JELLYFISH: false
+      PHX_HOST: ${DOMAIN}
     networks:
       - jellyfish_network
 

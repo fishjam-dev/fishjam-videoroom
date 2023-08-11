@@ -2,7 +2,8 @@ version: '3'
 
 services:
   jellyfish:
-    image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
+    # image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
+    build: ../jellyfish/
     restart: unless-stopped
     environment:
       VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$DOMAIN}"
@@ -12,6 +13,7 @@ services:
       INTEGRATED_TURN_PORT_RANGE: "50000-50500"
       INTEGRATED_TCP_TURN_PORT: "49999"
       SERVER_API_TOKEN: ${SERVER_API_TOKEN}
+      CHECK_ORIGIN: "${CHECK_ORIGIN:-true}"
       PORT: 5002
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
     healthcheck:
