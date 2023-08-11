@@ -1,0 +1,57 @@
+name: Sandbox Build and Deploy
+on:
+  push:
+    branches: 
+      - "sandbox"
+    paths:
+      - "**"
+      - "!README.md"
+
+env: 
+  DOMAIN: jellyroom.membrane.ovh
+  JELLYFISH_ADDRESS: jellyfish.jellyroom.membrane.ovh
+  BACKEND_ADDRESS: server.jellyroom.membrane.ovh
+  EXTERNAL_IP: 128.140.50.250
+  TAG: sandbox
+  PROJECT: sandbox
+  COMPOSE_FILE_NAME: docker-compose.yaml
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:  
+      - uses: actions/checkout@v2
+
+      - name: Prepare .env file for the deployment
+        id: variables_population
+        run: |
+          echo "DOMAIN=${{env.DOMAIN}} 
+          EXTERNAL_IP=${{env.EXTERNAL_IP}} 
+          TAG=${{env.TAG}}
+          SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
+          SECRET_KEY_BASE=${{secrets.SECRET_KEYBASE}}
+          JELLYFISH_ADDRESS=${{env.JELLYFISH_ADDRESS}}
+          BACKEND_ADDRESS=${{env.BACKEND_ADDRESS}}
+          SECURE_CONNECTION=true
+          CHECK_ORIGIN=false" > .env
+
+      - name: Remove old containers and pull changes
+        uses: JimCronqvist/action-ssh@master
+        with:
+          hosts: ${{ secrets.SANDBOX_HOST }}
+          privateKey: ${{ secrets.SSH_PRIV_KEY }}
+          command: |
+            source .env
+            docker compose -f ${{env.COMPOSE_FILE_NAME}} down
+            docker compose -f ${{env.COMPOSE_FILE_NAME}} pull
+            docker compose -f ${{env.COMPOSE_FILE_NAME}} build
+
+      - name: Deploy docker compose to a pre-configured server
+        id: deploy
+        uses: TapTap21/docker-remote-deployment-action@v1.1
+        with:
+          remote_docker_host: ${{ secrets.SANDBOX_HOST }}
+          ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
+          ssh_public_key: ${{ secrets.SSH_KNOWN_HOSTS }}
+          stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans
