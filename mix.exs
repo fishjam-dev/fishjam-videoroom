@@ -41,7 +41,7 @@ defmodule Videoroom.MixProject do
       {:plug_cowboy, "~> 2.5"},
 
       # Jellyfish deps
-      {:jellyfish_server_sdk, github: "jellyfish-dev/elixir_server_sdk", branch: "fix-rc"},
+      {:jellyfish_server_sdk, github: "jellyfish-dev/elixir_server_sdk"},
 
       # Dev
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
