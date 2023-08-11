@@ -1,4 +1,4 @@
-defmodule Videorom.ApiSpec.Error do
+defmodule Videoroom.ApiSpec.Error do
   @moduledoc false
 
   require OpenApiSpex
