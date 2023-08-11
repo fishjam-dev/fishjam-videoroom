@@ -2,8 +2,7 @@ version: '3'
 
 services:
   jellyfish:
-    # image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
-    build: ../jellyfish/
+    image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
     restart: unless-stopped
     environment:
       VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$DOMAIN}"
