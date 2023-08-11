@@ -1,8 +1,8 @@
-name: Sandbox Build and Deploy
+name: Main Build and Deploy
 on:
   push:
     branches: 
-      - "sandbox"
+      - "main"
     paths:
       - "**"
       - "!README.md"
@@ -11,10 +11,9 @@ env:
   DOMAIN: jellyroom.membrane.ovh
   JELLYFISH_ADDRESS: jellyfish.jellyroom.membrane.ovh
   BACKEND_ADDRESS: server.jellyroom.membrane.ovh
-  EXTERNAL_IP: 128.140.50.250
-  TAG: sandbox
-  PROJECT: sandbox
+  PROJECT: main
   COMPOSE_FILE_NAME: docker-compose.yaml
+  TARGET_DIR: jellyfish_videoroom
 
 jobs:
   deploy:
@@ -26,7 +25,7 @@ jobs:
         id: variables_population
         run: |
           echo "DOMAIN=${{env.DOMAIN}} 
-          EXTERNAL_IP=${{env.EXTERNAL_IP}} 
+          EXTERNAL_IP=${{secrets.SANDBOX_HOST}} 
           TAG=${{env.TAG}}
           SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
           SECRET_KEY_BASE=${{secrets.SECRET_KEYBASE}}
@@ -35,16 +34,15 @@ jobs:
           SECURE_CONNECTION=true
           CHECK_ORIGIN=false" > .env
 
-      - name: Remove old containers and pull changes
+      - name: Remove old containers
         uses: JimCronqvist/action-ssh@master
         with:
           hosts: ${{ secrets.SANDBOX_HOST }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
-            source .env
-            docker compose -f ${{env.COMPOSE_FILE_NAME}} down
-            docker compose -f ${{env.COMPOSE_FILE_NAME}} pull
-            docker compose -f ${{env.COMPOSE_FILE_NAME}} build
+            docker rm $(docker stop $(docker ps -a -q --filter ancestor=sandbox_backend --format="{{.ID}}"))
+            docker rm $(docker stop $(docker ps -a -q --filter ancestor=sandbox_frontend --format="{{.ID}}"))
+            docker rm $(docker stop $(docker ps -a -q --filter ancestor=ghcr.io/jellyfish-dev/jellyfish:edge --format="{{.ID}}"))
 
       - name: Deploy docker compose to a pre-configured server
         id: deploy
@@ -52,6 +50,6 @@ jobs:
         with:
           remote_docker_host: ${{ secrets.SANDBOX_HOST }}
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
-          ssh_public_key: ${{ secrets.SSH_KNOWN_HOSTS }}
+          ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
           args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans

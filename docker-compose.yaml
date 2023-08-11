@@ -15,13 +15,6 @@ services:
       CHECK_ORIGIN: "${CHECK_ORIGIN:-true}"
       PORT: 5002
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-    healthcheck:
-      test: >
-        curl --fail -H "authorization: Bearer development" http://jellyfish:5002/room || exit 1
-      interval: 3s
-      retries: 2
-      timeout: 2s
-      start_period: 30s
     ports:
       - "5002:5002"
       - "49999:49999"
@@ -55,7 +48,7 @@ services:
       JELLYFISH_ADDRESS: ${JELLYFISH_ADDRESS:-jellyfish:5002}
       SECURE_CONNECTION_JELLYFISH: ${SECURE_CONNECTION:-false}
       JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
-      PHX_SERVER: true
+      PHX_SERVER: "true"
       PHX_HOST: ${BACKEND_ADDRESS:-$DOMAIN}
       PORT: 5004
     restart: unless-stopped
