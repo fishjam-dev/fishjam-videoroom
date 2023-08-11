@@ -145,7 +145,7 @@ defmodule Videoroom.Meeting do
         :ok
       else
         {:error, reason} ->
-          Logger.warn("Error when deleting meeting #{reason}")
+          Logger.warning("Error when deleting meeting #{reason}")
 
         false ->
           Logger.error("Deleting non-empty room")

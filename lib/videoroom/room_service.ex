@@ -2,6 +2,7 @@ defmodule Videoroom.RoomService do
   @moduledoc false
   use GenServer
 
+  require Logger
   alias Jellyfish.Notifier
 
   alias Videoroom.Meeting
@@ -38,8 +39,19 @@ defmodule Videoroom.RoomService do
     with {:ok, room_name} <- RoomRegistry.lookup_room(room_id),
          [{pid, _value}] <- Registry.lookup(Videoroom.Registry, room_name) do
       send(pid, {:jellyfish, notification})
+    else
+      _error ->
+        handle_unexpected_notification(notification)
     end
 
     {:noreply, state}
+  end
+
+  defp handle_unexpected_notification(%Jellyfish.Notification.RoomDeleted{}), do: :ok
+
+  defp handle_unexpected_notification(notification) do
+    Logger.warning(
+      "Received notification #{inspect(notification)} which doesn't have a corresponding meeting"
+    )
   end
 end
