@@ -2,7 +2,7 @@ name: Main Build and Deploy
 on:
   push:
     branches: 
-      - "main"
+      - "grafana"
     paths:
       - "**"
       - "!README.md"

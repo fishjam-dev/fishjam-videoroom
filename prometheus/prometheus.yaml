@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 2s
+
+  external_labels:
+    monitor: 'codelab-monitor'
+
+scrape_configs:
+  - job_name: 'jellyfish'
+    static_configs:
+      - targets: ['jellyfish:9568']
