@@ -64,7 +64,9 @@ services:
       - jellyfish_network
 
   prometheus:
-    image: prom/prometheus
+    build:
+      context: ./prometheus
+      dockerfile: Dockerfile
     container_name: prometheus
     restart: on-failure
     command:
@@ -73,7 +75,6 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     volumes:
-      - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     depends_on:
       - jellyfish
@@ -83,12 +84,13 @@ services:
       - jellyfish_network
 
   grafana:
-    image: grafana/grafana:10.0.3
+    build:
+      context: ./grafana
+      dockerfile: Dockerfile
     container_name: grafana
     restart: on-failure
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
     environment:

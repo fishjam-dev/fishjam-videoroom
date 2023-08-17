@@ -2,7 +2,7 @@ name: Main Build and Deploy
 on:
   push:
     branches: 
-      - "grafana"
+      - "main"
     paths:
       - "**"
       - "!README.md"
@@ -26,11 +26,12 @@ jobs:
         run: |
           echo "DOMAIN=${{env.DOMAIN}} 
           EXTERNAL_IP=${{secrets.SANDBOX_HOST}} 
-          TAG=${{env.TAG}}
           SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
           SECRET_KEY_BASE=${{secrets.SECRET_KEYBASE}}
           JELLYFISH_ADDRESS=${{env.JELLYFISH_ADDRESS}}
           BACKEND_ADDRESS=${{env.BACKEND_ADDRESS}}
+          GF_SECURITY_ADMIN_PASSWORD=${{secrets.GF_SECURITY_ADMIN_PASSWORD}}
+          GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}}
           SECURE_CONNECTION=true
           CHECK_ORIGIN=false" > .env
 
@@ -40,9 +41,16 @@ jobs:
           hosts: ${{ secrets.SANDBOX_HOST }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
-            docker rm $(docker stop $(docker ps -a -q --filter ancestor=main_backend --format="{{.ID}}"))
-            docker rm $(docker stop $(docker ps -a -q --filter ancestor=main_frontend --format="{{.ID}}"))
-            docker rm $(docker stop $(docker ps -a -q --filter ancestor=ghcr.io/jellyfish-dev/jellyfish:edge --format="{{.ID}}"))
+            docker ps -a -q --filter ancestor=main_backend --format="{{.ID}}" | xargs -r docker stop
+            docker ps -a -q --filter ancestor=main_backend --format="{{.ID}}" | xargs -r docker rm
+            docker ps -a -q --filter ancestor=main_frontend --format="{{.ID}}" | xargs -r docker stop  
+            docker ps -a -q --filter ancestor=main_frontend --format="{{.ID}}" | xargs -r docker rm 
+            docker ps -a -q --filter ancestor=main_grafana --format="{{.ID}}" | xargs -r docker stop 
+            docker ps -a -q --filter ancestor=main_grafana --format="{{.ID}}" | xargs -r docker rm 
+            docker ps -a -q --filter ancestor=main_prometheus --format="{{.ID}}" | xargs -r docker stop  
+            docker ps -a -q --filter ancestor=main_prometheus --format="{{.ID}}" | xargs -r docker rm 
+            docker ps -a -q --filter ancestor=ghcr.io/jellyfish-dev/jellyfish:edge --format="{{.ID}}" | xargs -r docker stop 
+            docker ps -a -q --filter ancestor=ghcr.io/jellyfish-dev/jellyfish:edge --format="{{.ID}}" | xargs -r docker rm 
 
       - name: Deploy docker compose to a pre-configured server
         id: deploy
