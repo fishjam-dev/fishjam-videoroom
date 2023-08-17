@@ -30,8 +30,11 @@ services:
       NODE_NAME: app@jellyfish1
     ports:
       - "5002:5002"
+      - "9568:9568"
       - "49999:49999"
       - "50000-50500:50000-50500/udp"
+    networks:
+      - jellyfish_network
 
   jellyfish2:
     <<: *jellyfish-template
@@ -41,8 +44,6 @@ services:
       INTEGRATED_TURN_PORT_RANGE: "50501-51000"
       INTEGRATED_TCP_TURN_PORT: "499998"
       PORT: 5003
-      RELEASE_NODE: app@jellyfish2
-      NODE_NAME: app@jellyfish2
     ports:
       - "5003:5003"
       - "9567:9568"
@@ -56,6 +57,7 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
+        IS_REVERSY_PROXY_USED: ${IS_REVERSY_PROXY_USED:-false}
         JELLYFISH_ADDRESS: ${JELLYFISH_ADDRESS:-$DOMAIN:5002}
         BACKEND_ADDRESS: ${BACKEND_ADDRESS:-$DOMAIN:5004}
     container_name: frontend
@@ -66,6 +68,8 @@ services:
       - jellyfish2
     ports:
       - "5005:5005"
+    networks:
+      - jellyfish_network
 
   backend:
     build:
@@ -86,7 +90,54 @@ services:
       - jellyfish2
     ports:
       - "5004:5004"
+    networks:
+      - jellyfish_network
+
+  prometheus:
+    build:
+      context: ./prometheus
+      dockerfile: Dockerfile
+    container_name: prometheus
+    restart: on-failure
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - prometheus_data:/prometheus
+    depends_on:
+      - jellyfish1
+      - jellyfish2
+    ports:
+      - 9090:9090
+    networks:
+      - jellyfish_network
+
+  grafana:
+    build:
+      context: ./grafana
+      dockerfile: Dockerfile
+    container_name: grafana
+    restart: on-failure
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GF_SECURITY_ADMIN_PASSWORD}"
+      GF_SECURITY_ADMIN_USER: "${GF_SECURITY_ADMIN_USER}"
+    ports:
+      - '3000:3000'
+    expose:
+      - 3000
+    networks:
+      - jellyfish_network
 
 volumes:
   grafana_data: {}
   prometheus_data: {}
+
+networks:
+  jellyfish_network:
+    driver: bridge

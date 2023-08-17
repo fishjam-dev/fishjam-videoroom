@@ -4,10 +4,14 @@ import { BACKEND_URL } from "./pages/room/consts";
 
 const API = new RoomApi(undefined, BACKEND_URL.origin, axios);
 
-export const getToken = (roomId: string) =>
+export const getTokenAndAddress = (roomId: string) =>
   API.videoroomWebRoomControllerShow(roomId).then((resp) => {
     // console.log(resp);
+    // @ts-ignore    
+    const address = resp?.data?.data?.jellyfish_address || "";
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return resp?.data?.data?.token || "";
+    const token = resp?.data?.data?.token || "";
+    return { token: token, serverAddress: address };
   });

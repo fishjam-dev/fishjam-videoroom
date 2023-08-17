@@ -5,6 +5,9 @@ global:
     monitor: 'codelab-monitor'
 
 scrape_configs:
-  - job_name: 'jellyfish'
+  - job_name: 'jellyfish1'
     static_configs:
-      - targets: ['jellyfish:9568']
+      - targets: ['jellyfish1:9568']
+  - job_name: 'jellyfish2'
+    static_configs:
+      - targets: ['jellyfish2:9568']

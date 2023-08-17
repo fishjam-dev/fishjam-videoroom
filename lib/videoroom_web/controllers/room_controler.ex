@@ -37,11 +37,13 @@ defmodule VideoroomWeb.RoomController do
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => name}) do
     case RoomService.add_peer(name) do
-      {:ok, token} ->
+      {:ok, token, jellyfish_address} ->
         conn
-        |> render("show.json", token: token)
+        |> render("show.json", token: token, jellyfish_address: jellyfish_address)
 
       {:error, reason} ->
+        IO.inspect(reason, label: :error_reason)
+
         conn |> resp(503, inspect(reason))
     end
   end

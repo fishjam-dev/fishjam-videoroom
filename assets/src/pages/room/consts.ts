@@ -54,9 +54,19 @@ const origin_websocket_url = isProxyUsed ?
   new URL(`${protocol}://${import.meta.env.VITE_JELLYFISH_ADDRESS}`)
 origin_websocket_url.protocol = isSecure ? "wss:" : "ws:";
 
+export const getWebsocketURL = (serverAddress: String) => {
+  const address = new URL(`http://${serverAddress}`)
+
+  address.protocol = isSecure ? "wss:" : "ws:";
+
+  const finalAddress = isProxyUsed ? origin_websocket_url : address;
+
+  return `${finalAddress.origin}/socket/peer/websocket`
+}
 
 // @ts-ignore
-export const JELLYFISH_WEBSOCKET_URL = `${origin_websocket_url.origin}/socket/peer/websocket`;
+// export const JELLYFISH_WEBSOCKET_URL = `${origin_websocket_url.origin}/socket/peer/websocket`;
+
 export const JELLYFISH_WEBSOCKET_PROTOCOL = isSecure ? "wss" : "ws";
 
 export const MAX_TILE_HEIGHT_FOR_MEDIUM_ENCODING = 600;

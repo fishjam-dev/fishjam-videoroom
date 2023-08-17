@@ -9,8 +9,8 @@ import RoomSidebar from "./RoomSidebar";
 import { useConnect } from "../../jellifish.types";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext";
 import { useUser } from "../../contexts/UserContext";
-import { JELLYFISH_WEBSOCKET_URL } from "./consts";
-import { getToken } from "../../room.api";
+import { getWebsocketURL } from "./consts";
+import { getTokenAndAddress } from "../../room.api";
 import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
 
 type ConnectComponentProps = {
@@ -23,11 +23,11 @@ const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
   const streaming = useStreaming();
 
   useEffect(() => {
-    const disconnectCallback = getToken(roomId).then((token) => {
+    const disconnectCallback = getTokenAndAddress(roomId).then((tokenAndAddress) => {
       return connect({
         peerMetadata: { name: username },
-        token: token,
-        websocketUrl: JELLYFISH_WEBSOCKET_URL,
+        token: tokenAndAddress.token,
+        websocketUrl: getWebsocketURL(tokenAndAddress.serverAddress),
       });
     });
 
