@@ -41,16 +41,7 @@ jobs:
           hosts: ${{ secrets.SANDBOX_HOST }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
-            docker ps -a -q --filter ancestor=main_backend --format="{{.ID}}" | xargs -r docker stop
-            docker ps -a -q --filter ancestor=main_backend --format="{{.ID}}" | xargs -r docker rm
-            docker ps -a -q --filter ancestor=main_frontend --format="{{.ID}}" | xargs -r docker stop  
-            docker ps -a -q --filter ancestor=main_frontend --format="{{.ID}}" | xargs -r docker rm 
-            docker ps -a -q --filter ancestor=main_grafana --format="{{.ID}}" | xargs -r docker stop 
-            docker ps -a -q --filter ancestor=main_grafana --format="{{.ID}}" | xargs -r docker rm 
-            docker ps -a -q --filter ancestor=main_prometheus --format="{{.ID}}" | xargs -r docker stop  
-            docker ps -a -q --filter ancestor=main_prometheus --format="{{.ID}}" | xargs -r docker rm 
-            docker ps -a -q --filter ancestor=ghcr.io/jellyfish-dev/jellyfish:edge --format="{{.ID}}" | xargs -r docker stop 
-            docker ps -a -q --filter ancestor=ghcr.io/jellyfish-dev/jellyfish:edge --format="{{.ID}}" | xargs -r docker rm 
+            docker ps -aq | xargs docker stop | xargs docker rm 
 
       - name: Deploy docker compose to a pre-configured server
         id: deploy
