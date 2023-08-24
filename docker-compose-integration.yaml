@@ -8,8 +8,6 @@ services:
       - MIX_ENV=integration_test
     volumes:
       - .:/app
-    networks:
-      - network
     depends_on:
       - jellyfish
 
@@ -17,9 +15,3 @@ services:
     extends:
       file: docker-compose-dev.yaml
       service: jellyfish
-    networks:
-      - network
-
-networks:
-  network:
-    driver: bridge

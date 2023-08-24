@@ -13,8 +13,7 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     env_file:
       - .env
-    networks:
-      - jellyfish_network
+
     depends_on:
       - frontend
       - backend
@@ -29,8 +28,6 @@ services:
         IS_REVERSY_PROXY_USED: "true"
         JELLYFISH_ADDRESS: "${DOMAIN}:5002"
         BACKEND_ADDRESS: "${DOMAIN}:5004"
-    networks:
-      - jellyfish_network
 
   backend:
     extends:
@@ -40,8 +37,6 @@ services:
       JELLYFISH_ADDRESS: jellyfish:5002
       SECURE_CONNECTION_JELLYFISH: false
       PHX_HOST: ${DOMAIN}
-    networks:
-      - jellyfish_network
 
   jellyfish:
     extends:
@@ -52,9 +47,3 @@ services:
       JELLYFISH_ADDRESS: jellyfish:5002
       SECURE_CONNECTION_JELLYFISH: false
       PHX_HOST: ${DOMAIN}
-    networks:
-      - jellyfish_network
-
-networks:
-  jellyfish_network:
-    driver: bridge
