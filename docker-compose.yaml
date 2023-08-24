@@ -20,8 +20,6 @@ services:
       - "5002:5002"
       - "49999:49999"
       - "50000-50500:50000-50500/udp"
-    networks:
-      - jellyfish_network
 
   frontend:
     build:
@@ -38,8 +36,6 @@ services:
       - jellyfish
     ports:
       - "5005:5005"
-    networks:
-      - jellyfish_network
 
   backend:
     build:
@@ -59,8 +55,6 @@ services:
       - jellyfish
     ports:
       - "5004:5004"
-    networks:
-      - jellyfish_network
 
   prometheus:
     build:
@@ -77,8 +71,6 @@ services:
       - prometheus_data:/prometheus
     depends_on:
       - jellyfish
-    networks:
-      - jellyfish_network
 
   grafana:
     build:
@@ -97,13 +89,7 @@ services:
       - '3000:3000'
     expose:
       - 3000
-    networks:
-      - jellyfish_network
 
 volumes:
   grafana_data: {}
   prometheus_data: {}
-
-networks:
-  jellyfish_network:
-    driver: bridge
