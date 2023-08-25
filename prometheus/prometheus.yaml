@@ -10,4 +10,4 @@ scrape_configs:
       - targets: ['jellyfish1:9568']
   - job_name: 'jellyfish2'
     static_configs:
-      - targets: ['jellyfish2:9568']
+      - targets: ['${JELLYFISH2_IP:-jellyfish2}:9568']

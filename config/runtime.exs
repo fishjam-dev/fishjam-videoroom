@@ -52,6 +52,8 @@ if config_env() == :prod do
     System.get_env("JELLYFISH_ADDRESSES") ||
       raise "Environment variable JELLYFISH_ADDRESSES is missing."
 
+  IO.inspect(jellyfish_addresses, label: :jellyfish_addresses)
+
   jellyfish_addresses = String.split(jellyfish_addresses, " ")
 
   secure_connection? = System.get_env("SECURE_CONNECTION_JELLYFISH", "false") == "true"

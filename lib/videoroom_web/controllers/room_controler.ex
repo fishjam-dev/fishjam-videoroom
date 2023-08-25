@@ -42,8 +42,6 @@ defmodule VideoroomWeb.RoomController do
         |> render("show.json", token: token, jellyfish_address: jellyfish_address)
 
       {:error, reason} ->
-        IO.inspect(reason, label: :error_reason)
-
         conn |> resp(503, inspect(reason))
     end
   end

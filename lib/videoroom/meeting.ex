@@ -37,7 +37,6 @@ defmodule Videoroom.Meeting do
 
   @spec start_link(options()) :: GenServer.on_start()
   def start_link(%{name: name} = opts) do
-    IO.inspect(opts, label: :start_link_meeting_opts)
     GenServer.start_link(__MODULE__, opts, name: registry_id(name))
   end
 
@@ -62,6 +61,8 @@ defmodule Videoroom.Meeting do
 
     with {:ok, room, jellyfish_address} <- create_new_room(client, name) do
       peer_timeout = Application.fetch_env!(:videoroom, :peer_join_timeout)
+
+      client = Jellyfish.Client.update_address(client, jellyfish_address)
 
       Logger.info("Created meeting room id: #{room.id}")
 
@@ -93,8 +94,6 @@ defmodule Videoroom.Meeting do
 
   @impl true
   def handle_call(:add_peer, _from, state) do
-    IO.inspect(state.room_id, label: :add_peer_room_id)
-
     case Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC) do
       {:ok, peer, token} ->
         Logger.info("Added peer #{peer.id}")

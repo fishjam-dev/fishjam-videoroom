@@ -2,7 +2,7 @@ name: Main Build and Deploy
 on:
   push:
     branches: 
-      - "main"
+      - "multiple_jellyfishes"
     paths:
       - "**"
       - "!README.md"
@@ -12,7 +12,7 @@ env:
   JELLYFISH_ADDRESS: jellyfish.jellyroom.membrane.ovh
   BACKEND_ADDRESS: server.jellyroom.membrane.ovh
   PROJECT: main
-  COMPOSE_FILE_NAME: docker-compose.yaml
+  COMPOSE_FILE_NAME: docker-compose-deploy.yaml
   TARGET_DIR: jellyfish_videoroom
 
 jobs:
@@ -25,7 +25,8 @@ jobs:
         id: variables_population
         run: |
           echo "DOMAIN=${{env.DOMAIN}} 
-          EXTERNAL_IP=${{secrets.SANDBOX_HOST}} 
+          EXTERNAL_IP=${{secrets.SANDBOX_HOST}}
+          JELLYFISH2_IP=${{secrets.SANDBOX2_HOST}}
           SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
           SECRET_KEY_BASE=${{secrets.SECRET_KEYBASE}}
           JELLYFISH_ADDRESS=${{env.JELLYFISH_ADDRESS}}
@@ -41,7 +42,7 @@ jobs:
           hosts: ${{ secrets.SANDBOX_HOST }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
-            docker ps -aq | xargs docker stop | xargs docker rm 
+            docker ps -aq | xargs -r docker stop | xargs -r docker rm 
 
       - name: Deploy docker compose to a pre-configured server
         id: deploy
@@ -51,4 +52,4 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
-          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build

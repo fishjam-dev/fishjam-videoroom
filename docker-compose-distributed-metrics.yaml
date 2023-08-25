@@ -6,14 +6,11 @@ x-jellyfish-template: &jellyfish-template
     ERLANG_COOKIE: ${SERVER_API_TOKEN}
     SERVER_API_TOKEN: ${SERVER_API_TOKEN}
     SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-    VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$DOMAIN}"
     NODES: "app@jellyfish1 app@jellyfish2"
     USE_INTEGRATED_TURN: "true"
     INTEGRATED_TURN_IP: "${EXTERNAL_IP}"
     INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
     CHECK_ORIGIN: "${CHECK_ORIGIN:-true}"
-  networks:
-    - jellyfish_network
   restart: unless-stopped
 
 services:
@@ -25,9 +22,11 @@ services:
       <<: *jellyfish-environment
       INTEGRATED_TURN_PORT_RANGE: "50000-50500"
       INTEGRATED_TCP_TURN_PORT: "49999"
+      VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$EXTERNAL_IP}"
       PORT: 5002
       RELEASE_NODE: app@jellyfish1
       NODE_NAME: app@jellyfish1
+      CHECK_ORIGIN: false
     ports:
       - "5002:5002"
       - "49999:49999"
@@ -40,7 +39,11 @@ services:
       <<: *jellyfish-environment
       INTEGRATED_TURN_PORT_RANGE: "50501-51000"
       INTEGRATED_TCP_TURN_PORT: "499998"
+      VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$EXTERNAL_IP}"
       PORT: 5003
+      RELEASE_NODE: app@jellyfish2
+      NODE_NAME: app@jellyfish2
+      CHECK_ORIGIN: false
     ports:
       - "5003:5003"
       - "49998:49998"

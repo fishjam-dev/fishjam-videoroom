@@ -25,28 +25,32 @@ defmodule Videoroom.RoomService do
   def init(_init_arg) do
     {:ok, supervisor} = DynamicSupervisor.start_link([])
 
-    notifiers =
+    notifier =
       :videoroom
       |> Application.fetch_env!(:jellyfish_addresses)
-      |> Enum.map(fn jellyfish_address ->
-        {:ok, notifier} = Notifier.start_link(server_address: jellyfish_address)
-        Logger.info("Successfully connected to #{jellyfish_address}")
-        Notifier.subscribe_server_notifications(notifier)
-        {jellyfish_address, notifier}
-      end)
-      |> IO.inspect(label: :notifiers)
-      |> Map.new()
+      |> Enum.reduce_while(nil, fn jellyfish_address, nil ->
+        case Notifier.start_link(server_address: jellyfish_address) do
+          {:ok, notifier} ->
+            Logger.info("Successfully connected to #{jellyfish_address}")
+            Notifier.subscribe_server_notifications(notifier)
+            {:halt, {jellyfish_address, notifier}}
 
-    {:ok, %{supervisor: supervisor, notifiers: notifiers}}
+          {:error, reason} ->
+            Logger.warn("Unable to connect to #{jellyfish_address}, reason: #{inspect(reason)}")
+            {:cont, nil}
+        end
+      end)
+
+    if notifier == nil do
+      raise("Unable to connect to any jellyfish")
+    end
+
+    {:ok, %{supervisor: supervisor, notifier: notifier}}
   end
 
   @impl true
   def handle_call({:add_peer, room_name}, _from, state) do
-    IO.inspect(state.notifiers, label: :notifiers)
-
-    [jellyfish_address | _] = Map.keys(state.notifiers)
-
-    IO.inspect(jellyfish_address, label: :jellyfish_address)
+    {jellyfish_address, _pid} = state.notifier
 
     case DynamicSupervisor.start_child(
            state.supervisor,
