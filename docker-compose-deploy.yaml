@@ -24,6 +24,7 @@ services:
     ports:
       - "5002:5002"
       - "49999:49999"
+      - "4369:4369" # EPMD
       - "50000-50500:50000-50500/udp"
 
   # jellyfish2:
@@ -93,6 +94,8 @@ services:
       dockerfile: Dockerfile
     container_name: prometheus
     restart: on-failure
+    environment:
+      JELLYFISH2_IP: $JELLYFISH2_IP
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
