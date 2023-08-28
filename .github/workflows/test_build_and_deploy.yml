@@ -30,10 +30,12 @@ jobs:
           SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
           SECRET_KEY_BASE=${{secrets.SECRET_KEYBASE}}
           JELLYFISH_ADDRESS=${{env.JELLYFISH_ADDRESS}}
+          JELLYFISH_ADDRESSES=${{secrets.SANDBOX_HOST}}:5002 ${{secrets.SANDBOX2_HOST}}:4000
           BACKEND_ADDRESS=${{env.BACKEND_ADDRESS}}
+          BEAM_PORT=9000
           GF_SECURITY_ADMIN_PASSWORD=${{secrets.GF_SECURITY_ADMIN_PASSWORD}}
           GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}}
-          SECURE_CONNECTION=true
+          SECURE_CONNECTION=false
           CHECK_ORIGIN=false" > .env
 
       - name: Remove old containers

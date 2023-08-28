@@ -78,7 +78,7 @@ services:
     container_name: backend
     environment:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      JELLYFISH_ADDRESSES: ${JELLYFISH_ADDRESSES:-$EXTERNAL_IP:5002 $JELLYFISH2_IP:4000}
+      JELLYFISH_ADDRESSES: ${JELLYFISH_ADDRESSES:-${EXTERNAL_IP}:5002 ${JELLYFISH2_IP}:4000}
       SECURE_CONNECTION_JELLYFISH: ${SECURE_CONNECTION:-false}
       JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
       PHX_SERVER: "true"
@@ -94,10 +94,10 @@ services:
     build:
       context: ./prometheus
       dockerfile: Dockerfile
+      args:
+        JELLYFISH2_IP: $JELLYFISH2_IP
     container_name: prometheus
     restart: on-failure
-    environment:
-      JELLYFISH2_IP: $JELLYFISH2_IP
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
