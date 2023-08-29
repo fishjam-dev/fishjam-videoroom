@@ -104,7 +104,10 @@ defmodule Videoroom.Meeting do
         {:reply, {:ok, token, state.jellyfish_address}, state}
 
       error ->
-        Logger.warning("Failed to add peer, because of error: #{inspect(error)}")
+        Logger.warning(
+          "Failed to add peer, because of error: #{inspect(error)} on jellyfish: #{state.jellyfish_address}"
+        )
+
         {:reply, {:error, "Failed to add peer"}, state}
     end
   end

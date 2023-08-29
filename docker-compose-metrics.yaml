@@ -33,19 +33,6 @@ services:
       - "49999:49999"
       - "50000-50500:50000-50500/udp"
 
-  jellyfish2:
-    <<: *jellyfish-template
-    container_name: jellyfish2
-    environment:
-      <<: *jellyfish-environment
-      INTEGRATED_TURN_PORT_RANGE: "50501-51000"
-      INTEGRATED_TCP_TURN_PORT: "499998"
-      PORT: 5003
-    ports:
-      - "5003:5003"
-      - "49998:49998"
-      - "50501-51000:50501-51000/udp"
-
   frontend:
     build:
       context: ./assets
@@ -87,6 +74,8 @@ services:
     build:
       context: ./prometheus
       dockerfile: Dockerfile
+    environment:
+      TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
     container_name: prometheus
     restart: on-failure
     command:
@@ -98,7 +87,6 @@ services:
       - prometheus_data:/prometheus
     depends_on:
       - jellyfish1
-      - jellyfish2
 
   grafana:
     build:

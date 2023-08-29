@@ -13,6 +13,7 @@ services:
       SERVER_API_TOKEN: ${SERVER_API_TOKEN}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$EXTERNAL_IP}"
+      JELLYFISH_ADDRESS: ${JELLYFISH_ADDRESS}
       PORT: 5002
       RELEASE_COOKIE: ${SERVER_API_TOKEN}
       RELEASE_DISTRIBUTION: name
@@ -78,7 +79,7 @@ services:
     container_name: backend
     environment:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      JELLYFISH_ADDRESSES: ${JELLYFISH_ADDRESSES:-${EXTERNAL_IP}:5002 ${JELLYFISH2_IP}:4000}
+      JELLYFISH_ADDRESSES: ${JELLYFISH_ADDRESSES:-$EXTERNAL_IP:5002 $JELLYFISH2_IP:4000}
       SECURE_CONNECTION_JELLYFISH: ${SECURE_CONNECTION:-false}
       JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
       PHX_SERVER: "true"
@@ -94,8 +95,8 @@ services:
     build:
       context: ./prometheus
       dockerfile: Dockerfile
-      args:
-        JELLYFISH2_IP: $JELLYFISH2_IP
+    environment:
+      TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
     container_name: prometheus
     restart: on-failure
     command:
@@ -103,7 +104,6 @@ services:
       - --storage.tsdb.path=/prometheus
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-      # - '--enable-feature=expand-external-labels'
     volumes:
       - prometheus_data:/prometheus
     depends_on:

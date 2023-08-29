@@ -90,6 +90,8 @@ services:
     build:
       context: ./prometheus
       dockerfile: Dockerfile
+    environment:
+      TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
     container_name: prometheus
     restart: on-failure
     command:
