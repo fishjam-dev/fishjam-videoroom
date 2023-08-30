@@ -1,60 +1,52 @@
-version: '3'
+version: '2.2'
+
+x-jellyfish-template: &jellyfish-template
+  image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
+  restart: unless-stopped
+  environment: &jellyfish-environment
+    USE_INTEGRATED_TURN: "true"
+    INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
+    INTEGRATED_TURN_PORT_RANGE: "50000-50500"
+    INTEGRATED_TCP_TURN_PORT: "49999"
+    SERVER_API_TOKEN: ${SERVER_API_TOKEN}
+    SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    RELEASE_DISTRIBUTION: name
+    RELEASE_COOKIE: ${SERVER_API_TOKEN}
+    PORT: 5002
+    NODES: "app@jellyfish1 app@jellyfish2"
+    CHECK_ORIGIN: "${CHECK_ORIGIN:-true}"
+    BEAM_PORT: 9000
+    ELIXIR_ERL_OPTIONS: "-kernel inet_dist_listen_min $BEAM_PORT inet_dist_listen_max $BEAM_PORT"
+  ports:
+    - "5002:5002"
+    - "49999:49999"
+    - "4369:4369" # EPMD
+    - "9000:9000"
+    - "50000-50500:50000-50500/udp"
 
 services:
   jellyfish1:
-    image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
-    restart: unless-stopped
+    <<: *jellyfish-template
     container_name: jellyfish1
     environment:
-      USE_INTEGRATED_TURN: "true"
-      INTEGRATED_TURN_IP: "${EXTERNAL_IP}"
-      INTEGRATED_TURN_PORT_RANGE: "50000-50500"
-      INTEGRATED_TCP_TURN_PORT: "49999"
-      SERVER_API_TOKEN: ${SERVER_API_TOKEN}
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$EXTERNAL_IP}"
-      JELLYFISH_ADDRESS: ${JELLYFISH_ADDRESS}
-      PORT: 5002
-      RELEASE_COOKIE: ${SERVER_API_TOKEN}
-      RELEASE_DISTRIBUTION: name
-      RELEASE_NODE: app@$EXTERNAL_IP
-      NODE_NAME: app@$EXTERNAL_IP
-      NODES: "app@$EXTERNAL_IP app@$JELLYFISH2_IP"
-      CHECK_ORIGIN: "${CHECK_ORIGIN:-true}"
-      BEAM_PORT: 9000
-      ELIXIR_ERL_OPTIONS: "-kernel inet_dist_listen_min $BEAM_PORT inet_dist_listen_max $BEAM_PORT"
-    ports:
-      - "5002:5002"
-      - "49999:49999"
-      - "4369:4369" # EPMD
-      - "9000:9000"
-      - "50000-50500:50000-50500/udp"
+      <<: *jellyfish-environment
+      INTEGRATED_TURN_IP: "${JELLYFISH1_IP}"
+      VIRTUAL_HOST: "${JELLYFISH1_ADDRESS:-$JELLYFISH1_IP}"
+      JELLYFISH_ADDRESS: ${JELLYFISH1_ADDRESS}
+      RELEASE_NODE: app@$JELLYFISH1_IP
+      NODE_NAME: app@$JELLYFISH1_IP
+      NODES: "app@$JELLYFISH1_IP app@$JELLYFISH2_IP"
 
-  # jellyfish2:
-  #   image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
-  #   restart: unless-stopped
-  #   container_name: jellyfish2
-  #   environment:
-  #     USE_INTEGRATED_TURN: "true"
-  #     INTEGRATED_TURN_IP: "${JELLYFISH2_IP}"
-  #     INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
-  #     INTEGRATED_TURN_PORT_RANGE: "50000-50500"
-  #     INTEGRATED_TCP_TURN_PORT: "499999"
-  #     ERLANG_COOKIE: ${SERVER_API_TOKEN}
-  #     SERVER_API_TOKEN: ${SERVER_API_TOKEN}
-  #     SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-  #     VIRTUAL_HOST: $JELLYFISH2_IP
-  #     PORT: 4000
-  #     RELEASE_COOKIE: ${SERVER_API_TOKEN}
-  #     RELEASE_DISTRIBUTION: name
-  #     RELEASE_NODE: app@$JELLYFISH2_IP
-  #     NODE_NAME: app@$JELLYFISH2_IP
-  #     NODES: "app@$EXTERNAL_IP app@$JELLYFISH2_IP"
-  #     CHECK_ORIGIN: "${CHECK_ORIGIN:-true}"
-  #   ports:
-  #     - "4000:4000"
-  #     - "49999:49999"
-  #     - "50000-50500:50000-50500/udp"
+  jellyfish2:
+    <<: *jellyfish-template
+    container_name: jellyfish2
+    environment:
+      <<: *jellyfish-environment
+      INTEGRATED_TURN_IP: "${JELLYFISH2_IP}"
+      VIRTUAL_HOST: "${JELLYFISH2_ADDRESS:-$JELLYFISH2_IP}"
+      RELEASE_NODE: app@$JELLYFISH2_IP
+      NODE_NAME: app@$JELLYFISH2_IP
+      NODES: "app@$JELLYFISH1_IP app@$JELLYFISH2_IP"
 
   frontend:
     build:
@@ -62,7 +54,6 @@ services:
       dockerfile: ./Dockerfile
       args:
         IS_REVERSY_PROXY_USED: ${IS_REVERSY_PROXY_USED:-false}
-        JELLYFISH_ADDRESS: ${JELLYFISH_ADDRESS:-$DOMAIN:5002}
         BACKEND_ADDRESS: ${BACKEND_ADDRESS:-$DOMAIN:5004}
     container_name: frontend
     restart: unless-stopped
@@ -79,7 +70,7 @@ services:
     container_name: backend
     environment:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      JELLYFISH_ADDRESSES: ${JELLYFISH_ADDRESSES:-$EXTERNAL_IP:5002 $JELLYFISH2_IP:4000}
+      JELLYFISH_ADDRESSES: ${JELLYFISH_ADDRESSES:-$JELLYFISH1_IP:5002 $JELLYFISH2_IP:5002}
       SECURE_CONNECTION_JELLYFISH: ${SECURE_CONNECTION:-false}
       JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
       PHX_SERVER: "true"

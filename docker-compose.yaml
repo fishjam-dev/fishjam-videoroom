@@ -2,31 +2,31 @@ version: '3.7'
 
 x-jellyfish-template: &jellyfish-template
   image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
+  restart: unless-stopped
   environment: &jellyfish-environment
-    ERLANG_COOKIE: ${SERVER_API_TOKEN}
+    USE_INTEGRATED_TURN: "true"
+    INTEGRATED_TURN_IP: $EXTERNAL_IP
+    INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
+    INTEGRATED_TURN_PORT_RANGE: "50000-50500"
+    INTEGRATED_TCP_TURN_PORT: "49999"
     SERVER_API_TOKEN: ${SERVER_API_TOKEN}
     SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    RELEASE_COOKIE: ${SERVER_API_TOKEN}
     NODES: "app@jellyfish1 app@jellyfish2"
-    USE_INTEGRATED_TURN: "true"
-    INTEGRATED_TURN_IP: "${EXTERNAL_IP}"
-    INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
-    CHECK_ORIGIN: "${CHECK_ORIGIN:-true}"
-  restart: unless-stopped
+    CHECK_ORIGIN: "${CHECK_ORIGIN:-false}"
+    BEAM_PORT: 9000
+    ELIXIR_ERL_OPTIONS: "-kernel inet_dist_listen_min $BEAM_PORT inet_dist_listen_max $BEAM_PORT"
 
 services:
-
   jellyfish1:
     <<: *jellyfish-template
     container_name: jellyfish1
     environment:
       <<: *jellyfish-environment
-      INTEGRATED_TURN_PORT_RANGE: "50000-50500"
-      INTEGRATED_TCP_TURN_PORT: "49999"
-      VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$EXTERNAL_IP}"
-      PORT: 5002
+      VIRTUAL_HOST: "${JELLYFISH1_ADDRESS:-${JELLYFISH1_IP:-$EXTERNAL_IP}}"
       RELEASE_NODE: app@jellyfish1
       NODE_NAME: app@jellyfish1
-      CHECK_ORIGIN: "false"
+      PORT: 5002
     ports:
       - "5002:5002"
       - "49999:49999"
@@ -34,16 +34,17 @@ services:
 
   jellyfish2:
     <<: *jellyfish-template
+    image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
+    restart: unless-stopped
     container_name: jellyfish2
     environment:
       <<: *jellyfish-environment
       INTEGRATED_TURN_PORT_RANGE: "50501-51000"
-      INTEGRATED_TCP_TURN_PORT: "499998"
-      VIRTUAL_HOST: "${JELLYFISH_ADDRESS:-$EXTERNAL_IP}"
-      PORT: 5003
+      INTEGRATED_TCP_TURN_PORT: "49998"
+      VIRTUAL_HOST: "${JELLYFISH2_ADDRESS:-${JELLYFISH2_IP:-$EXTERNAL_IP}}"
       RELEASE_NODE: app@jellyfish2
       NODE_NAME: app@jellyfish2
-      CHECK_ORIGIN: "false"
+      PORT: 5003
     ports:
       - "5003:5003"
       - "49998:49998"
@@ -54,7 +55,6 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
-        JELLYFISH_ADDRESS: ${JELLYFISH_ADDRESS:-$DOMAIN:5002}
         BACKEND_ADDRESS: ${BACKEND_ADDRESS:-$DOMAIN:5004}
     container_name: frontend
     restart: unless-stopped
@@ -89,6 +89,8 @@ services:
     build:
       context: ./prometheus
       dockerfile: Dockerfile
+    environment:
+      TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
     container_name: prometheus
     restart: on-failure
     command:
