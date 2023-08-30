@@ -22,6 +22,7 @@ x-jellyfish-template: &jellyfish-template
     - "49999:49999"
     - "4369:4369" # EPMD
     - "9000:9000"
+    - "9568:9568"
     - "50000-50500:50000-50500/udp"
 
 services:
@@ -44,6 +45,7 @@ services:
       <<: *jellyfish-environment
       INTEGRATED_TURN_IP: "${JELLYFISH2_IP}"
       VIRTUAL_HOST: "${JELLYFISH2_ADDRESS:-$JELLYFISH2_IP}"
+      JELLYFISH_ADDRESS: ${JELLYFISH2_ADDRESS}
       RELEASE_NODE: app@$JELLYFISH2_IP
       NODE_NAME: app@$JELLYFISH2_IP
       NODES: "app@$JELLYFISH1_IP app@$JELLYFISH2_IP"
@@ -86,8 +88,8 @@ services:
     build:
       context: ./prometheus
       dockerfile: Dockerfile
-    environment:
-      TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
+      args:
+        TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
     container_name: prometheus
     restart: on-failure
     command:
