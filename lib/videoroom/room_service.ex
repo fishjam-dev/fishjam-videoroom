@@ -23,7 +23,8 @@ defmodule Videoroom.RoomService do
     {:ok, supervisor} = DynamicSupervisor.start_link([])
     {:ok, notifier} = Notifier.start_link()
     Notifier.subscribe_server_notifications(notifier)
-
+    Logger.info("Successfully connected")
+    Process.monitor(notifier)
     {:ok, %{supervisor: supervisor, notifier: notifier}}
   end
 
@@ -44,6 +45,12 @@ defmodule Videoroom.RoomService do
         handle_unexpected_notification(notification)
     end
 
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({:DOWN, _ref, :process, _object, _reason}, state) do
+    Logger.warning("Jellyfish Notifier exited")
     {:noreply, state}
   end
 
