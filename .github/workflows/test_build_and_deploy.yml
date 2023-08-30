@@ -2,7 +2,7 @@ name: Main Build and Deploy
 on:
   push:
     branches: 
-      - "multiple_jellyfishes"
+      - "main"
     paths:
       - "**"
       - "!README.md"
