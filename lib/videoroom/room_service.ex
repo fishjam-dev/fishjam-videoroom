@@ -33,6 +33,7 @@ defmodule Videoroom.RoomService do
           {:ok, notifier} ->
             Logger.info("Successfully connected to #{jellyfish_address}")
             Notifier.subscribe_server_notifications(notifier)
+            Process.monitor(notifier)
             {:halt, {jellyfish_address, notifier}}
 
           {:error, reason} ->
@@ -47,8 +48,6 @@ defmodule Videoroom.RoomService do
     if notifier == nil do
       raise("Unable to connect to any jellyfish")
     end
-
-    Process.monitor(notifier)
 
     {:ok, %{supervisor: supervisor, notifier: notifier}}
   end
