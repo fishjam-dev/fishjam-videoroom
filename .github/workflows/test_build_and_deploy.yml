@@ -9,14 +9,15 @@ on:
 
 env: 
   DOMAIN: jellyroom.membrane.ovh
-  JELLYFISH_ADDRESS: jellyfish.jellyroom.membrane.ovh
+  JELLYFISH1_ADDRESS: jellyfish.jellyroom.membrane.ovh
+  JELLYFISH2_ADDRESS: jellyfish1.membrane.ovh
   BACKEND_ADDRESS: server.jellyroom.membrane.ovh
   PROJECT: main
-  COMPOSE_FILE_NAME: docker-compose.yaml
+  COMPOSE_FILE_NAME: docker-compose-deploy.yaml
   TARGET_DIR: jellyfish_videoroom
 
 jobs:
-  deploy:
+  deploy1:
     runs-on: ubuntu-latest
     steps:  
       - uses: actions/checkout@v2
@@ -25,30 +26,74 @@ jobs:
         id: variables_population
         run: |
           echo "DOMAIN=${{env.DOMAIN}} 
-          EXTERNAL_IP=${{secrets.SANDBOX_HOST}} 
+          JELLYFISH1_IP=${{secrets.SANDBOX_HOST}}
+          JELLYFISH2_IP=${{secrets.SANDBOX2_HOST}}
           SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
           SECRET_KEY_BASE=${{secrets.SECRET_KEYBASE}}
-          JELLYFISH_ADDRESS=${{env.JELLYFISH_ADDRESS}}
+          JELLYFISH1_ADDRESS=${{env.JELLYFISH_ADDRESS}}
+          JELLYFISH2_ADDRESS=${{env.JELLYFISH2_ADDRESS}}
+          JELLYFISH_ADDRESSES=${{env.JELLYFISH1_ADDRESS}} ${{env.JELLYFISH2_ADDRESS}}
+          PROMETHEUS_TARGETS=jellyfish1:9568,${{secrets.SANDBOX2_HOST}}:9568
           BACKEND_ADDRESS=${{env.BACKEND_ADDRESS}}
+          BEAM_PORT=9000
           GF_SECURITY_ADMIN_PASSWORD=${{secrets.GF_SECURITY_ADMIN_PASSWORD}}
           GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}}
           SECURE_CONNECTION=true
           CHECK_ORIGIN=false" > .env
 
-      - name: Remove old containers
+      - name: Remove old containers on first host
         uses: JimCronqvist/action-ssh@master
         with:
           hosts: ${{ secrets.SANDBOX_HOST }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
-            docker ps -aq | xargs docker stop | xargs docker rm 
+            docker ps -aq | xargs -r docker stop | xargs -r docker rm 
 
-      - name: Deploy docker compose to a pre-configured server
-        id: deploy
+      - name: Deploy docker compose to a pre-configured server on first host
         uses: TapTap21/docker-remote-deployment-action@v1.1
         with:
           remote_docker_host: ${{ secrets.SANDBOX_HOST }}
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
-          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish1 frontend backend prometheus grafana
+
+  deploy2:
+    runs-on: ubuntu-latest
+    steps:  
+      - uses: actions/checkout@v2
+        
+      - name: Prepare .env file for the deployment
+        id: variables_population
+        run: |
+          echo "DOMAIN=${{env.DOMAIN}} 
+          JELLYFISH1_IP=${{secrets.SANDBOX_HOST}}
+          JELLYFISH2_IP=${{secrets.SANDBOX2_HOST}}
+          SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
+          SECRET_KEY_BASE=${{secrets.SECRET_KEYBASE}}
+          JELLYFISH1_ADDRESS=${{env.JELLYFISH_ADDRESS}}
+          JELLYFISH2_ADDRESS=${{env.JELLYFISH2_ADDRESS}}
+          JELLYFISH_ADDRESSES=${{env.JELLYFISH1_ADDRESS}} ${{env.JELLYFISH2_ADDRESS}}
+          PROMETHEUS_TARGETS=jellyfish1:9568,${{secrets.SANDBOX2_HOST}}:9568
+          BACKEND_ADDRESS=${{env.BACKEND_ADDRESS}}
+          BEAM_PORT=9000
+          GF_SECURITY_ADMIN_PASSWORD=${{secrets.GF_SECURITY_ADMIN_PASSWORD}}
+          GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}}
+          SECURE_CONNECTION=true
+          CHECK_ORIGIN=false" > .env
+      - name: Remove old containers on second host
+        uses: JimCronqvist/action-ssh@master
+        with:
+          hosts: ${{ secrets.SANDBOX2_HOST }}
+          privateKey: ${{ secrets.SSH_PRIV_KEY }}
+          command: |
+            docker ps -aq | xargs -r docker stop | xargs -r docker rm 
+
+      - name: Deploy docker compose to a pre-configured server on second host
+        uses: TapTap21/docker-remote-deployment-action@v1.1
+        with:
+          remote_docker_host: ${{ secrets.SANDBOX2_HOST }}
+          ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
+          ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
+          stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish2
