@@ -52,7 +52,7 @@ defmodule Videoroom.Meeting do
 
     client = Jellyfish.Client.new()
 
-    with {:ok, room} <- create_new_room(client, name) do
+    with {:ok, room, _jellyfish_address} <- create_new_room(client, name) do
       peer_timeout = Application.fetch_env!(:videoroom, :peer_join_timeout)
 
       Logger.info("Created meeting")
@@ -73,9 +73,9 @@ defmodule Videoroom.Meeting do
 
   defp create_new_room(client, name) do
     case Room.create(client) do
-      {:ok, room} ->
+      {:ok, room, jellyfish_address} ->
         RoomRegistry.insert_new(name, room.id)
-        {:ok, room}
+        {:ok, room, jellyfish_address}
 
       error ->
         error
