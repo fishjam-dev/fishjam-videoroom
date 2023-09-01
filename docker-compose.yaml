@@ -7,8 +7,6 @@ x-jellyfish-template: &jellyfish-template
     USE_INTEGRATED_TURN: "true"
     INTEGRATED_TURN_IP: $EXTERNAL_IP
     INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
-    INTEGRATED_TURN_PORT_RANGE: "50000-50500"
-    INTEGRATED_TCP_TURN_PORT: "49999"
     SERVER_API_TOKEN: ${SERVER_API_TOKEN}
     SECRET_KEY_BASE: ${SECRET_KEY_BASE}
     RELEASE_COOKIE: ${SERVER_API_TOKEN}
@@ -23,6 +21,8 @@ services:
     container_name: jellyfish1
     environment:
       <<: *jellyfish-environment
+      INTEGRATED_TURN_PORT_RANGE: "50000-50500"
+      INTEGRATED_TCP_TURN_PORT: "49999"
       VIRTUAL_HOST: "${JELLYFISH1_ADDRESS:-${JELLYFISH1_IP:-$EXTERNAL_IP}}"
       RELEASE_NODE: app@jellyfish1
       NODE_NAME: app@jellyfish1
