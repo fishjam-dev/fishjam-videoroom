@@ -46,6 +46,10 @@ defmodule Videoroom.Meeting do
       GenServer.call(registry_id(meeting_name), :add_peer)
     catch
       :exit, {:noproc, error} ->
+        Logger.error(
+          "Failed to call add peer because meeting #{meeting_name} doesn't exist, error: #{error}"
+        )
+
         {:error,
          "Failed to call add peer because meeting #{meeting_name} doesn't exist, error: #{error}"}
     end
@@ -77,6 +81,7 @@ defmodule Videoroom.Meeting do
        }}
     else
       {:error, reason} ->
+        Logger.error("Failed to create a meeting, reason: #{inspect(reason)}")
         raise "Failed to create a meeting, reason: #{inspect(reason)}"
     end
   end
@@ -104,7 +109,7 @@ defmodule Videoroom.Meeting do
         {:reply, {:ok, token, state.jellyfish_address}, state}
 
       error ->
-        Logger.warning(
+        Logger.error(
           "Failed to add peer, because of error: #{inspect(error)} on jellyfish: #{state.jellyfish_address}"
         )
 
@@ -158,7 +163,7 @@ defmodule Videoroom.Meeting do
         :ok
       else
         {:error, reason} ->
-          Logger.warning("Error when deleting meeting #{reason}")
+          Logger.error("Error when deleting meeting #{reason}")
 
         false ->
           Logger.error("Deleting non-empty room")
