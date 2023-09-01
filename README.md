@@ -38,15 +38,8 @@ Optionally, in production, these variables can be set:
 ## Production
 
 To run the Videoroom in production you can use the provided Docker compose file and adjust it to your needs.
-Example configuration is provided in `docker-compose-prod.yaml` and `.env.example` files.
+Example configuration is provided in `docker-compose.yaml` and `.env.example` files.
 You can copy the `.env.example` file to `.env` and adjust it to your needs.
-When using reverse proxy set `IS_REVERSY_PROXY_USED` to true.
-
-HTTPS connection requires SSL certificate and key files to be provided for reverse proxy.
-You can generate them for your domain using [Let's Encrypt](https://letsencrypt.org/).
-Example `certbot` is provided in `docker-compose-certbot.yaml` file.
-Certbot works only on machines accessible from the public domain.
-For local testing `docker-compose-prod.yaml`, you can generate certificates with the use of `generate_certificates.sh` script.
 
 ## Tests
 
