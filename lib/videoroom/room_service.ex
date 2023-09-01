@@ -36,7 +36,10 @@ defmodule Videoroom.RoomService do
             {:halt, {jellyfish_address, notifier}}
 
           {:error, reason} ->
-            Logger.warning("Unable to connect to #{jellyfish_address}, reason: #{inspect(reason)}")
+            Logger.warning(
+              "Unable to connect to #{jellyfish_address}, reason: #{inspect(reason)}"
+            )
+
             {:cont, nil}
         end
       end)
