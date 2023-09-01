@@ -26,7 +26,6 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
-        IS_REVERSY_PROXY_USED: ${IS_REVERSY_PROXY_USED:-false}
         JELLYFISH_ADDRESS: ${JELLYFISH_ADDRESS:-$DOMAIN:5002}
         BACKEND_ADDRESS: ${BACKEND_ADDRESS:-$DOMAIN:5004}
     container_name: frontend
