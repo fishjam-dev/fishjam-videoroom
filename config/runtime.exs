@@ -48,16 +48,16 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  jellyfish_ip =
-    System.get_env("JELLYFISH_IP") ||
-      raise "Environment variable JELLYFISH_IP is missing."
+  jellyfish_addresses =
+    System.get_env("JELLYFISH_ADDRESSES") ||
+      raise "Environment variable JELLYFISH_ADDRESSES is missing."
 
-  jellyfish_port =
-    System.get_env("JELLYFISH_PORT") ||
-      raise "Environment variable JELLYFISH_PORT is missing."
+  jellyfish_addresses = String.split(jellyfish_addresses, " ")
+
+  secure_connection? = System.get_env("SECURE_CONNECTION_JELLYFISH", "false") == "true"
 
   config :jellyfish_server_sdk,
-    server_address: "#{jellyfish_ip}:#{jellyfish_port}",
+    secure?: secure_connection?,
     server_api_token:
       System.get_env("JELLYFISH_API_TOKEN") ||
         raise("""
@@ -65,7 +65,8 @@ if config_env() == :prod do
         """)
 
   config :videoroom,
-    peer_join_timeout: String.to_integer(System.get_env("PEER_JOIN_TIMEOUT") || "60000")
+    peer_join_timeout: String.to_integer(System.get_env("PEER_JOIN_TIMEOUT") || "60000"),
+    jellyfish_addresses: jellyfish_addresses
 
   # ## SSL Support
   #

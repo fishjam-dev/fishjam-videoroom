@@ -19,7 +19,8 @@ defmodule Videoroom.Meeting do
       :client,
       :room_id,
       :peer_timers,
-      :peer_timeout
+      :peer_timeout,
+      :jellyfish_address
     ]
 
     defstruct @enforce_keys
@@ -27,11 +28,16 @@ defmodule Videoroom.Meeting do
 
   @type name :: binary()
 
+  @type options() :: %{
+          name: binary(),
+          server_address: String.t()
+        }
+
   # Api
 
-  @spec start_link(name()) :: GenServer.on_start()
-  def start_link(name) do
-    GenServer.start_link(__MODULE__, name, name: registry_id(name))
+  @spec start_link(options()) :: GenServer.on_start()
+  def start_link(%{name: name} = opts) do
+    GenServer.start_link(__MODULE__, opts, name: registry_id(name))
   end
 
   @spec add_peer(name()) :: {:ok, Room.peer_token()} | {:error, binary()}
@@ -39,23 +45,30 @@ defmodule Videoroom.Meeting do
     try do
       GenServer.call(registry_id(meeting_name), :add_peer)
     catch
-      :exit, {:noproc, _error} ->
-        {:error, "Failed to call add peer"}
+      :exit, {:noproc, error} ->
+        Logger.error(
+          "Failed to call add peer because meeting #{meeting_name} doesn't exist, error: #{error}"
+        )
+
+        {:error,
+         "Failed to call add peer because meeting #{meeting_name} doesn't exist, error: #{error}"}
     end
   end
 
   # Callbacks
 
   @impl true
-  def init(name) do
+  def init(%{name: name, jellyfish_address: jellyfish_address}) do
     Logger.metadata(room_name: name)
 
-    client = Jellyfish.Client.new()
+    client = Jellyfish.Client.new(server_address: jellyfish_address)
 
-    with {:ok, room} <- create_new_room(client, name) do
+    with {:ok, room, jellyfish_address} <- create_new_room(client, name) do
       peer_timeout = Application.fetch_env!(:videoroom, :peer_join_timeout)
 
-      Logger.info("Created meeting")
+      client = Jellyfish.Client.update_address(client, jellyfish_address)
+
+      Logger.info("Created meeting room id: #{room.id}")
 
       {:ok,
        %State{
@@ -63,19 +76,21 @@ defmodule Videoroom.Meeting do
          name: name,
          room_id: room.id,
          peer_timers: %{},
-         peer_timeout: peer_timeout
+         peer_timeout: peer_timeout,
+         jellyfish_address: jellyfish_address
        }}
     else
       {:error, reason} ->
+        Logger.error("Failed to create a meeting, reason: #{inspect(reason)}")
         raise "Failed to create a meeting, reason: #{inspect(reason)}"
     end
   end
 
   defp create_new_room(client, name) do
     case Room.create(client) do
-      {:ok, room} ->
+      {:ok, room, jellyfish_address} ->
         RoomRegistry.insert_new(name, room.id)
-        {:ok, room}
+        {:ok, room, jellyfish_address}
 
       error ->
         error
@@ -91,17 +106,20 @@ defmodule Videoroom.Meeting do
         timer = Process.send_after(self(), {:peer_timeout, peer.id}, state.peer_timeout)
         state = put_in(state.peer_timers[peer.id], timer)
 
-        {:reply, {:ok, token}, state}
+        {:reply, {:ok, token, state.jellyfish_address}, state}
 
-      _error ->
-        Logger.warning("Failed to add peer")
+      error ->
+        Logger.error(
+          "Failed to add peer, because of error: #{inspect(error)} on jellyfish: #{state.jellyfish_address}"
+        )
+
         {:reply, {:error, "Failed to add peer"}, state}
     end
   end
 
   @impl true
   def handle_info({:jellyfish, notification}, state) do
-    Logger.info("jellyfish notification: #{inspect(notification)}")
+    Logger.info("Jellyfish notification: #{inspect(notification)}")
     handle_notification(notification, state)
   end
 
@@ -145,7 +163,7 @@ defmodule Videoroom.Meeting do
         :ok
       else
         {:error, reason} ->
-          Logger.warning("Error when deleting meeting #{reason}")
+          Logger.error("Error when deleting meeting #{reason}")
 
         false ->
           Logger.error("Deleting non-empty room")
@@ -161,7 +179,7 @@ defmodule Videoroom.Meeting do
   @impl true
   def terminate(reason, state) do
     if reason != :normal do
-      Logger.warning("Meeting terminated abnormally with reason: #{reason}")
+      Logger.warning("Meeting terminated abnormally with reason: #{inspect(reason)}")
     end
 
     Room.delete(state.client, state.room_id)

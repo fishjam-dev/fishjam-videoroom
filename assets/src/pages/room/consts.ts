@@ -36,10 +36,33 @@ export const DEFAULT_AUTOSTART_MICROPHONE_VALUE = true;
 export const DEFAULT_MANUAL_MODE_CHECKBOX_VALUE = false;
 export const DEFAULT_SMART_LAYER_SWITCHING_VALUE = false;
 
+const isSecure = new URL(window.location.origin).protocol === "https:";
+// @ts-ignore
+const isProxyUsed = import.meta.env.MODE === "development";
+
+const protocol = isSecure ? "https" : "http"
+
+// @ts-ignore
+export const BACKEND_URL = isProxyUsed ?
+  new URL(window.location.origin) :
+  new URL(`${protocol}://${import.meta.env.VITE_BACKEND_ADDRESS}`)
+
 // videoroom_backend should return this address (host and port)
-const origin_websocket_url = new URL(window.location.origin);
-origin_websocket_url.protocol = origin_websocket_url.protocol === "https:" ? "wss:" : "ws:";
-export const JELLYFISH_WEBSOCKET_URL = `${origin_websocket_url.origin}/socket/peer/websocket`;
+// @ts-ignore
+const origin_websocket_url = new URL(window.location.origin)
+origin_websocket_url.protocol = isSecure ? "wss:" : "ws:";
+
+export const getWebsocketURL = (serverAddress: String) => {
+  const address = new URL(`http://${serverAddress}`)
+
+  address.protocol = isSecure ? "wss:" : "ws:";
+
+  const finalAddress = isProxyUsed ? origin_websocket_url : address;
+
+  return `${finalAddress.origin}/socket/peer/websocket`
+}
+
+export const JELLYFISH_WEBSOCKET_PROTOCOL = isSecure ? "wss" : "ws";
 
 export const MAX_TILE_HEIGHT_FOR_MEDIUM_ENCODING = 600;
 export const MAX_TILE_HEIGHT_FOR_LOW_ENCODING = 250;

@@ -13,7 +13,7 @@ Running the Videoroom requires connecting to an instance of [Jellyfish Server](h
 When running locally, you can start an instance of Jellyfish inside docker using docker compose.
 
 ```sh
-INTEGRATED_TURN_IP=<your ip in local network> docker compose -f docker-compose-dev.yaml up
+EXTERNAL_IP=<your ip in local network> docker compose -f docker-compose-dev.yaml up
 ```
 
 Now you can start the Videoroom:
@@ -21,27 +21,25 @@ Now you can start the Videoroom:
 - Run `mix setup` to install and setup dependencies
 - Start Phoenix server with `mix phx.server`
 
-When running the build version of the Phoenix app, you must specify the address of the Jellyfish.
-as well as the authentication token via the environment variables:
+When running the build version of the Phoenix app, you must specify the addresses of the Jellyfish and backend service.
+As well as the authentication token via the environment variables:
 
 ```sh
-JELLYFISH_IP=<IP_ADDRESS>
-JELLYFISH_PORT=<PORT>
+JELLYFISH_ADDRESS=`<IP_ADDRESS>:<PORT> OR <DOMAIN>`
+BACKEND_ADDRESS=`<IP_ADDRESS>:<PORT> OR <DOMAIN>`
 JELLYFISH_API_TOKEN=<TOKEN>
 ```
 
-Optionally, in production the `PEER_JOIN_TIMEOUT` variable can be used to limit the
-period in which a new peer must join the meeting.
+Optionally, in production, these variables can be set: 
+* `PEER_JOIN_TIMEOUT` - can be used to limit the period in which a new peer must join the meeting,
+* `SECURE_CONNECTION` - enforces connecting the backend to jellyfish through `wss` protocol,
+* `CHECK_ORIGIN` - define whether jellyfish should check origin of incoming requests
 
 ## Production
 
 To run the Videoroom in production you can use the provided Docker compose file and adjust it to your needs.
 Example configuration is provided in `docker-compose.yaml` and `.env.example` files.
 You can copy the `.env.example` file to `.env` and adjust it to your needs.
-
-HTTPS connection requires SSL certificate and key files to be provided for reverse proxy.
-You can generate them for your domain using [Let's Encrypt](https://letsencrypt.org/).
-Example `certbot` is provided in `docker-compose-certbot.yaml` file.
 
 ## Tests
 
