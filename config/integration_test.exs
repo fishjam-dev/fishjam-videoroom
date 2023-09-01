@@ -5,4 +5,5 @@ config :jellyfish_server_sdk,
   server_api_token: "development"
 
 config :videoroom,
-  peer_join_timeout: 500
+  peer_join_timeout: 500,
+  jellyfish_addresses: ["jellyfish:5002"]
