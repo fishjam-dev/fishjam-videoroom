@@ -34,7 +34,6 @@ services:
 
   jellyfish2:
     <<: *jellyfish-template
-    image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
     restart: unless-stopped
     container_name: jellyfish2
     environment:

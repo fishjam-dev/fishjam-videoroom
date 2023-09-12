@@ -25,8 +25,8 @@ When running the build version of the Phoenix app, you must specify the addresse
 As well as the authentication token via the environment variables:
 
 ```sh
-JELLYFISH_ADDRESS=`<IP_ADDRESS>:<PORT> OR <DOMAIN>`
-BACKEND_ADDRESS=`<IP_ADDRESS>:<PORT> OR <DOMAIN>`
+JELLYFISH_ADDRESSES=<IP_ADDRESS1>:<PORT1> OR <DOMAIN1> <IP_ADDRESS2>:<PORT2> OR <DOMAIN2> #Example of using two jellyfishes: `127.0.0.1:5002 jellyroom.membrane.ovh`
+BACKEND_ADDRESS=<IP_ADDRESS>:<PORT> OR <DOMAIN>
 JELLYFISH_API_TOKEN=<TOKEN>
 ```
 
@@ -37,9 +37,35 @@ Optionally, in production, these variables can be set:
 
 ## Production
 
-To run the Videoroom in production you can use the provided Docker compose file and adjust it to your needs.
+To run the Videoroom in production on one machine you can use the provided Docker compose file and adjust it to your needs.
 Example configuration is provided in `docker-compose.yaml` and `.env.example` files.
 You can copy the `.env.example` file to `.env` and adjust it to your needs.
+
+## Deployment with load-balancing
+
+`docker-compose.yaml` allows to run a jellyfish videoroom with multiple jellyfishes but all of that runs on the same machine.
+For properly using load-balancing two machines will be needed and `docker-compose-deploy.yaml` will be used. 
+Our deployment workflow you can see [here](.github/workflows/test_build_and_deploy.yml).
+This deployment is pretty simple all containers besides `jellyfish2` container are started on node1 and `jellyfish2` is started on node2.
+All environment variables used in our deployment are presented below:
+
+```sh
+DOMAIN=<FRONTEND_DOMAIN>
+JELLYFISH1_IP=<NODE1_IP> # IP address of first node on which jellyfish will be run
+JELLYFISH2_IP=<NODE2_IP> # IP address of second node on which jellyfish will be run
+SERVER_API_TOKEN=<API_TOKEN> #The same API token is used for all jellyfishes
+SECRET_KEY_BASE=<SECRET_KEY_BASE>
+JELLYFISH1_ADDRESS=<DOMAIN_JELLYFISH1> OR <JELLYFISH1_IP>:<JELLYFISH1_PORT> # Value passed to jellyfish and returns by it when creating a room on this speicific jellyfish
+JELLYFISH2_ADDRESS=<DOMAIN_JELLYFISH2> OR <JELLYFISH2_IP>:<JELLYFISH2_PORT>
+JELLYFISH_ADDRESSES=<JELLYFISH1_ADDRESS> <JELLYFISH2_ADDRESS> #Used by backend to create a notifier to one of jellyfishes
+PROMETHEUS_TARGETS=<JELLYFISH1_IP>:9568,<JELLYFISH2_IP>:9568 #Addresses on which prometheus will query for data
+BACKEND_ADDRESS=<BACKEND_DOMAIN>
+BEAM_PORT=9000 #Port used by beam for distribution communication 
+GF_SECURITY_ADMIN_PASSWORD=<GRAFANA_PASSWORD>
+GF_SECURITY_ADMIN_USER=<GRAFANA_LOGIN>
+SECURE_CONNECTION=true
+CHECK_ORIGIN=false
+```
 
 ## Tests
 
