@@ -47,11 +47,11 @@ defmodule Videoroom.Meeting do
     catch
       :exit, {:noproc, error} ->
         Logger.error(
-          "Failed to call add peer because meeting #{meeting_name} doesn't exist, error: #{error}"
+          "Failed to call add peer because meeting #{meeting_name} doesn't exist, error: #{inspect(error)}"
         )
 
         {:error,
-         "Failed to call add peer because meeting #{meeting_name} doesn't exist, error: #{error}"}
+         "Failed to call add peer to meeting #{meeting_name} because of error: #{inspect(error)}"}
     end
   end
 
