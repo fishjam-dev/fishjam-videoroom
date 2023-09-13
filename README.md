@@ -45,7 +45,7 @@ You can copy the `.env.example` file to `.env` and adjust it to your needs.
 
 `docker-compose.yaml` allows to run a jellyfish videoroom with multiple jellyfishes but all of that runs on the same machine.
 For properly using load-balancing two machines will be needed and `docker-compose-deploy.yaml` will be used. 
-Our deployment workflow you can see [here](.github/workflows/test_build_and_deploy.yml).
+You can see our deployment workflow  [here](.github/workflows/test_build_and_deploy.yml).
 This deployment is pretty simple all containers besides `jellyfish2` container are started on node1 and `jellyfish2` is started on node2.
 All environment variables used in our deployment are presented below:
 
