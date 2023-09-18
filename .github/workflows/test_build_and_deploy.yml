@@ -57,7 +57,7 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
-          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish1 frontend backend grafana
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish1 frontend backend
 
   deploy2:
     runs-on: ubuntu-latest
