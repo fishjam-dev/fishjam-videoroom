@@ -3,6 +3,7 @@ on:
   push:
     branches: 
       - "main"
+      - "test-deploy"
     paths:
       - "**"
       - "!README.md"
@@ -56,7 +57,7 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
-          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish1 frontend backend prometheus grafana
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish1 frontend backend grafana
 
   deploy2:
     runs-on: ubuntu-latest
