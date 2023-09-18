@@ -9,7 +9,7 @@ on:
 
 env: 
   DOMAIN: jellyroom.membrane.ovh
-  JELLYFISH1_ADDRESS: jellyfish.jellyroom.membrane.ovh
+  JELLYFISH1_ADDRESS: jellyfish.membrane.ovh
   JELLYFISH2_ADDRESS: jellyfish1.membrane.ovh
   BACKEND_ADDRESS: server.jellyroom.membrane.ovh
   PROJECT: main
