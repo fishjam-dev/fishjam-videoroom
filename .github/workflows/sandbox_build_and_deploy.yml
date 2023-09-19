@@ -2,10 +2,9 @@ name: Main Build and Deploy
 on:
   push:
     branches: 
-      - "main"
+      - "sandbox"
     paths:
       - "**"
-      - "!README.md"
 
 env: 
   DOMAIN: jellyroom.membrane.ovh
