@@ -4,17 +4,15 @@ x-jellyfish-template: &jellyfish-template
   image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
   restart: unless-stopped
   environment: &jellyfish-environment
-    USE_INTEGRATED_TURN: "true"
-    INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
-    INTEGRATED_TURN_PORT_RANGE: "50000-50500"
-    INTEGRATED_TCP_TURN_PORT: "49999"
-    SERVER_API_TOKEN: ${SERVER_API_TOKEN}
-    SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    JF_INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
+    JF_INTEGRATED_TURN_PORT_RANGE: "50000-50500"
+    JF_INTEGRATED_TCP_TURN_PORT: "49999"
+    JF_SERVER_API_TOKEN: ${SERVER_API_TOKEN}
     RELEASE_DISTRIBUTION: name
     RELEASE_COOKIE: ${SERVER_API_TOKEN}
-    PORT: 5002
-    NODES: "app@jellyfish1 app@jellyfish2"
-    CHECK_ORIGIN: "${CHECK_ORIGIN:-true}"
+    JF_PORT: 5002
+    JF_NODES: "app@jellyfish1 app@jellyfish2"
+    JF_CHECK_ORIGIN: "${CHECK_ORIGIN:-true}"
     BEAM_PORT: 9000
     ELIXIR_ERL_OPTIONS: "-kernel inet_dist_listen_min $BEAM_PORT inet_dist_listen_max $BEAM_PORT"
   ports:
@@ -31,24 +29,20 @@ services:
     container_name: jellyfish1
     environment:
       <<: *jellyfish-environment
-      INTEGRATED_TURN_IP: "${JELLYFISH1_IP}"
-      VIRTUAL_HOST: "${JELLYFISH1_ADDRESS:-$JELLYFISH1_IP}"
-      JELLYFISH_ADDRESS: ${JELLYFISH1_ADDRESS}
+      JF_INTEGRATED_TURN_IP: "${JELLYFISH1_IP}"
+      JF_HOST: "${JELLYFISH1_ADDRESS:-$JELLYFISH1_IP}"
       RELEASE_NODE: app@$JELLYFISH1_IP
-      NODE_NAME: app@$JELLYFISH1_IP
-      NODES: "app@$JELLYFISH1_IP app@$JELLYFISH2_IP"
+      JF_NODES: "app@$JELLYFISH1_IP app@$JELLYFISH2_IP"
 
   jellyfish2:
     <<: *jellyfish-template
     container_name: jellyfish2
     environment:
       <<: *jellyfish-environment
-      INTEGRATED_TURN_IP: "${JELLYFISH2_IP}"
-      VIRTUAL_HOST: "${JELLYFISH2_ADDRESS:-$JELLYFISH2_IP}"
-      JELLYFISH_ADDRESS: ${JELLYFISH2_ADDRESS}
+      JF_INTEGRATED_TURN_IP: "${JELLYFISH2_IP}"
+      JF_HOST: "${JELLYFISH2_ADDRESS:-$JELLYFISH2_IP}"
       RELEASE_NODE: app@$JELLYFISH2_IP
-      NODE_NAME: app@$JELLYFISH2_IP
-      NODES: "app@$JELLYFISH1_IP app@$JELLYFISH2_IP"
+      JF_NODES: "app@$JELLYFISH1_IP app@$JELLYFISH2_IP"
 
   frontend:
     build:
