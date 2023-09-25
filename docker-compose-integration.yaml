@@ -12,7 +12,8 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - jellyfish
+      jellyfish:
+        condition: service_healthy
 
   jellyfish:
     extends:

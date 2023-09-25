@@ -20,6 +20,14 @@ if System.get_env("PHX_SERVER") do
   config :videoroom, VideoroomWeb.Endpoint, server: true
 end
 
+if Mix.env() == :test do
+  # FIXME it seems that divo tries to do docker cleanup
+  # before RoomService exits, which results in a bunch of error
+  # logs at the end of tests - RoomService is linked to the
+  # Notifier and Notifier to the WS connection to the JF
+  Divo.Suite.start(services: [:jellyfish], auto_start: false)
+end
+
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
