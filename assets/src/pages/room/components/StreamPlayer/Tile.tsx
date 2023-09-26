@@ -43,6 +43,7 @@ const Tile: FC<TileProps> = ({ tile, className, forceEncoding, showSimulcast, pi
         forceEncoding={forceEncoding || null}
         encodingQuality={tile.video?.encodingQuality || null}
         remoteTrackId={tile.video?.remoteTrackId || null}
+        blockFillContent={true}
       />
     );
   }
