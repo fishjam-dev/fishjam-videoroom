@@ -12,11 +12,12 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - jellyfish
+      jellyfish:
+        condition: service_healthy
 
   jellyfish:
     extends:
       file: docker-compose-dev.yaml
       service: jellyfish
     environment:
-      - VIRTUAL_HOST=jellyfish
+      - JF_HOST=jellyfish:5002

@@ -12,10 +12,10 @@ config :jellyfish_server_sdk,
   server_api_token: "development"
 
 config :videoroom,
-  divo: "docker-compose-integration.yaml",
+  divo: "docker-compose-dev.yaml",
   divo_wait: [dwell: 1500, max_tries: 50],
   peer_join_timeout: 500,
-  jellyfish_addresses: ["jellyfish:5002"]
+  jellyfish_addresses: ["localhost:5002"]
 
 config :logger, level: :info
 
