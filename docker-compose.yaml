@@ -1,7 +1,7 @@
 version: '3.7'
 
 x-jellyfish-template: &jellyfish-template
-  image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
+  image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.1.0-4a3173b}"
   restart: unless-stopped
   environment: &jellyfish-environment
     JF_INTEGRATED_TURN_IP: $EXTERNAL_IP
