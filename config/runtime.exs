@@ -20,7 +20,7 @@ if System.get_env("PHX_SERVER") do
   config :videoroom, VideoroomWeb.Endpoint, server: true
 end
 
-if Mix.env() == :test do
+if config_env() == :test do
   # FIXME it seems that divo tries to do docker cleanup
   # before RoomService exits, which results in a bunch of error
   # logs at the end of tests - RoomService is linked to the
