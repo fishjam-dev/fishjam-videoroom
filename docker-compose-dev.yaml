@@ -2,7 +2,7 @@ version: "3"
 
 services:
   jellyfish:
-    image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-edge}"
+    image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.1.0-4a3173b}"
     container_name: jellyfish
     restart: on-failure
     healthcheck:
@@ -13,15 +13,13 @@ services:
       timeout: 2s
       start_period: 30s
     environment:
-      VIRTUAL_HOST: "localhost"
-      USE_INTEGRATED_TURN: "true"
-      INTEGRATED_TURN_IP: "${EXTERNAL_IP:-127.0.0.1}"
-      INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
-      INTEGRATED_TURN_PORT_RANGE: "50000-50050"
-      INTEGRATED_TCP_TURN_PORT: "49999"
-      SERVER_API_TOKEN: "development"
-      PORT: 5002
-      SECRET_KEY_BASE: "super-secret-key"
+      JF_HOST: "localhost:5002"
+      JF_INTEGRATED_TURN_IP: "${EXTERNAL_IP:-127.0.0.1}"
+      JF_INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
+      JF_INTEGRATED_TURN_PORT_RANGE: "50000-50050"
+      JF_INTEGRATED_TCP_TURN_PORT: "49999"
+      JF_SERVER_API_TOKEN: "development"
+      JF_PORT: 5002
     ports:
       - "5002:5002"
       - "49999:49999"
