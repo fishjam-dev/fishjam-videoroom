@@ -2,7 +2,7 @@ name: Tag Build and Deploy
 on:
   push:
     tags: 
-      - 'release-v*.*.*'
+      - 'v*.*.*'
 
 env: 
   DOMAIN: jellyroom.membrane.stream
@@ -41,7 +41,7 @@ jobs:
       - name: Remove old containers on first host
         uses: JimCronqvist/action-ssh@master
         with:
-          hosts: ${{ secrets.PRODUCTION_HOST }}
+          hosts: ${{ secrets.PRODUCTION_HOST }}:${{ secrets.SSH_PROD_PORT }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
             docker ps -aq | xargs -r docker stop | xargs -r docker rm 
@@ -82,7 +82,7 @@ jobs:
       - name: Remove old containers on second host
         uses: JimCronqvist/action-ssh@master
         with:
-          hosts: ${{ secrets.PRODUCTION2_HOST }}
+          hosts: ${{ secrets.PRODUCTION2_HOST }}:${{ secrets.SSH_PROD_PORT }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
             docker ps -aq | xargs -r docker stop | xargs -r docker rm 
