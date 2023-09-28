@@ -24,6 +24,7 @@ jobs:
           echo "DOMAIN=${{env.DOMAIN}} 
           JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
           JF_CHECK_ORIGIN=false
+          JF_PORT=5002
           JF1_IP=${{secrets.STAGING_IP}}
           JF2_IP=${{secrets.STAGING2_IP}}
           JF1_HOST=${{env.JF1_HOST}}
@@ -62,6 +63,7 @@ jobs:
         run: |
           echo "JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
           JF_CHECK_ORIGIN=false
+          JF_PORT=5002
           JF1_IP=${{secrets.STAGING_IP}}
           JF2_IP=${{secrets.STAGING2_IP}}
           JF2_HOST=${{env.JF2_HOST}}" > .env
