@@ -1,20 +1,16 @@
 name: Tag Build and Deploy
 on:
   push:
-    branches: 
-      - "main"
-    paths:
-      - "**"
-      - "!README.md"
+    tags: 
+      - 'v*.*'
 
 env: 
   DOMAIN: jellyroom.membrane.work
-  JELLYFISH1_ADDRESS: jellyfish.membrane.work
-  JELLYFISH2_ADDRESS: jellyfish1.membrane.work
-  BACKEND_ADDRESS: server.jellyroom.membrane.work
+  JF1_HOST: jellyfish.membrane.work
+  JF2_HOST: jellyfish1.membrane.work
+  BE_HOST: server.jellyroom.membrane.work
   PROJECT: staging
   COMPOSE_FILE_NAME: docker-compose-deploy.yaml
-  TARGET_DIR: jellyfish_videoroom
 
 jobs:
   deploy1:
@@ -26,20 +22,18 @@ jobs:
         id: variables_population
         run: |
           echo "DOMAIN=${{env.DOMAIN}} 
-          JELLYFISH1_IP=${{secrets.STAGING_HOST}}
-          JELLYFISH2_IP=${{secrets.STAGING2_HOST}}
-          SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
-          SECRET_KEY_BASE=${{secrets.SECRET_KEYBASE}}
-          JELLYFISH1_ADDRESS=${{env.JELLYFISH1_ADDRESS}}
-          JELLYFISH2_ADDRESS=${{env.JELLYFISH2_ADDRESS}}
-          JELLYFISH_ADDRESSES=${{env.JELLYFISH1_ADDRESS}} ${{env.JELLYFISH2_ADDRESS}}
+          JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
+          JF_CHECK_ORIGIN=false
+          JF1_IP=${{secrets.STAGING_HOST}}
+          JF2_IP=${{secrets.STAGING2_HOST}}
+          JF1_HOST=${{env.JF1_HOST}}
+          JF2_HOST=${{env.JF2_HOST}}
+          BE_HOST=${{env.BE_HOST}}
+          BE_JF_SECURE_CONNECTION=true
+          BE_JF_ADDRESSES=${{env.JF1_HOST}} ${{env.JF2_HOST}}
           PROMETHEUS_TARGETS=jellyfish1:9568,${{secrets.STAGING2_HOST}}:9568
-          BACKEND_ADDRESS=${{env.BACKEND_ADDRESS}}
-          BEAM_PORT=9000
           GF_SECURITY_ADMIN_PASSWORD=${{secrets.GF_SECURITY_ADMIN_PASSWORD}}
-          GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}}
-          SECURE_CONNECTION=true
-          CHECK_ORIGIN=false" > .env
+          GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}}" > .env
 
       - name: Remove old containers on first host
         uses: JimCronqvist/action-ssh@master
@@ -66,21 +60,11 @@ jobs:
       - name: Prepare .env file for the deployment
         id: variables_population
         run: |
-          echo "DOMAIN=${{env.DOMAIN}} 
-          JELLYFISH1_IP=${{secrets.STAGING_HOST}}
-          JELLYFISH2_IP=${{secrets.STAGING2_HOST}}
-          SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
-          SECRET_KEY_BASE=${{secrets.SECRET_KEYBASE}}
-          JELLYFISH1_ADDRESS=${{env.JELLYFISH1_ADDRESS}}
-          JELLYFISH2_ADDRESS=${{env.JELLYFISH2_ADDRESS}}
-          JELLYFISH_ADDRESSES=${{env.JELLYFISH1_ADDRESS}} ${{env.JELLYFISH2_ADDRESS}}
-          PROMETHEUS_TARGETS=jellyfish1:9568,${{secrets.STAGING2_HOST}}:9568
-          BACKEND_ADDRESS=${{env.BACKEND_ADDRESS}}
-          BEAM_PORT=9000
-          GF_SECURITY_ADMIN_PASSWORD=${{secrets.GF_SECURITY_ADMIN_PASSWORD}}
-          GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}}
-          SECURE_CONNECTION=true
-          CHECK_ORIGIN=false" > .env
+          echo "JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
+          JF_CHECK_ORIGIN=false
+          JF1_IP=${{secrets.STAGING_HOST}}
+          JF2_IP=${{secrets.STAGING2_HOST}}
+          JF2_HOST=${{env.JF2_HOST}}" > .env
       - name: Remove old containers on second host
         uses: JimCronqvist/action-ssh@master
         with:

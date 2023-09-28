@@ -10,13 +10,13 @@ import Config
 # ## Using releases
 #
 # If you use `mix release`, you need to explicitly enable the server
-# by passing the PHX_SERVER=true when you start it:
+# by passing the BE_PHX_SERVER=true when you start it:
 #
-#     PHX_SERVER=true bin/videoroom start
+#     BE_PHX_SERVER=true bin/videoroom start
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
-if System.get_env("PHX_SERVER") do
+if System.get_env("BE_PHX_SERVER") do
   config :videoroom, VideoroomWeb.Endpoint, server: true
 end
 
@@ -35,14 +35,10 @@ if config_env() == :prod do
   # to check this value into version control, so we use an environment
   # variable instead.
   secret_key_base =
-    System.get_env("SECRET_KEY_BASE") ||
-      raise """
-      environment variable SECRET_KEY_BASE is missing.
-      You can generate one by calling: mix phx.gen.secret
-      """
+    System.get_env("BE_SECRET_KEY_BASE") || Base.encode64(:crypto.strong_rand_bytes(48))
 
-  host = System.get_env("PHX_HOST") || "example.com"
-  port = String.to_integer(System.get_env("PORT") || "5004")
+  host = System.get_env("BE_HOST") || "example.com"
+  port = String.to_integer(System.get_env("BE_PORT") || "5004")
 
   config :videoroom, VideoroomWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
@@ -57,23 +53,22 @@ if config_env() == :prod do
     secret_key_base: secret_key_base
 
   jellyfish_addresses =
-    System.get_env("JELLYFISH_ADDRESSES") ||
-      raise "Environment variable JELLYFISH_ADDRESSES is missing."
+    System.get_env("BE_JF_ADDRESSES") || raise "Environment variable BE_JF_ADDRESSES is missing."
 
   jellyfish_addresses = String.split(jellyfish_addresses, " ")
 
-  secure_connection? = System.get_env("SECURE_CONNECTION_JELLYFISH", "false") == "true"
+  secure_connection? = System.get_env("BE_JF_SECURE_CONNECTION", "false") == "true"
 
   config :jellyfish_server_sdk,
     secure?: secure_connection?,
     server_api_token:
-      System.get_env("JELLYFISH_API_TOKEN") ||
+      System.get_env("BE_JF_SERVER_API_TOKEN") ||
         raise("""
-        Environment variable JELLYFISH_API_TOKEN is missing.
+        Environment variable BE_JF_SERVER_API_TOKEN is missing.
         """)
 
   config :videoroom,
-    peer_join_timeout: String.to_integer(System.get_env("PEER_JOIN_TIMEOUT") || "60000"),
+    peer_join_timeout: String.to_integer(System.get_env("BE_PEER_JOIN_TIMEOUT") || "60000"),
     jellyfish_addresses: jellyfish_addresses
 
   # ## SSL Support

@@ -3,8 +3,8 @@
 FROM alpine:3.18 as builder
 WORKDIR '/app'
 
-ARG BACKEND_ADDRESS
-ENV VITE_BACKEND_ADDRESS=$BACKEND_ADDRESS
+ARG BE_HOST
+ENV VITE_BE_HOST=$BE_HOST
 
 # Install nodejs and npm
 RUN apk add --no-cache nodejs npm

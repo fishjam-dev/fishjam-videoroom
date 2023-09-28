@@ -45,7 +45,7 @@ const protocol = isSecure ? "https" : "http"
 // @ts-ignore
 export const BACKEND_URL = isProxyUsed ?
   new URL(window.location.origin) :
-  new URL(`${protocol}://${import.meta.env.VITE_BACKEND_ADDRESS}`)
+  new URL(`${protocol}://${import.meta.env.VITE_BE_HOST}`)
 
 // videoroom_backend should return this address (host and port)
 // @ts-ignore
