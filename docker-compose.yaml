@@ -6,6 +6,7 @@ x-jellyfish-template: &jellyfish-template
   environment: &jellyfish-environment
     JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
     JF_CHECK_ORIGIN: "${JF_CHECK_ORIGIN:-false}"
+    JF_DIST_ENABLED: "${JF_DIST_ENABLED:-true}"
     JF_DIST_NODES: "app@jellyfish1 app@jellyfish2"
     JF_WEBRTC_TURN_IP: $EXTERNAL_IP
     JF_WEBRTC_TURN_LISTEN_IP: "0.0.0.0"
