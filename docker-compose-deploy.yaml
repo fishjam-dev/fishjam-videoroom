@@ -8,7 +8,7 @@ x-jellyfish-template: &jellyfish-template
     JF_CHECK_ORIGIN: "${JF_CHECK_ORIGIN:-true}"
     JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
     JF_DIST_ENABLED: "${JF_DIST_ENABLED:-true}"
-    JF_DIST_NODES: "app@jellyfish1 app@jellyfish2"
+    JF_DIST_NODES: "app@$JF1_IP app@$JF2_IP"
     JF_WEBRTC_TURN_LISTEN_IP: "0.0.0.0"
     JF_WEBRTC_TURN_PORT_RANGE: "50000-50500"
     JF_WEBRTC_TURN_TCP_PORT: "49999"
@@ -28,7 +28,6 @@ services:
       <<: *jellyfish-environment
       JF_HOST: "${JF1_HOST:-$JF1_IP:$JF_PORT}"
       JF_DIST_NODE_NAME: app@$JF1_IP
-      JF_DIST_NODES: "app@$JF1_IP app@$JF2_IP"
       JF_WEBRTC_TURN_IP: "${JF1_IP}"
 
   jellyfish2:
@@ -38,7 +37,6 @@ services:
       <<: *jellyfish-environment
       JF_HOST: "${JF2_HOST:-$JF2_IP:$JF_PORT}"
       JF_DIST_NODE_NAME: app@$JF2_IP
-      JF_DIST_NODES: "app@$JF1_IP app@$JF2_IP"
       JF_WEBRTC_TURN_IP: "${JF2_IP}"
 
   frontend:
