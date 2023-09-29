@@ -4,9 +4,24 @@ Videoroom is an open-source, basic video conferencing platform using WebRTC.
 It is based on [jellyfish](https://github.com/jellyfish-dev/jellyfish), a general-purpose media server.
 Videoroom may be a good starting point for building your own real-time communication solution using Elixir and Jellyfish.
 
+## Running jellfish videoroom
+
+The simplest way to run videoroom is with use of docker, but first we need to set environment variables. Commands below will setup all needed environment variables for local running of videoroom.
+
+```bash
+cp .env.example .env
+[ ! -f .env ] || export $(grep -v '^#' .env | xargs)
+export EXTERNAL_IP=127.0.0.1 #this will works only on local development
+```
+
+After that you can start videoroom with command:
+```bash
+docker compose up
+```
+
 ## Installation
 
-Make sure to have installed [Elixir](https://elixir-lang.org/install.html) first.
+Make sure to have installed [Elixir](https://elixir-lang.org/install.html) and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) first.
 
 Running the Videoroom requires connecting to an instance of [Jellyfish Server](https://github.com/jellyfish-dev/jellyfish).
 
@@ -16,8 +31,7 @@ When running locally, you can start an instance of Jellyfish inside docker using
 EXTERNAL_IP=<your ip in local network> docker compose -f docker-compose-dev.yaml up
 ```
 
-Now you can start the Videoroom:
-
+Now you can start the Videoroom backend:
 - Run `mix setup` to install and setup dependencies
 - Start Phoenix server with `mix phx.server`
 
@@ -26,14 +40,20 @@ As well as the authentication token via the environment variables:
 
 ```sh
 BE_JF_ADDRESSES=<IP_ADDRESS1>:<PORT1> OR <DOMAIN1> <IP_ADDRESS2>:<PORT2> OR <DOMAIN2> #Example of using two jellyfishes: `127.0.0.1:5002 jellyroom.membrane.ovh`
-BE_HOST=<IP_ADDRESS>:<PORT> OR <DOMAIN>
-BE_JF_SERVER_API_TOKEN=<TOKEN>
+BE_HOST=<IP_ADDRESS>:<PORT> OR <DOMAIN> 
+BE_JF_SERVER_API_TOKEN=<TOKEN> #This must be the same token that was setup in jellyfish. In `docker-compose-dev.yaml` we setup `development`.
 ```
 
 Optionally, in production, these variables can be set: 
 * `BE_PEER_JOIN_TIMEOUT` - can be used to limit the period in which a new peer must join the meeting,
 * `BE_JF_SECURE_CONNECTION` - enforces connecting the backend to jellyfish through `wss` protocol,
 * `JF_CHECK_ORIGIN` - define whether jellyfish should check origin of incoming requests
+
+Next you have to start a Videoroom frontend:
+- Run `npm ci --prefix=assets` to install and setup dependencies
+- Start vite server with `npm run dev --prefix=assets`
+
+Now you have all needed components to use jellyfish videoroom.
 
 ## Production
 

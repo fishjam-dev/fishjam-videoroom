@@ -8,6 +8,7 @@ x-jellyfish-template: &jellyfish-template
     JF_CHECK_ORIGIN: "${JF_CHECK_ORIGIN:-false}"
     JF_DIST_ENABLED: "${JF_DIST_ENABLED:-true}"
     JF_DIST_NODES: "app@jellyfish1 app@jellyfish2"
+    JF_DIST_MODE: "sname"
     JF_WEBRTC_TURN_IP: $EXTERNAL_IP
     JF_WEBRTC_TURN_LISTEN_IP: "0.0.0.0"
 
@@ -17,9 +18,8 @@ services:
     container_name: jellyfish1
     environment:
       <<: *jellyfish-environment
-      JF_PORT: 5002
       JF_HOST: "${JF1_HOST:-${JF1_IP:-$EXTERNAL_IP}:5002}"
-      JF_DIST_MODE: sname
+      JF_PORT: 5002
       JF_DIST_NODE_NAME: app@jellyfish1
       JF_WEBRTC_TURN_PORT_RANGE: "50000-50500"
       JF_WEBRTC_TURN_TCP_PORT: "49999"
@@ -34,9 +34,8 @@ services:
     container_name: jellyfish2
     environment:
       <<: *jellyfish-environment
-      JF_PORT: 5003
       JF_HOST: "${JF2_HOST:-${JF2_IP:-$EXTERNAL_IP}:5003}"
-      JF_DIST_MODE: sname
+      JF_PORT: 5003
       JF_DIST_NODE_NAME: app@jellyfish2
       JF_WEBRTC_TURN_PORT_RANGE: "50501-51000"
       JF_WEBRTC_TURN_TCP_PORT: "49998"
@@ -50,7 +49,7 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
-        BE_HOST: ${BE_HOST:-$DOMAIN:5004}
+        FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
     container_name: frontend
     restart: unless-stopped
     depends_on:
