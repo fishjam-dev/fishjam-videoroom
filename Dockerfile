@@ -45,7 +45,7 @@ FROM hexpm/elixir:1.14.4-erlang-25.3.2-alpine-3.16.5
 RUN apk add --no-cache openssl ncurses-libs
 
 # Set the PORT
-ENV PORT=5004
+ENV BE_PORT=5004
 
 # Create an environment variable with the directory where the app is going to be installed
 ENV APP_HOME=/opt/app 

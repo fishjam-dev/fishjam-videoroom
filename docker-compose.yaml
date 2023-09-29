@@ -1,17 +1,15 @@
 version: '3.7'
 
 x-jellyfish-template: &jellyfish-template
-  image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.1.0-4a3173b}"
+  image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.1.0-5ef4452}"
   restart: unless-stopped
   environment: &jellyfish-environment
-    JF_INTEGRATED_TURN_IP: $EXTERNAL_IP
-    JF_INTEGRATED_TURN_LISTEN_IP: "0.0.0.0"
-    JF_SERVER_API_TOKEN: ${SERVER_API_TOKEN}
-    RELEASE_COOKIE: ${SERVER_API_TOKEN}
-    JF_NODES: "app@jellyfish1 app@jellyfish2"
-    JF_CHECK_ORIGIN: "${CHECK_ORIGIN:-false}"
-    BEAM_PORT: 9000
-    ELIXIR_ERL_OPTIONS: "-kernel inet_dist_listen_min $BEAM_PORT inet_dist_listen_max $BEAM_PORT"
+    JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
+    JF_CHECK_ORIGIN: "${JF_CHECK_ORIGIN:-false}"
+    JF_DIST_ENABLED: "${JF_DIST_ENABLED:-true}"
+    JF_DIST_NODES: "app@jellyfish1 app@jellyfish2"
+    JF_WEBRTC_TURN_IP: $EXTERNAL_IP
+    JF_WEBRTC_TURN_LISTEN_IP: "0.0.0.0"
 
 services:
   jellyfish1:
@@ -19,11 +17,11 @@ services:
     container_name: jellyfish1
     environment:
       <<: *jellyfish-environment
-      JF_INTEGRATED_TURN_PORT_RANGE: "50000-50500"
-      JF_INTEGRATED_TCP_TURN_PORT: "49999"
-      JF_HOST: "${JELLYFISH1_ADDRESS:-${JELLYFISH1_IP:-$EXTERNAL_IP}}"
-      RELEASE_NODE: app@jellyfish1
       JF_PORT: 5002
+      JF_HOST: "${JF1_HOST:-${JF1_IP:-$EXTERNAL_IP}:$JF_PORT}"
+      JF_DIST_NODE_NAME: app@jellyfish1
+      JF_WEBRTC_TURN_PORT_RANGE: "50000-50500"
+      JF_WEBRTC_TURN_TCP_PORT: "49999"
     ports:
       - "5002:5002"
       - "49999:49999"
@@ -35,11 +33,11 @@ services:
     container_name: jellyfish2
     environment:
       <<: *jellyfish-environment
-      JF_INTEGRATED_TURN_PORT_RANGE: "50501-51000"
-      JF_INTEGRATED_TCP_TURN_PORT: "49998"
-      JF_HOST: "${JELLYFISH2_ADDRESS:-${JELLYFISH2_IP:-$EXTERNAL_IP}}"
-      RELEASE_NODE: app@jellyfish2
       JF_PORT: 5003
+      JF_HOST: "${JF2_HOST:-${JF2_IP:-$EXTERNAL_IP}:$JF_PORT}"
+      JF_DIST_NODE_NAME: app@jellyfish2
+      JF_WEBRTC_TURN_PORT_RANGE: "50501-51000"
+      JF_WEBRTC_TURN_TCP_PORT: "49998"
     ports:
       - "5003:5003"
       - "49998:49998"
@@ -50,7 +48,7 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
-        BACKEND_ADDRESS: ${BACKEND_ADDRESS:-$DOMAIN:5004}
+        BE_HOST: ${BE_HOST:-$DOMAIN:5004}
     container_name: frontend
     restart: unless-stopped
     depends_on:
@@ -66,13 +64,12 @@ services:
       dockerfile: ./Dockerfile
     container_name: backend
     environment:
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      JELLYFISH_ADDRESSES: ${JELLYFISH_ADDRESSES:-jellyfish1:5002 jellyfish2:5003}
-      SECURE_CONNECTION_JELLYFISH: ${SECURE_CONNECTION:-false}
-      JELLYFISH_API_TOKEN: ${SERVER_API_TOKEN}
-      PHX_SERVER: "true"
-      PHX_HOST: ${BACKEND_ADDRESS:-$DOMAIN}
-      PORT: 5004
+      BE_PORT: 5004
+      BE_HOST: ${BE_HOST:-$DOMAIN}
+      BE_PHX_SERVER: "true"
+      BE_JF_ADDRESSES: ${BE_JF_ADDRESSES:-jellyfish1:5002 jellyfish2:5003}
+      BE_JF_SECURE_CONNECTION: ${BE_JF_SECURE_CONNECTION:-false}
+      BE_JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
     restart: unless-stopped
     depends_on:
       - jellyfish1

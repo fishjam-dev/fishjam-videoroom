@@ -25,15 +25,15 @@ When running the build version of the Phoenix app, you must specify the addresse
 As well as the authentication token via the environment variables:
 
 ```sh
-JELLYFISH_ADDRESSES=<IP_ADDRESS1>:<PORT1> OR <DOMAIN1> <IP_ADDRESS2>:<PORT2> OR <DOMAIN2> #Example of using two jellyfishes: `127.0.0.1:5002 jellyroom.membrane.ovh`
-BACKEND_ADDRESS=<IP_ADDRESS>:<PORT> OR <DOMAIN>
-JELLYFISH_API_TOKEN=<TOKEN>
+BE_JF_ADDRESSES=<IP_ADDRESS1>:<PORT1> OR <DOMAIN1> <IP_ADDRESS2>:<PORT2> OR <DOMAIN2> #Example of using two jellyfishes: `127.0.0.1:5002 jellyroom.membrane.ovh`
+BE_HOST=<IP_ADDRESS>:<PORT> OR <DOMAIN>
+BE_JF_SERVER_API_TOKEN=<TOKEN>
 ```
 
 Optionally, in production, these variables can be set: 
-* `PEER_JOIN_TIMEOUT` - can be used to limit the period in which a new peer must join the meeting,
-* `SECURE_CONNECTION` - enforces connecting the backend to jellyfish through `wss` protocol,
-* `CHECK_ORIGIN` - define whether jellyfish should check origin of incoming requests
+* `BE_PEER_JOIN_TIMEOUT` - can be used to limit the period in which a new peer must join the meeting,
+* `BE_JF_SECURE_CONNECTION` - enforces connecting the backend to jellyfish through `wss` protocol,
+* `JF_CHECK_ORIGIN` - define whether jellyfish should check origin of incoming requests
 
 ## Production
 
@@ -52,20 +52,18 @@ All environment variables used in our deployment are presented below:
 
 ```sh
 DOMAIN=<FRONTEND_DOMAIN>
-JELLYFISH1_IP=<NODE1_IP> # IP address of first node on which jellyfish will be run
-JELLYFISH2_IP=<NODE2_IP> # IP address of second node on which jellyfish will be run
-SERVER_API_TOKEN=<API_TOKEN> #The same API token is used for all jellyfishes
-SECRET_KEY_BASE=<SECRET_KEY_BASE>
-JELLYFISH1_ADDRESS=<DOMAIN_JELLYFISH1> OR <JELLYFISH1_IP>:<JELLYFISH1_PORT> # Value passed to jellyfish and returns by it when creating a room on this speicific jellyfish
-JELLYFISH2_ADDRESS=<DOMAIN_JELLYFISH2> OR <JELLYFISH2_IP>:<JELLYFISH2_PORT>
-JELLYFISH_ADDRESSES=<JELLYFISH1_ADDRESS> <JELLYFISH2_ADDRESS> #Used by backend to create a notifier to one of jellyfishes
-PROMETHEUS_TARGETS=<JELLYFISH1_IP>:9568,<JELLYFISH2_IP>:9568 #Addresses on which prometheus will query for data
-BACKEND_ADDRESS=<BACKEND_DOMAIN>
-BEAM_PORT=9000 #Port used by beam for distribution communication 
+JF1_IP=<NODE1_IP> # IP address of first node on which jellyfish will be run
+JF2_IP=<NODE2_IP> # IP address of second node on which jellyfish will be run
+JF_SERVER_API_TOKEN=<API_TOKEN> #The same API token is used for all jellyfishes
+JF1_HOST=<DOMAIN_JELLYFISH1> OR <JF1_IP>:<JELLYFISH1_PORT> # Value passed to jellyfish and returns by it when creating a room on this speicific jellyfish
+JF2_HOST=<DOMAIN_JELLYFISH2> OR <JF2_IP>:<JELLYFISH2_PORT>
+BE_JF_ADDRESSES=<JF1_HOST> <JF2_HOST> #Used by backend to create a notifier to one of jellyfishes
+PROMETHEUS_TARGETS=<JF1_IP>:9568,<JF2_IP>:9568 #Addresses on which prometheus will query for data
+BE_HOST=<BACKEND_DOMAIN>
 GF_SECURITY_ADMIN_PASSWORD=<GRAFANA_PASSWORD>
 GF_SECURITY_ADMIN_USER=<GRAFANA_LOGIN>
-SECURE_CONNECTION=true
-CHECK_ORIGIN=false
+BE_JF_SECURE_CONNECTION=true
+JF_CHECK_ORIGIN=false
 ```
 
 ## Tests
