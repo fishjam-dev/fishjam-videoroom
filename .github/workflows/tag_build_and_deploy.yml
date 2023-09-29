@@ -63,6 +63,7 @@ jobs:
         run: |
           echo "JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN}}
           JF_CHECK_ORIGIN=false
+          JF1_IP=${{secrets.PRODUCTION_HOST}}
           JF2_IP=${{secrets.PRODUCTION2_HOST}}
           JF2_HOST=${{env.JF2_HOST}}" > .env
       - name: Remove old containers on second host
