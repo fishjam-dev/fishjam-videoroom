@@ -1,4 +1,4 @@
-name: Tag Build and Deploy
+name: Production Build and Deploy
 on:
   push:
     tags: 

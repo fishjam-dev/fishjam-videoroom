@@ -1,8 +1,8 @@
-name: Tag Build and Deploy
+name: Staging Build and Deploy
 on:
   push:
-    tags: 
-      - 'v*.*'
+    branches: 
+      - "main"
 
 env: 
   DOMAIN: jellyroom.membrane.work

@@ -1,4 +1,4 @@
-name: Main Build and Deploy
+name: Sandbox Build and Deploy
 on:
   push:
     branches: 
@@ -11,7 +11,7 @@ env:
   JF1_HOST: jellyfish.membrane.ovh
   JF2_HOST: jellyfish1.membrane.ovh
   BE_HOST: server.jellyroom.membrane.ovh
-  PROJECT: main
+  PROJECT: sandbox
   COMPOSE_FILE_NAME: docker-compose-deploy.yaml
 
 jobs:
