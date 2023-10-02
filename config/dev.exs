@@ -43,10 +43,16 @@ config :jellyfish_server_sdk,
 # configured to run both http and https servers on
 # different ports.
 
+jellyfish_addresses =
+  System.get_env("BE_JF_ADDRESSES", "localhost:5002 localhost:5003")
+
+jellyfish_addresses = String.split(jellyfish_addresses, " ")
+
 # Enable dev routes for dashboard and mailbox
 config :videoroom,
   dev_routes: true,
-  peer_join_timeout: 60_000
+  peer_join_timeout: 60_000,
+  jellyfish_addresses: jellyfish_addresses
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
