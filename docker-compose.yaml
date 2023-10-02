@@ -18,7 +18,8 @@ services:
     environment:
       <<: *jellyfish-environment
       JF_PORT: 5002
-      JF_HOST: "${JF1_HOST:-${JF1_IP:-$EXTERNAL_IP}:$JF_PORT}"
+      JF_HOST: "${JF1_HOST:-${JF1_IP:-$EXTERNAL_IP}:5002}"
+      JF_DIST_MODE: sname
       JF_DIST_NODE_NAME: app@jellyfish1
       JF_WEBRTC_TURN_PORT_RANGE: "50000-50500"
       JF_WEBRTC_TURN_TCP_PORT: "49999"
@@ -34,7 +35,8 @@ services:
     environment:
       <<: *jellyfish-environment
       JF_PORT: 5003
-      JF_HOST: "${JF2_HOST:-${JF2_IP:-$EXTERNAL_IP}:$JF_PORT}"
+      JF_HOST: "${JF2_HOST:-${JF2_IP:-$EXTERNAL_IP}:5003}"
+      JF_DIST_MODE: sname
       JF_DIST_NODE_NAME: app@jellyfish2
       JF_WEBRTC_TURN_PORT_RANGE: "50501-51000"
       JF_WEBRTC_TURN_TCP_PORT: "49998"
