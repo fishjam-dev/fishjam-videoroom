@@ -18,7 +18,7 @@ config :videoroom, VideoroomWeb.Endpoint,
 
 config :jellyfish_server_sdk,
   server_address: "localhost:5002",
-  server_api_token: "development"
+  server_api_token: System.get_env("BE_JF_SERVER_API_TOKEN", "development")
 
 # ## SSL Support
 #

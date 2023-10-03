@@ -4,7 +4,7 @@ x-jellyfish-template: &jellyfish-template
   image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.1.0-5ef4452}"
   restart: unless-stopped
   environment: &jellyfish-environment
-    JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
+    JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN:-development}
     JF_CHECK_ORIGIN: "${JF_CHECK_ORIGIN:-false}"
     JF_DIST_ENABLED: "${JF_DIST_ENABLED:-true}"
     JF_DIST_NODES: "app@jellyfish1 app@jellyfish2"
@@ -21,12 +21,12 @@ services:
       JF_HOST: "${JF1_HOST:-${JF1_IP:-$EXTERNAL_IP}:5002}"
       JF_PORT: 5002
       JF_DIST_NODE_NAME: app@jellyfish1
-      JF_WEBRTC_TURN_PORT_RANGE: "50000-50500"
+      JF_WEBRTC_TURN_PORT_RANGE: "50000-50100"
       JF_WEBRTC_TURN_TCP_PORT: "49999"
     ports:
       - "5002:5002"
       - "49999:49999"
-      - "50000-50500:50000-50500/udp"
+      - "50000-50100:50000-50100/udp"
 
   jellyfish2:
     <<: *jellyfish-template
@@ -37,12 +37,12 @@ services:
       JF_HOST: "${JF2_HOST:-${JF2_IP:-$EXTERNAL_IP}:5003}"
       JF_PORT: 5003
       JF_DIST_NODE_NAME: app@jellyfish2
-      JF_WEBRTC_TURN_PORT_RANGE: "50501-51000"
+      JF_WEBRTC_TURN_PORT_RANGE: "50101-50200"
       JF_WEBRTC_TURN_TCP_PORT: "49998"
     ports:
       - "5003:5003"
       - "49998:49998"
-      - "50501-51000:50501-51000/udp"
+      - "50101-50200:50101-50200/udp"
 
   frontend:
     build:
@@ -70,7 +70,7 @@ services:
       BE_PHX_SERVER: "true"
       BE_JF_ADDRESSES: ${BE_JF_ADDRESSES:-jellyfish1:5002 jellyfish2:5003}
       BE_JF_SECURE_CONNECTION: ${BE_JF_SECURE_CONNECTION:-false}
-      BE_JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
+      BE_JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN:-development}
     restart: unless-stopped
     depends_on:
       - jellyfish1

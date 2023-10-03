@@ -20,6 +20,7 @@ services:
       JF_WEBRTC_TURN_PORT_RANGE: "50000-50050"
       JF_WEBRTC_TURN_TCP_PORT: "49999"
       JF_SERVER_API_TOKEN: "development"
+      JF_CHECK_ORIGIN: "false"
     ports:
       - "5002:5002"
       - "49999:49999"
