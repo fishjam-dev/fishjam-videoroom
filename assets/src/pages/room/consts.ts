@@ -38,7 +38,6 @@ export const DEFAULT_SMART_LAYER_SWITCHING_VALUE = false;
 
 const isSecure = new URL(window.location.origin).protocol === "https:";
 // @ts-ignore
-const isProxyUsed = import.meta.env.MODE === "development";
 
 const protocol = isSecure ? "https" : "http"
 
@@ -57,9 +56,8 @@ export const getWebsocketURL = (serverAddress: String) => {
 
   address.protocol = isSecure ? "wss:" : "ws:";
 
-  const finalAddress = isProxyUsed ? origin_websocket_url : address;
 
-  return `${finalAddress.origin}/socket/peer/websocket`
+  return `${address.origin}/socket/peer/websocket`
 }
 
 export const JELLYFISH_WEBSOCKET_PROTOCOL = isSecure ? "wss" : "ws";
