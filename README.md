@@ -39,15 +39,16 @@ When running the build version of the Phoenix app, you must specify the addresse
 As well as the authentication token via the environment variables:
 
 ```sh
-BE_JF_ADDRESSES=<IP_ADDRESS1>:<PORT1> OR <DOMAIN1> <IP_ADDRESS2>:<PORT2> OR <DOMAIN2> #Example of using two jellyfishes: `127.0.0.1:5002 jellyroom.membrane.ovh`
-BE_HOST=<IP_ADDRESS>:<PORT> OR <DOMAIN> 
-BE_JF_SERVER_API_TOKEN=<TOKEN> #This must be the same token that was setup in jellyfish. In `docker-compose-dev.yaml` we setup `development`.
+BE_JF_ADDRESSES=<IP_ADDRESS1>:<PORT1> OR <DOMAIN1> <IP_ADDRESS2>:<PORT2> OR <DOMAIN2> #Example of using two jellyfishes: `127.0.0.1:5002 jellyroom.membrane.ovh`, if not provided in dev environment `localhost:5002 localhost:5003` is used.
+BE_JF_SERVER_API_TOKEN=<TOKEN> #This must be the same token that was setup in jellyfish. In `docker-compose-dev.yaml` we setup `development` and this variable is used by default in `dev` environment
 ```
 
 Optionally, in production, these variables can be set: 
 * `BE_PEER_JOIN_TIMEOUT` - can be used to limit the period in which a new peer must join the meeting,
 * `BE_JF_SECURE_CONNECTION` - enforces connecting the backend to jellyfish through `wss` protocol,
+* `BE_HOST` - address of backend
 * `JF_CHECK_ORIGIN` - define whether jellyfish should check origin of incoming requests
+
 
 Next you have to start a Videoroom frontend:
 - Run `npm ci --prefix=assets` to install and setup dependencies
