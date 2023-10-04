@@ -4,19 +4,11 @@ Videoroom is an open-source, basic video conferencing platform using WebRTC.
 It is based on [jellyfish](https://github.com/jellyfish-dev/jellyfish), a general-purpose media server.
 Videoroom may be a good starting point for building your own real-time communication solution using Elixir and Jellyfish.
 
-## Running jellfish videoroom
-
-The simplest way to run videoroom is with use of docker, but first we need to set environment variables. Commands below will setup all needed environment variables for local running of videoroom.
-
+## Running with Docker
+The simplest way to run videoroom is with use of Docker.
+To do so, modify `.env.example` file by setting the `EXTERNAL_IP` to your private IP address (this can't be loopback!) and type:
 ```bash
-cp .env.example .env
-[ ! -f .env ] || export $(grep -v '^#' .env | xargs) #Exporting variables from env 
-export EXTERNAL_IP=127.0.0.1 #this will works only on local development
-```
-
-After that you can start videoroom with command:
-```bash
-docker compose up
+docker compose --env-file .env.example up
 ```
 
 ## Running from source
