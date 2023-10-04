@@ -19,7 +19,7 @@ After that you can start videoroom with command:
 docker compose up
 ```
 
-## Installation
+## Running from source
 
 Make sure to have installed [Elixir](https://elixir-lang.org/install.html) and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) first.
 
