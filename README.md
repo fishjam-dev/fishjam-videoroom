@@ -10,7 +10,7 @@ The simplest way to run videoroom is with use of docker, but first we need to se
 
 ```bash
 cp .env.example .env
-[ ! -f .env ] || export $(grep -v '^#' .env | xargs)
+[ ! -f .env ] || export $(grep -v '^#' .env | xargs) #Exporting variables from env 
 export EXTERNAL_IP=127.0.0.1 #this will works only on local development
 ```
 
