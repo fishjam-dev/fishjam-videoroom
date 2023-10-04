@@ -38,11 +38,12 @@ export const DEFAULT_SMART_LAYER_SWITCHING_VALUE = false;
 
 const isSecure = new URL(window.location.origin).protocol === "https:";
 // @ts-ignore
+const isDevEnv = import.meta.env.MODE === "development";
 
 const protocol = isSecure ? "https" : "http"
 
 // @ts-ignore
-export const BACKEND_URL = isProxyUsed ?
+export const BACKEND_URL = isDevEnv ?
   new URL(window.location.origin) :
   new URL(`${protocol}://${import.meta.env.VITE_BE_HOST}`)
 
