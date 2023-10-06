@@ -4,7 +4,7 @@ x-jellyfish-template: &jellyfish-template
   image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.1.0-5ef4452}"
   restart: unless-stopped
   environment: &jellyfish-environment
-    JF_PORT: 5002
+    JF_PORT: $JF_PORT
     JF_CHECK_ORIGIN: "${JF_CHECK_ORIGIN:-true}"
     JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
     JF_DIST_ENABLED: "${JF_DIST_ENABLED:-true}"
