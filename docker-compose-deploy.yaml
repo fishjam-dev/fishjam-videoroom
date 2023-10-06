@@ -1,7 +1,7 @@
 version: '2.2'
 
 x-jellyfish-template: &jellyfish-template
-  image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.1.0-5ef4452}"
+  image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.2.0}"
   restart: unless-stopped
   environment: &jellyfish-environment
     JF_PORT: $JF_PORT
@@ -44,7 +44,7 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
-        BE_HOST: ${BE_HOST:-$DOMAIN:5004}
+        FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
     container_name: frontend
     restart: unless-stopped
     depends_on:
