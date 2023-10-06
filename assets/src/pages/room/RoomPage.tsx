@@ -9,7 +9,7 @@ import RoomSidebar from "./RoomSidebar";
 import { useConnect } from "../../jellifish.types";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext";
 import { useUser } from "../../contexts/UserContext";
-import { getWebsocketURL } from "./consts";
+import { getSignalingAddress } from "./consts";
 import { getTokenAndAddress } from "../../room.api";
 import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
 
@@ -27,7 +27,7 @@ const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
       return connect({
         peerMetadata: { name: username },
         token: tokenAndAddress.token,
-        websocketUrl: getWebsocketURL(tokenAndAddress.serverAddress),
+        signaling: getSignalingAddress(tokenAndAddress.serverAddress)
       });
     });
 

@@ -141,40 +141,40 @@ const useTilePinning = (): TilePinningApi => {
   useEffect(() => {
     if (!client) return;
 
-    const onPeerJoined: MessageEvents["onPeerJoined"] = (peer) => {
+    const onPeerJoined: MessageEvents["peerJoined"] = (peer) => {
       dispatch({ type: "remotePeerAdded", tileId: peer.id });
     };
 
-    const onJoinSuccess: MessageEvents["onJoinSuccess"] = (_, peersInRoom) => {
+    const onJoinSuccess: MessageEvents["joined"] = (_, peersInRoom) => {
       peersInRoom.forEach((peer) => {
         dispatch({ type: "remotePeerAdded", tileId: peer.id });
       });
     };
 
-    const onTrackReady: MessageEvents["onTrackReady"] = (ctx) => {
+    const onTrackReady: MessageEvents["trackReady"] = (ctx) => {
       const trackType: TrackType | null = parseTrackMetadata(ctx)?.type || null;
       if (trackType === "camera" || trackType === "screensharing") {
         dispatch({ type: "remoteTrackAdded", trackType, tileId: ctx.trackId });
       }
     };
 
-    const onTrackRemoved: MessageEvents["onTrackRemoved"] = (ctx) => {
+    const onTrackRemoved: MessageEvents["trackRemoved"] = (ctx) => {
       const trackType: TrackType | null = parseTrackMetadata(ctx)?.type || null;
       if (trackType === "camera" || trackType === "screensharing") {
         dispatch({ type: "remoteTrackRemoved", tileId: ctx.trackId });
       }
     };
 
-    client.on("onPeerJoined", onPeerJoined);
-    client.on("onJoinSuccess", onJoinSuccess);
-    client.on("onTrackReady", onTrackReady);
-    client.on("onTrackRemoved", onTrackRemoved);
+    client.on("peerJoined", onPeerJoined);
+    client.on("joined", onJoinSuccess);
+    client.on("trackReady", onTrackReady);
+    client.on("trackRemoved", onTrackRemoved);
 
     return () => {
-      client.off("onPeerJoined", onPeerJoined);
-      client.off("onJoinSuccess", onJoinSuccess);
-      client.off("onTrackReady", onTrackReady);
-      client.off("onTrackRemoved", onTrackRemoved);
+      client.off("peerJoined", onPeerJoined);
+      client.off("joined", onJoinSuccess);
+      client.off("trackReady", onTrackReady);
+      client.off("trackRemoved", onTrackRemoved);
     };
   }, [client, dispatch]);
 

@@ -52,13 +52,12 @@ export const BACKEND_URL = isDevEnv ?
 const origin_websocket_url = new URL(window.location.origin)
 origin_websocket_url.protocol = isSecure ? "wss:" : "ws:";
 
-export const getWebsocketURL = (serverAddress: String) => {
-  const address = new URL(`http://${serverAddress}`)
-
-  address.protocol = isSecure ? "wss:" : "ws:";
-
-
-  return `${address.origin}/socket/peer/websocket`
+export const getSignalingAddress = (serverAddress: String) => {
+  return {
+    host: serverAddress.toString(),
+    path: "/socket/peer/websocket",
+    protocol: isSecure ? "wss" : "ws"
+  }
 }
 
 export const JELLYFISH_WEBSOCKET_PROTOCOL = isSecure ? "wss" : "ws";
