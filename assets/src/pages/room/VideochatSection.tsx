@@ -107,11 +107,6 @@ export const VideochatSection: FC<Props> = ({ showSimulcast, unpinnedTilesHorizo
     initials: computeInitials(state?.local?.metadata?.name || "")
   }));
 
-  const fullState = useSelector((state) => state);
-  useEffect(() => {
-    console.log({ name: "VideochatSection", fullState });
-  }, [fullState]);
-
   const localUser: PeerTileConfig = {
     typeName: "local",
     peerId,

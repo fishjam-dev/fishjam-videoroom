@@ -6,7 +6,6 @@ const API = new RoomApi(undefined, BACKEND_URL.origin, axios);
 
 export const getTokenAndAddress = (roomId: string) =>
   API.videoroomWebRoomControllerShow(roomId).then((resp) => {
-    // console.log(resp);
     // @ts-ignore    
     const address = resp?.data?.data?.jellyfish_address || "";
 

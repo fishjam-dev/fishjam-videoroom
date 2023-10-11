@@ -124,10 +124,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     [screenSharingConfig, screenSharingDevice]
   );
 
-  useEffect(()=>{
-    console.log({ video })
-  }, [video])
-
   return (
     <LocalPeerMediaContext.Provider
       value={{

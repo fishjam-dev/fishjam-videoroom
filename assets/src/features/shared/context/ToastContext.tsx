@@ -6,7 +6,7 @@ const DEFAULT_TOAST_TIMEOUT = 2500;
 export type ToastType = { id: string; message?: string; timeout?: number | "INFINITY"; type?: "information" | "error" };
 
 export const ToastContext = createContext({
-  addToast: (newToast: ToastType) => console.log(`Unknown error while adding toast: ${newToast}`),
+  addToast: (newToast: ToastType) => console.error(`Unknown error while adding toast: ${newToast}`),
 });
 
 export const ToastProvider = ({ children }: { children?: ReactNode }) => {
