@@ -34,7 +34,7 @@ export const LOCAL_SCREEN_SHARING_ID = "LOCAL_SCREEN_SHARING_ID";
 export const DEFAULT_AUTOSTART_CAMERA_VALUE = true;
 export const DEFAULT_AUTOSTART_MICROPHONE_VALUE = true;
 export const DEFAULT_MANUAL_MODE_CHECKBOX_VALUE = false;
-export const DEFAULT_SMART_LAYER_SWITCHING_VALUE = false;
+export const DEFAULT_SMART_LAYER_SWITCHING_CHECKBOX_VALUE = true;
 
 const isSecure = new URL(window.location.origin).protocol === "https:";
 // @ts-ignore

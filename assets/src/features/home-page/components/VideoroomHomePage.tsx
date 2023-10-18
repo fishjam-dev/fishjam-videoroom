@@ -2,7 +2,7 @@ import { FC, useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext";
 import { useUser } from "../../../contexts/UserContext";
-import { DEFAULT_MANUAL_MODE_CHECKBOX_VALUE, DEFAULT_SMART_LAYER_SWITCHING_VALUE } from "../../../pages/room/consts";
+import { DEFAULT_MANUAL_MODE_CHECKBOX_VALUE, DEFAULT_SMART_LAYER_SWITCHING_CHECKBOX_VALUE } from "../../../pages/room/consts";
 import { useToggle } from "../../../pages/room/hooks/useToggle";
 import Button from "../../shared/components/Button";
 import { Checkbox, CheckboxProps } from "../../shared/components/Checkbox";
@@ -33,7 +33,7 @@ const VideoroomHomePage: FC = () => {
 
   const [simulcastInput, toggleSimulcastCheckbox] = useToggle(simulcastDefaultValue);
   const [manualModeInput, toggleManualModeCheckbox] = useToggle(DEFAULT_MANUAL_MODE_CHECKBOX_VALUE);
-  const [smartLayerSwitchingInput, toggleSmartLayerSwitchingInput] = useToggle(DEFAULT_SMART_LAYER_SWITCHING_VALUE);
+  const [smartLayerSwitchingInput, toggleSmartLayerSwitchingInput] = useToggle(DEFAULT_SMART_LAYER_SWITCHING_CHECKBOX_VALUE);
 
   const checkboxes: CheckboxProps[] = [
     {
@@ -41,14 +41,12 @@ const VideoroomHomePage: FC = () => {
       id: "simulcast",
       onChange: toggleSimulcastCheckbox,
       status: simulcastInput,
-      disabled: false,
     },
     {
       label: "Smart layer switching",
       id: "smart-layer-mode",
       onChange: toggleSmartLayerSwitchingInput,
       status: smartLayerSwitchingInput,
-      disabled: true,
     },
     {
       label: "Manual mode",
