@@ -14,7 +14,6 @@ import Chat from "../../../features/room-page/icons/Chat";
 import useSmartphoneViewport from "../../../features/shared/hooks/useSmartphoneViewport";
 import MenuDots from "../../../features/room-page/icons/MenuDots";
 import { activeButtonStyle, neutralButtonStyle, redButtonStyle } from "../../../features/room-page/consts";
-import { SCREENSHARING_MEDIA_CONSTRAINTS } from "../consts";
 import { LocalPeerContext, useLocalPeer } from "../../../features/devices/LocalPeerMediaContext";
 import { StreamingContext, useStreaming } from "../../../features/streaming/StreamingContext";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext";
@@ -35,14 +34,14 @@ const getAutomaticControls = (
   openSidebar: () => void,
   isMobileViewport?: boolean
 ): ControlButton[] => [
-  local.video.device.isEnabled
+  local.video.enabled
     ? {
         id: "cam-off",
         icon: Camera,
         hover: "Turn off the camera",
         buttonClassName: neutralButtonStyle,
         onClick: () => {
-          local.video.device.disable();
+          local.video.setEnable(false);
           camera.setActive(false);
         },
       }
@@ -52,22 +51,22 @@ const getAutomaticControls = (
         icon: CameraOff,
         buttonClassName: activeButtonStyle,
         onClick: () => {
-          if (local.video.device.stream) {
-            local.video.device.enable();
+          if (local.video.stream) {
+            local.video.setEnable(true);
           } else {
-            local.video.device.start();
+            local.video.start();
           }
           camera.setActive(true);
         },
       },
-  local.audio.device.isEnabled
+  local.audio.enabled
     ? {
         id: "mic-mute",
         icon: Microphone,
         hover: "Turn off the microphone",
         buttonClassName: neutralButtonStyle,
         onClick: () => {
-          local.audio.device.disable();
+          local.audio.setEnable(false);
           microphone.setActive(false);
         },
       }
@@ -77,15 +76,15 @@ const getAutomaticControls = (
         hover: "Turn on the microphone",
         buttonClassName: activeButtonStyle,
         onClick: () => {
-          if (local.audio.device.stream) {
-            local.audio.device.enable();
+          if (local.audio.stream) {
+            local.audio.setEnable(true);
           } else {
-            local.audio.device.start();
+            local.audio.start();
           }
           microphone.setActive(true);
         },
       },
-  local.screenShare.device.stream
+  local.screenShare.stream
     ? {
         id: "screenshare-stop",
         icon: Screenshare,
@@ -93,7 +92,7 @@ const getAutomaticControls = (
         buttonClassName: neutralButtonStyle,
         hideOnMobile: true,
         onClick: () => {
-          local.screenShare.setConfig(null);
+          local.screenShare.stop();
           screenShare.setActive(false);
         },
       }
@@ -104,7 +103,7 @@ const getAutomaticControls = (
         buttonClassName: neutralButtonStyle,
         hideOnMobile: true,
         onClick: () => {
-          local.screenShare.setConfig(SCREENSHARING_MEDIA_CONSTRAINTS);
+          local.screenShare.start();
           screenShare.setActive(true);
         },
       },
@@ -132,39 +131,40 @@ const getManualControls = (
   local: LocalPeerContext,
   navigate: NavigateFunction,
   roomId?: string
-): ControlButton[][] => [
+): ControlButton[][] => 
   [
-    local.audio.device.stream
+  [
+    local.audio.stream
       ? {
           id: "mic-stop",
           icon: Microphone,
           buttonClassName: neutralButtonStyle,
           hover: "Start the microphone",
-          onClick: () => local.audio.device.stop(),
+          onClick: () => local.audio.stop(),
         }
       : {
           id: "mic-start",
           icon: MicrophoneOff,
           buttonClassName: activeButtonStyle,
           hover: "Stop the microphone",
-          onClick: () => local.audio.device.start(),
+          onClick: () => local.audio.start(),
         },
-    local.audio.device.isEnabled
+    local.audio.enabled
       ? {
           id: "mic-disable",
           icon: Microphone,
           buttonClassName: neutralButtonStyle,
           hover: "Disable microphone stream",
-          onClick: () => local.audio.device.disable(),
+          onClick: () => local.audio.setEnable(false),
         }
       : {
           id: "mic-enable",
           icon: MicrophoneOff,
           buttonClassName: activeButtonStyle,
           hover: "Enable microphone stream",
-          onClick: () => local.audio.device.enable(),
+          onClick: () => local.audio.setEnable(true),
         },
-    microphone.trackId
+    local.audio.broadcast?.trackId
       ? {
           id: "mic-remove",
           icon: Microphone,
@@ -177,9 +177,9 @@ const getManualControls = (
           icon: MicrophoneOff,
           buttonClassName: activeButtonStyle,
           hover: "Add microphone track",
-          onClick: () => local.audio.device?.stream && microphone.addTracks(local.audio.device?.stream),
+          onClick: () => local.audio.stream && microphone.addTracks(),
         },
-    microphone.trackMetadata?.active
+    local.audio.broadcast?.metadata?.active
       ? {
           id: "mic-metadata-false",
           icon: Microphone,
@@ -196,52 +196,56 @@ const getManualControls = (
         },
   ],
   [
-    local.video.device.stream
+    local.video.stream
       ? {
           id: "cam-stop",
           icon: Camera,
           buttonClassName: neutralButtonStyle,
           hover: "Turn off the camera",
-          onClick: () => local.video.device.stop(),
+          onClick: () => 
+            local.video.stop()
+          
         }
       : {
           id: "cam-start",
           hover: "Turn on the camera",
           icon: CameraOff,
           buttonClassName: activeButtonStyle,
-          onClick: () => local.video.device.start(),
+          onClick: () => 
+            local.video.start()
+          
         },
-    local.video.device.isEnabled
+    local.video.enabled
       ? {
           id: "cam-disable",
           icon: Camera,
           buttonClassName: neutralButtonStyle,
           hover: "Disable the camera stream",
-          onClick: () => local.video.device.disable(),
+          onClick: () => local.video.setEnable(false),
         }
       : {
           id: "cam-enable",
           hover: "Enable the the camera stream",
           icon: CameraOff,
           buttonClassName: activeButtonStyle,
-          onClick: () => local.video.device.enable(),
+          onClick: () => local.video.setEnable(true),
         },
-    camera.trackId
+    local.video.broadcast?.trackId
       ? {
           id: "cam-remove",
           icon: Camera,
           buttonClassName: neutralButtonStyle,
           hover: "Remove camera track",
-          onClick: () => camera.removeTracks(),
+          onClick: () => camera.removeTracks()
         }
       : {
           id: "cam-add",
           icon: CameraOff,
           buttonClassName: activeButtonStyle,
           hover: "Add camera track",
-          onClick: () => local.video.device?.stream && camera.addTracks(local.video.device?.stream),
+          onClick: () => local.video.stream && camera.addTracks()
         },
-    camera.trackMetadata?.active
+    local.video.broadcast?.metadata?.active
       ? {
           id: "cam-metadata-false",
           icon: Camera,
@@ -258,14 +262,14 @@ const getManualControls = (
         },
   ],
   [
-    local.screenShare.device.stream
+    local.screenShare.stream
       ? {
           id: "screen-stop",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
           hover: "Stop the screensharing",
           hideOnMobile: true,
-          onClick: () => local.screenShare.device.stop(),
+          onClick: () => local.screenShare.stop(),
         }
       : {
           id: "screen-start",
@@ -273,16 +277,16 @@ const getManualControls = (
           buttonClassName: neutralButtonStyle,
           hover: "Start the screensharing",
           hideOnMobile: true,
-          onClick: () => local.screenShare.device.start(),
+          onClick: () => local.screenShare.start(),
         },
-    local.screenShare.device.isEnabled
+    local.screenShare.enabled
       ? {
           id: "screen-disable",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
           hover: "Disable screensharing stream",
           hideOnMobile: true,
-          onClick: () => local.screenShare.device.disable(),
+          onClick: () => local.screenShare.setEnable(false),
         }
       : {
           id: "screen-enable",
@@ -290,9 +294,9 @@ const getManualControls = (
           buttonClassName: neutralButtonStyle,
           hover: "Enable screensharing stream",
           hideOnMobile: true,
-          onClick: () => local.screenShare.device.enable(),
+          onClick: () => local.screenShare.setEnable(true),
         },
-    screenShare.trackId
+    local.screenShare.broadcast?.trackId
       ? {
           id: "screen-remove",
           icon: Screenshare,
@@ -307,9 +311,9 @@ const getManualControls = (
           buttonClassName: neutralButtonStyle,
           hover: "Add screensharing track",
           hideOnMobile: true,
-          onClick: () => local.screenShare.device?.stream && screenShare.addTracks(local.screenShare.device?.stream),
+          onClick: () => local.screenShare.stream && screenShare.addTracks(),
         },
-    screenShare.trackMetadata?.active
+    local.screenShare.broadcast?.metadata?.active
       ? {
           id: "screen-metadata-false",
           icon: Screenshare,

@@ -20,7 +20,7 @@ export const LocalMediaMessagesBoundary: FC<PropsWithChildren> = ({ children }) 
   useEffectOnChange(
     [video.error, audio.error],
     () => {
-      const message = prepareErrorMessage(video.error, audio.error);
+      const message = prepareErrorMessage(video.error?.name ?? null, audio.error?.name ?? null);
 
       if (message) {
         addToast({
@@ -34,8 +34,8 @@ export const LocalMediaMessagesBoundary: FC<PropsWithChildren> = ({ children }) 
     (next, prev) => prev?.[0] === next[0] && prev?.[1] === next[1]
   );
 
-  useEffectOnChange(screenShare.device.stream, () => {
-    if (screenShare.device.stream) {
+  useEffectOnChange(screenShare.stream, () => {
+    if (screenShare.stream) {
       addToast({ id: "screen-sharing", message: "You are sharing the screen now", timeout: 4000 });
     }
   });

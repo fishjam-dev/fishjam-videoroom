@@ -24,20 +24,20 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
   return (
     <div className="h-full w-full">
       <GenericMediaPlayerTile
-        video={video.device.stream || null}
+        video={video.stream || null}
         audio={null}
         flipHorizontally
         layers={
           <>
-            {!video.device.isEnabled ? <InitialsImage initials={initials} /> : null}
+            {!video.enabled ? <InitialsImage initials={initials} /> : null}
             <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-x-4">
-              {video.device.isEnabled ? (
+              {video.enabled ? (
                 <MediaControlButton
                   icon={Camera}
                   hover="Turn off the camera"
                   buttonClassName={neutralButtonStyle}
                   onClick={() => {
-                    video.device.stop();
+                    video.stop();
                   }}
                 />
               ) : (
@@ -46,21 +46,21 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the camera"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    if (video.device.stream) {
-                      video.device.enable();
+                    if (video.stream) {
+                      video.setEnable(true);
                     } else {
-                      video.device.start();
+                      video.start();
                     }
                   }}
                 />
               )}
-              {audio.device.isEnabled ? (
+              {audio.enabled ? (
                 <MediaControlButton
                   icon={Microphone}
                   hover="Turn off the microphone"
                   buttonClassName={neutralButtonStyle}
                   onClick={() => {
-                    audio.device.stop();
+                    audio.stop();
                   }}
                 />
               ) : (
@@ -69,10 +69,10 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the microphone"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    if (audio.device.stream) {
-                      audio.device.enable();
+                    if (audio.stream) {
+                      audio.setEnable(true);
                     } else {
-                      audio.device.start();
+                      audio.start();
                     }
                   }}
                 />

@@ -1,9 +1,7 @@
 import { toPairs } from "ramda";
 import { TrackWithId } from "./pages/types";
 import { ApiTrack, RemotePeer } from "./pages/room/hooks/usePeerState";
-import { Api, State } from "@jellyfish-dev/react-client-sdk";
-import { create } from "@jellyfish-dev/react-client-sdk/experimental";
-import { JellyfishClient } from "@jellyfish-dev/ts-client-sdk";
+import { State, JellyfishClient, create } from "@jellyfish-dev/react-client-sdk";
 
 const TrackTypeValues = ["screensharing", "camera", "audio"] as const;
 export type TrackType = (typeof TrackTypeValues)[number];
@@ -16,13 +14,18 @@ export type TrackMetadata = {
   active: boolean;
 };
 
-// export const { useSelector, useConnect, JellyfishContextProvider } = create<PeerMetadata, TrackMetadata>();
-export const { useSelector, useConnect } = create<PeerMetadata, TrackMetadata>();
+export const {
+  useSelector,
+  useStatus,
+  useConnect,
+  useSetupMedia,
+  useCamera,
+  useMicrophone,
+  useScreenshare,
+  JellyfishContextProvider,
+  useApi,
+} = create<PeerMetadata, TrackMetadata>();
 
-export const useApi = (): Api<TrackMetadata> | null => useSelector((s) => s.connectivity.api);
-// export const useApi = (): Api<TrackMetadata> | null => null;
-// export const useApi = (): Api<TrackMetadata> | null => useSelector((s) => null);
-// export const useJellyfishClient = () => null;
 export const useJellyfishClient = (): JellyfishClient<PeerMetadata, TrackMetadata> | null =>
   useSelector((s) => s.connectivity.client);
 

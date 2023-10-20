@@ -64,6 +64,7 @@ const UnpinnedTilesSection: FC<Props> = ({
     <div id="videos-grid" className={videoGridStyle}>
       {tileConfigs.map((config: MediaPlayerTileConfig) => {
         const video: TrackWithId | null = config.video;
+        console.log(video);
         const upperLeftIcon: JSX.Element | null = getTileUpperLeftIcon(config);
 
         const InfoLayer: FC = () => (
