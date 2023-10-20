@@ -106,7 +106,6 @@ export const useMembraneMediaStreaming = (
 
   const setActive = useCallback(
     (status: boolean) => {
-      console.log(trackMetadata)
       if (trackMetadata) {
         updateTrackMetadata({ ...trackMetadata, active: status });
       } else {

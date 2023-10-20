@@ -16,7 +16,6 @@ const LocalMediaPlayerTile: FC<Props> = ({
   className,
   blockFillContent,
 }: Props) => {
-  console.log(video, audio)
   const localEncoding: UseSimulcastLocalEncoding = useSimulcastSend();
 
   return (

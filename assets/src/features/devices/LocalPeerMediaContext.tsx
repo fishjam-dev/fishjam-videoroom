@@ -1,34 +1,7 @@
 import React, { useContext } from "react";
-import { AUDIO_TRACK_CONSTRAINTS, VIDEO_TRACK_CONSTRAINTS } from "../../pages/room/consts";
-// import { loadObject, saveObject } from "../shared/utils/localStorage";
-// import { useMedia } from "./useMedia";
-// import { DeviceState, Type, UseUserMediaConfig, UseUserMediaStartConfig } from "./use-user-media/type";
+import { AUDIO_TRACK_CONSTRAINTS, SCREENSHARING_TRACK_CONSTRAINTS, VIDEO_TRACK_CONSTRAINTS } from "../../pages/room/consts";
 import { TrackMetadata, useCamera, useMicrophone, useScreenshare, useSetupMedia } from "../../jellifish.types";
 import { UseCameraResult, UseMicrophoneResult, UseScreenshareResult } from "@jellyfish-dev/react-client-sdk";
-// import { useUserMedia } from "./use-user-media/useUserMedia";
-
-export type Device = {
-  stream: MediaStream | null;
-  start: () => void;
-  stop: () => void;
-  isEnabled: boolean;
-  disable: () => void;
-  enable: () => void;
-};
-
-export type UserMedia = {
-  id: string | null;
-  setId: (id: string) => void;
-  device: Device;
-  error: string | null;
-  devices: MediaDeviceInfo[] | null;
-};
-
-export type DisplayMedia = {
-  setConfig: (constraints: MediaStreamConstraints | null) => void;
-  config: MediaStreamConstraints | null;
-  device: Device;
-};
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
@@ -62,10 +35,10 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       preview: true,
     },
     screenshare: {
+      trackConstraints: SCREENSHARING_TRACK_CONSTRAINTS,
       defaultTrackMetadata: {active: true, type: "screensharing"},
       autoStreaming: false,
       preview: true,
-      trackConstraints: true,
     },
     startOnMount: true,
     storage: true,
