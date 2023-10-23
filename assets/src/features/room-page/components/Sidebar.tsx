@@ -5,7 +5,7 @@ import ChevronDown from "../icons/ChevronDown";
 import Chat from "./Chat";
 import PeopleComponent from "./PeopleComponent";
 import SidebarTab, { Tab } from "./SidebarTab";
-import { useSelector } from "../../../jellifish.types";
+import { useSelector } from "../../../jellyfish.types";
 
 type SidebarProps = {
   onClose?: () => void;

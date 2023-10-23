@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { AUDIO_TRACK_CONSTRAINTS, SCREENSHARING_TRACK_CONSTRAINTS, VIDEO_TRACK_CONSTRAINTS } from "../../pages/room/consts";
-import { TrackMetadata, useCamera, useMicrophone, useScreenshare, useSetupMedia } from "../../jellifish.types";
+import { TrackMetadata, useCamera, useMicrophone, useScreenshare, useSetupMedia } from "../../jellyfish.types";
 import { UseCameraResult, UseMicrophoneResult, UseScreenshareResult } from "@jellyfish-dev/react-client-sdk";
 
 export type LocalPeerContext = {

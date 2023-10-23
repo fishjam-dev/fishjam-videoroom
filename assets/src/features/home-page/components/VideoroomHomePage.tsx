@@ -28,7 +28,7 @@ const VideoroomHomePage: FC = () => {
   // const [searchParams] = useSearchParams();
   // const simulcastParam: string = searchParams?.get("simulcast") || "true";
   // const simulcastDefaultValue: boolean = simulcastParam === "true";
-  // right now Jellifish does not support simulcast
+  // right now Jellyfish does not support simulcast
   const simulcastDefaultValue = true;
 
   const [simulcastInput, toggleSimulcastCheckbox] = useToggle(simulcastDefaultValue);

@@ -4,7 +4,7 @@ import {
   StreamingMode,
   useMembraneMediaStreaming,
 } from "../../pages/room/hooks/useMembraneMediaStreaming";
-import { useStatus } from "../../jellifish.types";
+import { useStatus } from "../../jellyfish.types";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext";
 import { useLocalPeer } from "../devices/LocalPeerMediaContext";
 

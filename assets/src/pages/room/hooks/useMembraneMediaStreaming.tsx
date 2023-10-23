@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TrackMetadata, useApi } from "../../../jellifish.types.ts";
+import { TrackMetadata, useApi } from "../../../jellyfish.types.ts";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext.tsx";
 import { selectBandwidthLimit } from "../bandwidth.tsx";
 import { UseCameraResult, UseMicrophoneResult, UseScreenshareResult } from "@jellyfish-dev/react-client-sdk";

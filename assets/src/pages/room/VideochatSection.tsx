@@ -9,7 +9,7 @@ import { MediaPlayerTileConfig, PeerTileConfig, ScreenShareTileConfig, TrackType
 import UnpinnedTilesSection from "./components/StreamPlayer/UnpinnedTilesSection";
 import PinnedTilesSection from "./components/StreamPlayer/PinnedTilesSection";
 import useTilePinning from "./hooks/useTilePinning";
-import { toLocalTrackSelector, toRemotePeerSelector, useSelector } from "../../jellifish.types";
+import { toLocalTrackSelector, toRemotePeerSelector, useSelector } from "../../jellyfish.types";
 
 type Props = {
   showSimulcast: boolean;

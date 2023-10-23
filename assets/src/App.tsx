@@ -12,10 +12,9 @@ import { disableSafariCache } from "./features/devices/disableSafariCache";
 import ReactModal from "react-modal";
 import "./index.css";
 
-// import { JellyfishContextProvider } from "./jellifish.types";
 import { StreamingProvider } from "./features/streaming/StreamingContext";
 import { StreamingErrorBoundary } from "./features/streaming/StreamingErrorBoundary";
-import { JellyfishContextProvider } from "./jellifish.types";
+import { JellyfishContextProvider } from "./jellyfish.types";
 
 // When returning to the videoroom page from another domain using the 'Back' button on the Safari browser,
 // the page is served from the cache, which prevents lifecycle events from being triggered.
