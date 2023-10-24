@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TrackType } from "../../types";
-import { TrackMetadata, useApi } from "../../../jellifish.types";
-import { Device } from "../../../features/devices/LocalPeerMediaContext";
+import { TrackMetadata, useApi } from "../../../jellyfish.types.ts";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext.tsx";
 import { selectBandwidthLimit } from "../bandwidth.tsx";
+import { UseCameraResult, UseMicrophoneResult, UseScreenshareResult } from "@jellyfish-dev/react-client-sdk";
 
 export type MembraneStreaming = {
   trackId: string | null;
   removeTracks: () => void;
-  addTracks: (stream: MediaStream) => void;
+  addTracks: () => void;
   setActive: (status: boolean) => void;
   updateTrackMetadata: (metadata: TrackMetadata) => void;
   trackMetadata: TrackMetadata | null;
@@ -23,9 +22,9 @@ type TrackIds = {
 
 export const useMembraneMediaStreaming = (
   mode: StreamingMode,
-  type: TrackType,
+  {type, device}: {type: "screensharing",
+  device: UseScreenshareResult<TrackMetadata>} | {type: "camera", device: UseCameraResult<TrackMetadata>} | {type: "audio", device: UseMicrophoneResult<TrackMetadata>},
   isConnected: boolean,
-  device: Device
 ): MembraneStreaming => {
   const [trackIds, setTrackIds] = useState<TrackIds | null>(null);
 
@@ -34,34 +33,20 @@ export const useMembraneMediaStreaming = (
   const simulcastEnabled = simulcast.status;
 
   const [trackMetadata, setTrackMetadata] = useState<TrackMetadata | null>(null);
-  const defaultTrackMetadata = useMemo(() => ({ active: device.isEnabled, type }), [device.isEnabled, type]);
+  const defaultTrackMetadata = useMemo(() => ({ active: device.enabled, type }), [device.enabled, type]);
 
   const addTracks = useCallback(
-    (stream: MediaStream) => {
-      if (!api) return;
-      const tracks = type === "audio" ? stream.getAudioTracks() : stream.getVideoTracks();
+    () => {
       const simulcast = simulcastEnabled && type === "camera";
-
-      const track: MediaStreamTrack | undefined = tracks[0];
-
-      if (!track) {
-        console.error({ stream, type });
-        throw Error("Stream has no tracks!");
+      const trackMetadata = { active: device.enabled, type };
+      if (type === "camera") {
+        device.addTrack(trackMetadata, simulcast ? { enabled: true, active_encodings: ["l", "m", "h"]} : undefined, selectBandwidthLimit(type, simulcast));
+      } else {
+        device.addTrack(trackMetadata, selectBandwidthLimit(type, simulcast))
       }
-
-      const remoteTrackId = api.addTrack(
-        track,
-        stream,
-        defaultTrackMetadata,
-        simulcast ? { enabled: true, active_encodings: ["l", "m", "h"] } : undefined,
-        selectBandwidthLimit(type, simulcast)
-      );
-
-      setTrackIds({ localId: track.id, remoteId: remoteTrackId });
       setTrackMetadata(defaultTrackMetadata);
     },
-    // [defaultTrackMetadata, simulcastEnabled, type, api]
-    [defaultTrackMetadata, type, api]
+    [defaultTrackMetadata, simulcastEnabled, type, api]
   );
 
   const replaceTrack = useCallback(
@@ -70,7 +55,7 @@ export const useMembraneMediaStreaming = (
       const tracks = type === "audio" ? stream.getAudioTracks() : stream.getVideoTracks();
 
       const track: MediaStreamTrack | undefined = tracks[0];
-      if (!track) {
+      if (!device.track) {
         console.error({ stream, type });
         throw Error("Stream has no tracks!");
       }
@@ -83,11 +68,8 @@ export const useMembraneMediaStreaming = (
   const removeTracks = useCallback(() => {
     setTrackIds(null);
     setTrackMetadata(null);
-
-    if (!api || !trackIds) return;
-
-    api.removeTrack(trackIds.remoteId);
-  }, [api, trackIds]);
+    device.removeTrack();
+  }, [device]);
 
   useEffect(() => {
     if (!api || !isConnected || mode !== "automatic") {
@@ -99,13 +81,19 @@ export const useMembraneMediaStreaming = (
     const localTrackId: string | undefined = (tracks || [])[0]?.id;
 
     if (stream && !trackIds) {
-      addTracks(stream);
+      addTracks();
     } else if (stream && trackIds && trackIds.localId !== localTrackId) {
       replaceTrack(stream);
     } else if (!stream && trackIds) {
       removeTracks();
     }
-  }, [api, device.stream, device.isEnabled, isConnected, addTracks, mode, removeTracks, trackIds, replaceTrack, type]);
+  }, [api, device.stream, device.enabled, isConnected, addTracks, mode, removeTracks, trackIds, replaceTrack, type]);
+  
+  useEffect(() => {
+    if (device.track?.id && device.broadcast?.trackId) {
+      setTrackIds({ localId: device.track?.id, remoteId: device.broadcast?.trackId });
+    }
+  }, [device.track?.id, device.broadcast?.trackId]);
 
   const updateTrackMetadata = useCallback(
     (metadata: TrackMetadata) => {
@@ -120,8 +108,9 @@ export const useMembraneMediaStreaming = (
     (status: boolean) => {
       if (trackMetadata) {
         updateTrackMetadata({ ...trackMetadata, active: status });
+      } else {
+        throw Error("Track metadata is null!");
       }
-      throw Error("Track metadata is null!");
     },
     [trackMetadata, updateTrackMetadata]
   );

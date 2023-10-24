@@ -6,7 +6,7 @@ import PageLayout from "../../features/room-page/components/PageLayout";
 import { useAcquireWakeLockAutomatically } from "./hooks/useAcquireWakeLockAutomatically";
 import clsx from "clsx";
 import RoomSidebar from "./RoomSidebar";
-import { useConnect } from "../../jellifish.types";
+import { useConnect } from "../../jellyfish.types.ts";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext";
 import { useUser } from "../../contexts/UserContext";
 import { getSignalingAddress } from "./consts";

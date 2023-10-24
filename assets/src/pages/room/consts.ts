@@ -19,12 +19,10 @@ export const VIDEO_TRACK_CONSTRAINTS: MediaTrackConstraints = {
   },
 };
 
-export const SCREENSHARING_MEDIA_CONSTRAINTS: MediaStreamConstraints = {
-  video: {
-    frameRate: { ideal: 20, max: 25 },
-    width: { max: 1920, ideal: 1920 },
-    height: { max: 1080, ideal: 1080 },
-  },
+export const SCREENSHARING_TRACK_CONSTRAINTS: MediaTrackConstraints = {
+  frameRate: { ideal: 20, max: 25 },
+  width: { max: 1920, ideal: 1920 },
+  height: { max: 1080, ideal: 1080 },
 };
 
 export const LOCAL_PEER_NAME = "You";

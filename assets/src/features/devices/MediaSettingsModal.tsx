@@ -6,26 +6,26 @@ import { Modal } from "../shared/components/modal/Modal";
 
 export const MediaSettingsModal: React.FC = () => {
   const { setOpen, isOpen } = useModal();
-  const { video, audio, start } = useLocalPeer();
+  const { video, audio } = useLocalPeer();
   const [videoInput, setVideoInput] = useState<string | null>(null);
   const [audioInput, setAudioInput] = useState<string | null>(null);
 
   useEffect(() => {
-    if (video.devices && video.id) {
-      setVideoInput(video.id);
+    if (video.devices && video.deviceInfo?.deviceId) {
+      setVideoInput(video.deviceInfo?.deviceId);
     }
-  }, [video.devices, video.id]);
+  }, [video.devices, video.deviceInfo?.deviceId]);
 
   useEffect(() => {
-    if (audio.devices && audio.id) {
-      setAudioInput(audio.id);
+    if (audio.devices && audio.deviceInfo?.deviceId) {
+      setAudioInput(audio.deviceInfo.deviceId);
     }
-  }, [audio.devices, audio.id]);
+  }, [audio.devices, audio.deviceInfo?.deviceId]);
 
   const handleClose = () => {
     setOpen(false);
-    setAudioInput(audio.id);
-    setVideoInput(video.id);
+    setAudioInput(audio.deviceInfo?.deviceId ?? null);
+    setVideoInput(video.deviceInfo?.deviceId ?? null);
   };
 
   return (
@@ -36,10 +36,8 @@ export const MediaSettingsModal: React.FC = () => {
       closable
       cancelClassName="!text-additional-red-100"
       onConfirm={() => {
-        start({
-          audioDeviceId: audioInput || undefined,
-          videoDeviceId: videoInput || undefined,
-        });
+        video.start(videoInput || undefined);
+        audio.start(audioInput || undefined);
         setOpen(false);
       }}
       onCancel={handleClose}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer } from "react";
-import { toLocalTrackSelector, TrackType, useJellyfishClient, useSelector } from "../../../jellifish.types";
+import { toLocalTrackSelector, TrackType, useJellyfishClient, useSelector } from "../../../jellyfish.types";
 import useEffectOnChange from "../../../features/shared/hooks/useEffectOnChange";
 import { MessageEvents } from "@jellyfish-dev/ts-client-sdk";
 import { LOCAL_SCREEN_SHARING_ID, LOCAL_VIDEO_ID } from "../consts";

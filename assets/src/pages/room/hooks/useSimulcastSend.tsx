@@ -1,6 +1,6 @@
 import { useToggle } from "./useToggle";
 import { TrackEncoding } from "@jellyfish-dev/membrane-webrtc-js";
-import { useApi, useCurrentUserVideoTrackId } from "../../../jellifish.types";
+import { useApi, useCurrentUserVideoTrackId } from "../../../jellyfish.types";
 
 export type UseSimulcastLocalEncoding = {
   highQuality: boolean;
