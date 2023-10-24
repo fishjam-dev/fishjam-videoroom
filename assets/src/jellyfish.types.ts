@@ -58,8 +58,8 @@ export const toRemotePeerSelector = (state: State<PeerMetadata, TrackMetadata>):
       return {
         trackId,
         metadata: track.metadata || undefined,
-        isSpeaking: false,
-        encoding: "h",
+        isSpeaking: track.vadStatus === "speech",
+        encoding: track.encoding || undefined,
         mediaStream: track.stream || undefined,
         mediaStreamTrack: track.track || undefined,
       };
