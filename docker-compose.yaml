@@ -50,6 +50,8 @@ services:
       dockerfile: ./Dockerfile
       args:
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
+        JELLYROOM_VERSION: ${JELLYROOM_VERSION:-0.2.R}
+        JELLYFISH_VERSION: ${JELLYFISH_VERSION:-0.2.F}
     container_name: frontend
     restart: unless-stopped
     depends_on:

@@ -4,6 +4,7 @@ import BlockingScreen from "../../shared/components/BlockingScreen";
 
 import Navbar from "./Navbar";
 import useSmartphoneViewport from "../../shared/hooks/useSmartphoneViewport";
+import { JELLYFISH_VERSION, JELLYROOM_VERSION } from "../../../pages/room/consts";
 
 const HomePageLayout: FC<PropsWithChildren> = ({ children }) => {
   const { isSmartphone, isHorizontal } = useSmartphoneViewport();
@@ -21,8 +22,11 @@ const HomePageLayout: FC<PropsWithChildren> = ({ children }) => {
           shouldBlockScreen && "invisible"
         )}
       >
-        <div className="top-4 mb-4 self-start sm:absolute sm:inset-x-4 sm:mb-0">
+        <div className="top-4 mb-4 self-start flex justify-between sm:absolute sm:inset-x-4 sm:mb-0">
           <Navbar />
+          <div className="">
+            {`${JELLYROOM_VERSION} (jellyfish ${JELLYFISH_VERSION})`}
+          </div>
         </div>
 
         <div className="flex h-full w-full items-center justify-center">{children}</div>

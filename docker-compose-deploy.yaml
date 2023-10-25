@@ -1,7 +1,7 @@
 version: '2.2'
 
 x-jellyfish-template: &jellyfish-template
-  image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.2.0}"
+  image: "ghcr.io/jellyfish-dev/jellyfish:${JELLYFISH_VERSION:-0.2.0}"
   restart: unless-stopped
   environment: &jellyfish-environment
     JF_PORT: $JF_PORT
@@ -45,6 +45,8 @@ services:
       dockerfile: ./Dockerfile
       args:
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
+        JELLYROOM_VERSION: ${JELLYROOM_VERSION}
+        JELLYFISH_VERSION: ${JELLYFISH_VERSION}
     container_name: frontend
     restart: unless-stopped
     depends_on:
