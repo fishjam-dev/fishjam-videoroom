@@ -24,7 +24,7 @@ jobs:
         id: versions
         run: |
           cat << EOF >> $GITHUB_OUTPUT
-          jellyroom=${GITHUB_SHA}
+          jellyroom=${GITHUB_SHA:0:7}
           jellyfish=$(cat .jellyfish-version)
           EOF
 

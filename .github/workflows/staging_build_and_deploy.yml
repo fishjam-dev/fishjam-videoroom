@@ -20,8 +20,11 @@ jobs:
 
       - name: Set versions
         id: versions
-        run: echo "jellyroom=${GITHUB_SHA}" >> $GITHUB_OUTPUT
-        run: echo "jellyfish=$(cat .jellyfish-version)" >> $GITHUB_OUTPUT
+        run: |
+          cat << EOF >> $GITHUB_OUTPUT
+          jellyroom=${GITHUB_SHA:0:7}
+          jellyfish=$(cat .jellyfish-version)
+          EOF
 
       - name: Prepare .env file for the deployment
         id: variables_population
