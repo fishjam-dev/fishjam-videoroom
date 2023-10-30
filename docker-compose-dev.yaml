@@ -2,7 +2,7 @@ version: "3"
 
 services:
   jellyfish:
-    image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.2.0}"
+    image: "ghcr.io/jellyfish-dev/jellyfish:${JELLYFISH_VERSION:-0.2.0}"
     container_name: jellyfish
     restart: on-failure
     healthcheck:
