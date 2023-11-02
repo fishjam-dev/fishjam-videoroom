@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import MediaControlButtons from "./components/MediaControlButtons";
 import { useToggle } from "./hooks/useToggle";
 import { VideochatSection } from "./VideochatSection";
@@ -11,6 +11,7 @@ import { useUser } from "../../contexts/UserContext";
 import { getSignalingAddress } from "./consts";
 import { getTokenAndAddress } from "../../room.api";
 import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
+import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 
 type ConnectComponentProps = {
   username: string;
@@ -20,8 +21,18 @@ type ConnectComponentProps = {
 const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
   const connect = useConnect();
   const streaming = useStreaming();
-
+  const localPeer = useLocalPeer();
+  const localPeerRef = useRef(localPeer);
   useEffect(() => {
+    localPeerRef.current = localPeer;
+  }, [localPeer]);
+
+  const wasConnectedRef = useRef(false);
+  useEffect(() => {
+    if (!wasConnectedRef.current) {
+      wasConnectedRef.current = true;
+      return;
+    };
     const disconnectCallback = getTokenAndAddress(roomId).then((tokenAndAddress) => {
       return connect({
         peerMetadata: { name: username },
@@ -34,6 +45,10 @@ const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
       streaming.camera.removeTracks();
       streaming.microphone.removeTracks();
       streaming.screenShare.removeTracks();
+      const { video, audio, screenShare } = localPeerRef.current;
+      video.stop();
+      audio.stop();
+      screenShare.stop();
       disconnectCallback.then((disconnect) => {
         disconnect();
       });
@@ -46,9 +61,11 @@ const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
 
 type Props = {
   roomId: string;
+  wasCameraDisabled: boolean;
+  wasMicrophoneDisabled: boolean;
 };
 
-const RoomPage: FC<Props> = ({ roomId }: Props) => {
+const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled }: Props) => {
   useAcquireWakeLockAutomatically();
 
   const [showSimulcastMenu, toggleSimulcastMenu] = useToggle(false);
@@ -56,6 +73,16 @@ const RoomPage: FC<Props> = ({ roomId }: Props) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { username } = useUser();
+  
+  const { video, audio } = useLocalPeer();
+
+  const wasMediaStartedRef = useRef(false);
+  useEffect(() => {
+    if (wasMediaStartedRef.current) return;
+    wasMediaStartedRef.current = true;
+    if (!wasCameraDisabled) video.start();
+    if (!wasMicrophoneDisabled) audio.start();
+  }, []);
 
   return (
     <PageLayout>

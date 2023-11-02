@@ -1,8 +1,24 @@
-import { FC } from "react";
+import { FC, SyntheticEvent } from "react";
 import Button from "../../shared/components/Button";
 import HomePageLayout from "./HomePageLayout";
+import { useNavigate } from "react-router-dom";
 
-const LeavingRoomScreen: FC<{ roomId: string }> = ({ roomId }) => {
+interface Props {
+  roomId: string;
+  wasCameraDisabled: boolean;
+  wasMicrophoneDisabled: boolean;
+}
+
+const LeavingRoomScreen: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled }) => {
+  const navigate = useNavigate();
+  
+  const rejoinHref = `/room/${roomId}`;
+
+  const onRejoin = (e: SyntheticEvent) => {
+    e.preventDefault();
+    navigate(rejoinHref, { state: { wasCameraDisabled, wasMicrophoneDisabled}});
+  }
+
   return (
     <HomePageLayout>
       <section className="flex h-full w-full flex-col items-center justify-center gap-y-14 sm:gap-y-20">
@@ -12,7 +28,7 @@ const LeavingRoomScreen: FC<{ roomId: string }> = ({ roomId }) => {
         </div>
 
         <div className="flex w-full flex-col justify-center gap-6 text-center sm:flex-row">
-          <Button href={`/room/${roomId}`} name="rejoin-meeting" variant="light">
+          <Button onClick={onRejoin} href={rejoinHref} name="rejoin-meeting" variant="light">
             Rejoin the meeting
           </Button>
           <Button href="/" name="main-page" variant="normal">
