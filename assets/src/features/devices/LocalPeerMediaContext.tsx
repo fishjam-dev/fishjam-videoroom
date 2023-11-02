@@ -25,7 +25,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       preview: true,
       defaultSimulcastConfig: {
         enabled: true,
-        active_encodings: ["l", "m", "h"],
+        activeEncodings: ["l", "m", "h"],
       },
     },
     microphone: {
@@ -43,7 +43,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     startOnMount: true,
     storage: true,
   });
-  
+
   const video = useCamera();
   const audio = useMicrophone();
   const screenShare = useScreenshare();

@@ -12,10 +12,10 @@ export const SimulcastEncodingToSend: FC<Props> = ({ localEncoding, disabled }: 
     localEncoding;
 
   return (
-    <div className="absolute right-0 top-0 z-50 flex flex-row rounded-bl-xl bg-white/80 px-4 py-2 text-sm text-gray-700  md:text-base">
+    <div className="absolute right-0 top-0 z-50 flex flex-row rounded-bl-xl bg-white/80 px-4 py-2 text-sm text-gray-700 md:text-base">
       <div>Encodings to send</div>
       <LayerButton
-        selected={highQuality}
+        selected={highQuality && !disabled}
         disabled={disabled}
         text="H"
         onClick={() => toggleHighQuality()}
@@ -23,7 +23,7 @@ export const SimulcastEncodingToSend: FC<Props> = ({ localEncoding, disabled }: 
         tooltipCss="right-10"
       />
       <LayerButton
-        selected={mediumQuality}
+        selected={mediumQuality && !disabled}
         disabled={disabled}
         text="M"
         onClick={() => toggleMediumQuality()}
@@ -31,7 +31,7 @@ export const SimulcastEncodingToSend: FC<Props> = ({ localEncoding, disabled }: 
         tooltipCss="right-10"
       />
       <LayerButton
-        selected={lowQuality}
+        selected={lowQuality && !disabled}
         disabled={disabled}
         text="L"
         onClick={() => toggleLowQuality()}

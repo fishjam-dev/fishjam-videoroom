@@ -18,7 +18,7 @@ export const LayerButton = ({ onClick, text, tooltipText, disabled, selected, to
       disabled={disabled}
       onClick={onClick}
       className={clsx(
-        "mx-0.5 flex min-w-[26px] items-center justify-center rounded-full border px-2 disabled:pointer-events-none",
+        "mx-0.5 flex min-w-[26px] items-center justify-center rounded-full border px-2 disabled:pointer-events-none hover:bg-red-300",
         selected && "bg-red-100"
       )}
     >

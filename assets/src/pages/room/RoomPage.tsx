@@ -7,7 +7,6 @@ import { useAcquireWakeLockAutomatically } from "./hooks/useAcquireWakeLockAutom
 import clsx from "clsx";
 import RoomSidebar from "./RoomSidebar";
 import { useConnect } from "../../jellyfish.types.ts";
-import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext";
 import { useUser } from "../../contexts/UserContext";
 import { getSignalingAddress } from "./consts";
 import { getTokenAndAddress } from "../../room.api";
@@ -52,9 +51,6 @@ type Props = {
 const RoomPage: FC<Props> = ({ roomId }: Props) => {
   useAcquireWakeLockAutomatically();
 
-  const { simulcast } = useDeveloperInfo();
-  const isSimulcastOn = simulcast.status;
-
   const [showSimulcastMenu, toggleSimulcastMenu] = useToggle(false);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -81,15 +77,13 @@ const RoomPage: FC<Props> = ({ roomId }: Props) => {
 
         {/* dev helpers */}
         <div className="invisible absolute bottom-3 right-3 flex flex-col items-stretch md:visible">
-          {isSimulcastOn && (
-            <button
-              onClick={toggleSimulcastMenu}
-              className="m-1 w-full rounded bg-brand-grey-80 px-4 py-2 text-white hover:bg-brand-grey-100"
-              type="submit"
-            >
-              Show simulcast controls
-            </button>
-          )}
+          <button
+            onClick={toggleSimulcastMenu}
+            className="m-1 w-full rounded bg-brand-grey-80 px-4 py-2 text-white hover:bg-brand-grey-100"
+            type="submit"
+          >
+            Show simulcast controls
+          </button>
         </div>
       </div>
     </PageLayout>
