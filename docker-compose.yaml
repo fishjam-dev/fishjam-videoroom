@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 x-jellyfish-template: &jellyfish-template
   image: "ghcr.io/jellyfish-dev/jellyfish:${TAG:-0.2.0}"
@@ -83,7 +83,8 @@ services:
       context: ./prometheus
       dockerfile: Dockerfile
       args:
-        TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
+        JELLYFISH_TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
+        NODE_TARGETS: 'node_exporter:9100'
     container_name: prometheus
     restart: on-failure
     command:
@@ -114,6 +115,15 @@ services:
       - '3000:3000'
     expose:
       - 3000
+
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: node_exporter
+    restart: on-failure
+    command:
+      - --path.rootfs=/host
+    volumes:
+      - /:/host:ro,rslave
 
 volumes:
   grafana_data: {}

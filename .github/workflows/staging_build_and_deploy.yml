@@ -32,7 +32,8 @@ jobs:
           BE_HOST=${{env.BE_HOST}}
           BE_JF_SECURE_CONNECTION=true
           BE_JF_ADDRESSES=${{env.JF1_HOST}} ${{env.JF2_HOST}}
-          PROMETHEUS_TARGETS=jellyfish1:9568,${{secrets.STAGING2_IP}}:9568
+          JELLYFISH_TARGETS=jellyfish1:9568,${{secrets.SANDBOX2_IP}}:9568
+          NODE_TARGETS=node_exporter1:9100,${{secrets.SANDBOX2_IP}}:9100
           GF_SECURITY_ADMIN_PASSWORD=${{secrets.GF_SECURITY_ADMIN_PASSWORD}}
           GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}}" > .env
 
@@ -51,7 +52,7 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
-          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish1 frontend backend prometheus grafana
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish1 node_exporter1 frontend backend prometheus grafana
 
   deploy2:
     runs-on: ubuntu-latest
@@ -82,4 +83,4 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
-          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish2
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build jellyfish2 node_exporter2
