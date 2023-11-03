@@ -23,12 +23,11 @@ x-jellyfish-template: &jellyfish-template
 x-node-exporter: &node-exporter-template
   image: prom/node-exporter:v1.6.1
   restart: on-failure
+  network_mode: host
   command:
     - --path.rootfs=/host
   volumes:
     - /:/host:ro,rslave
-  ports:
-    - "9100:9100"
 
 services:
   jellyfish1:

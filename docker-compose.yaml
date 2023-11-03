@@ -84,7 +84,7 @@ services:
       dockerfile: Dockerfile
       args:
         JELLYFISH_TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
-        NODE_TARGETS: 'node_exporter:9100'
+        NODE_TARGETS: '172.17.0.1:9100'
     container_name: prometheus
     restart: on-failure
     command:
@@ -120,6 +120,7 @@ services:
     image: prom/node-exporter:v1.6.1
     container_name: node_exporter
     restart: on-failure
+    network_mode: host
     command:
       - --path.rootfs=/host
     volumes:
