@@ -48,18 +48,18 @@ export const useMembraneMediaStreaming = (
   const addTracks = useCallback(
     () => {
       if (type === "camera") {
-        device.addTrack(defaultTrackMetadata, simulcastEnabled ? { enabled: true, active_encodings: ["l", "m", "h"]} : undefined, selectBandwidthLimit(type, simulcastEnabled));
+        device.addTrack(defaultTrackMetadata, simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"]} : undefined, selectBandwidthLimit(type, simulcastEnabled));
       } else {
         device.addTrack(defaultTrackMetadata, selectBandwidthLimit(type, simulcastEnabled))
       }
       setTrackMetadata(defaultTrackMetadata);
     },
-    [defaultTrackMetadata, simulcastEnabled, type, api]
+    [defaultTrackMetadata, simulcastEnabled, type]
   );
 
   const replaceTrack = useCallback(
     () => {
-      if (!api || !trackIds || !device.stream) return;
+      if (!trackIds || !device.stream) return;
       if (!device.track) {
         console.error({ stream: device.stream, type });
         throw Error("Stream has no tracks!");
@@ -67,7 +67,7 @@ export const useMembraneMediaStreaming = (
 
       device.replaceTrack(device.track, device.stream)
     },
-    [device.stream, device.track, trackIds, type, api]
+    [device.stream, device.track, trackIds, type]
   );
 
   const removeTracks = useCallback(() => {
