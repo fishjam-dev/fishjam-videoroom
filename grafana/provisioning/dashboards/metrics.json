@@ -48,8 +48,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green",
-                                        "value": null
+                                        "color": "green"
                                     }
                                 ]
                             }
@@ -145,8 +144,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green",
-                                        "value": null
+                                        "color": "green"
                                     }
                                 ]
                             },
@@ -219,6 +217,7 @@
                                 "mode": "continuous-BlYlRd"
                             },
                             "custom": {
+                                "axisBorderShow": false,
                                 "axisCenteredZero": false,
                                 "axisColorMode": "text",
                                 "axisLabel": "",
@@ -254,7 +253,8 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green"
+                                        "color": "green",
+                                        "value": null
                                     }
                                 ]
                             },
@@ -266,7 +266,7 @@
                         "h": 8,
                         "w": 12,
                         "x": 0,
-                        "y": 34
+                        "y": 2
                     },
                     "id": 3,
                     "options": {
@@ -314,6 +314,7 @@
                                 "mode": "continuous-BlYlRd"
                             },
                             "custom": {
+                                "axisBorderShow": false,
                                 "axisCenteredZero": false,
                                 "axisColorMode": "text",
                                 "axisLabel": "",
@@ -349,7 +350,8 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green"
+                                        "color": "green",
+                                        "value": null
                                     }
                                 ]
                             },
@@ -361,7 +363,7 @@
                         "h": 8,
                         "w": 12,
                         "x": 12,
-                        "y": 34
+                        "y": 2
                     },
                     "id": 2,
                     "options": {
@@ -409,6 +411,7 @@
                                 "mode": "palette-classic"
                             },
                             "custom": {
+                                "axisBorderShow": false,
                                 "axisCenteredZero": false,
                                 "axisColorMode": "text",
                                 "axisLabel": "",
@@ -444,7 +447,8 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green"
+                                        "color": "green",
+                                        "value": null
                                     }
                                 ]
                             },
@@ -472,7 +476,7 @@
                         "h": 10,
                         "w": 24,
                         "x": 0,
-                        "y": 42
+                        "y": 10
                     },
                     "id": 8,
                     "options": {
@@ -584,8 +588,7 @@
                                 "mode": "percentage",
                                 "steps": [
                                     {
-                                        "color": "green",
-                                        "value": null
+                                        "color": "green"
                                     },
                                     {
                                         "color": "dark-red",
@@ -681,8 +684,7 @@
                                 "mode": "percentage",
                                 "steps": [
                                     {
-                                        "color": "green",
-                                        "value": null
+                                        "color": "green"
                                     }
                                 ]
                             },
@@ -774,8 +776,7 @@
                                 "mode": "percentage",
                                 "steps": [
                                     {
-                                        "color": "green",
-                                        "value": null
+                                        "color": "green"
                                     }
                                 ]
                             },
@@ -867,8 +868,7 @@
                                 "mode": "percentage",
                                 "steps": [
                                     {
-                                        "color": "green",
-                                        "value": null
+                                        "color": "green"
                                     }
                                 ]
                             },
@@ -935,7 +935,7 @@
                     "fieldConfig": {
                         "defaults": {
                             "color": {
-                                "mode": "continuous-BlYlRd"
+                                "mode": "palette-classic"
                             },
                             "custom": {
                                 "axisBorderShow": false,
@@ -1013,7 +1013,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$node\"}[1m])) * 100)",
+                            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$node\"}[$__rate_interval])) * 100)",
                             "instant": false,
                             "legendFormat": "{{instance}}",
                             "range": true,
@@ -1032,7 +1032,7 @@
                     "fieldConfig": {
                         "defaults": {
                             "color": {
-                                "mode": "continuous-BlYlRd"
+                                "mode": "palette-classic"
                             },
                             "custom": {
                                 "axisBorderShow": false,
@@ -1125,7 +1125,7 @@
                     "fieldConfig": {
                         "defaults": {
                             "color": {
-                                "mode": "continuous-BlYlRd"
+                                "mode": "palette-classic"
                             },
                             "custom": {
                                 "axisBorderShow": false,
@@ -1214,11 +1214,11 @@
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "Memory usage from each of the nodes.",
+                    "description": "The percentage of memory used by each node.",
                     "fieldConfig": {
                         "defaults": {
                             "color": {
-                                "mode": "continuous-BlYlRd"
+                                "mode": "palette-classic"
                             },
                             "custom": {
                                 "axisBorderShow": false,
@@ -1262,7 +1262,7 @@
                                     }
                                 ]
                             },
-                            "unit": "decbytes"
+                            "unit": "percent"
                         },
                         "overrides": []
                     },
@@ -1292,14 +1292,14 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "(avg by (instance) (node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemFree_bytes{instance=~\"$node\"} - node_memory_Buffers_bytes{instance=~\"$node\"} - node_memory_Cached_bytes{instance=~\"$node\"}))",
+                            "expr": "100 * (1 - ((avg_over_time(node_memory_MemFree_bytes{instance=~\"$node\"}[$__rate_interval]) + avg_over_time(node_memory_Cached_bytes{instance=~\"$node\"}[$__rate_interval]) + avg_over_time(node_memory_Buffers_bytes{instance=~\"$node\"}[$__rate_interval])) / avg_over_time(node_memory_MemTotal_bytes{instance=~\"$node\"}[$__rate_interval])))",
                             "instant": false,
                             "legendFormat": "{{instance}}",
                             "range": true,
                             "refId": "A"
                         }
                     ],
-                    "title": "Memory usage by node ($node)",
+                    "title": "Percentage of memory used by node ($node)",
                     "type": "timeseries"
                 },
                 {
@@ -1311,7 +1311,7 @@
                     "fieldConfig": {
                         "defaults": {
                             "color": {
-                                "mode": "continuous-BlYlRd"
+                                "mode": "palette-classic"
                             },
                             "custom": {
                                 "axisBorderShow": false,
@@ -1470,7 +1470,7 @@
                     "uid": "PBFA97CFB590B2093"
                 },
                 "definition": "label_values(node_uname_info,instance)",
-                "description": "Allows you limit graphs only to selected nodes",
+                "description": "Allows you to limit graphs only to selected nodes in node-related rows.",
                 "hide": 0,
                 "includeAll": true,
                 "label": "Node",
@@ -1498,6 +1498,6 @@
     "timezone": "",
     "title": "Jellyfishes dashboard",
     "uid": "ef7bdb94-c912-49ac-a273-e7a31598001a",
-    "version": 28,
+    "version": 5,
     "weekStart": ""
 }
