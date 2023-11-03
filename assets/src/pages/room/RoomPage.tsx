@@ -16,23 +16,27 @@ import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 type ConnectComponentProps = {
   username: string;
   roomId: string;
+  wasMicrophoneDisabled: boolean;
+  wasCameraDisabled: boolean;
 };
 
-const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
+const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId, wasCameraDisabled, wasMicrophoneDisabled }) => {
   const connect = useConnect();
   const streaming = useStreaming();
+
   const localPeer = useLocalPeer();
   const localPeerRef = useRef(localPeer);
   useEffect(() => {
     localPeerRef.current = localPeer;
   }, [localPeer]);
 
-  const wasConnectedRef = useRef(false);
+  const { video, audio } = localPeer;
   useEffect(() => {
-    if (!wasConnectedRef.current) {
-      wasConnectedRef.current = true;
-      return;
-    };
+    if (!wasCameraDisabled && !video.stream) video.start();
+    if (!wasMicrophoneDisabled && !audio.stream) audio.start();
+  }, [video.stream, audio.stream])
+
+  useEffect(() => {
     const disconnectCallback = getTokenAndAddress(roomId).then((tokenAndAddress) => {
       return connect({
         peerMetadata: { name: username },
@@ -74,19 +78,9 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
 
   const { username } = useUser();
   
-  const { video, audio } = useLocalPeer();
-
-  const wasMediaStartedRef = useRef(false);
-  useEffect(() => {
-    if (wasMediaStartedRef.current) return;
-    wasMediaStartedRef.current = true;
-    if (!wasCameraDisabled) video.start();
-    if (!wasMicrophoneDisabled) audio.start();
-  }, []);
-
   return (
     <PageLayout>
-      {username && <ConnectComponent username={username} roomId={roomId} />}
+      {username && <ConnectComponent username={username} roomId={roomId} wasCameraDisabled={wasCameraDisabled} wasMicrophoneDisabled={wasMicrophoneDisabled} />}
       <div className="flex h-full w-full flex-col gap-y-4">
         {/* main grid - videos + future chat */}
         <section

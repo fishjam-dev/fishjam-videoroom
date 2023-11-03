@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext";
 import { useUser } from "../../../contexts/UserContext";
@@ -59,15 +59,12 @@ const VideoroomHomePage: FC = () => {
 
   const navigate = useNavigate();
   const { audio, video } = useLocalPeer();
-  const wasMountedRef = useRef(false);
+  // const wasMountedRef = useRef(false);
 
   useEffect(() => {
-    if (wasMountedRef.current) return;
-    wasMountedRef.current = true;
-    console.log("videoroomhomepage")
-    video.start();
-    audio.start();
-  }, []);
+    if (!video.stream) video.start();
+    if (!audio.stream) audio.start();
+  }, [video, audio]);
   
   const onJoin = useCallback((e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -89,7 +86,9 @@ const VideoroomHomePage: FC = () => {
     simulcastInput,
     smartLayerSwitching,
     smartLayerSwitchingInput,
-    navigate
+    navigate,
+    video,
+    audio
   ]);
 
   const inputs = useMemo(() => {
