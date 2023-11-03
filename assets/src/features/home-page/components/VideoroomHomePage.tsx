@@ -59,12 +59,11 @@ const VideoroomHomePage: FC = () => {
 
   const navigate = useNavigate();
   const { audio, video } = useLocalPeer();
-  // const wasMountedRef = useRef(false);
 
   useEffect(() => {
     if (!video.stream) video.start();
     if (!audio.stream) audio.start();
-  }, [video, audio]);
+  }, []);
   
   const onJoin = useCallback((e: React.SyntheticEvent) => {
     e.preventDefault();
