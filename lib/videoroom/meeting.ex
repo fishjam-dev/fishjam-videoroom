@@ -87,13 +87,20 @@ defmodule Videoroom.Meeting do
   end
 
   defp create_new_room(client, name) do
-    case Room.create(client) do
-      {:ok, room, jellyfish_address} ->
-        RoomRegistry.insert_new(name, room.id)
-        {:ok, room, jellyfish_address}
+    with {:ok, room, jellyfish_address} <- Room.create(client),
+         client <- Jellyfish.Client.update_address(client, jellyfish_address),
+         :ok <- add_room_to_registry(client, name, room) do
+      {:ok, room, jellyfish_address}
+    end
+  end
 
-      error ->
-        error
+  defp add_room_to_registry(client, name, room) do
+    if RoomRegistry.insert_new(name, room.id) do
+      :ok
+    else
+      Logger.warning("Inserting room with id #{room.id} to RoomRegistry failed")
+      Room.delete(client, room.id)
+      {:error, :registry_insert_failed}
     end
   end
 
