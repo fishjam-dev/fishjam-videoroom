@@ -14,3 +14,8 @@ datasources:
     editable: true
     basicAuth: false
     isDefault: true
+
+  - name: Loki
+    type: loki
+    url: http://loki:3100
+    isDefault: false

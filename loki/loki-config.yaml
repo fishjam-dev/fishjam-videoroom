@@ -1,0 +1,16 @@
+---
+server:
+  http_listen_port: 3100
+query_range:
+  deny_queries_without_filters: false
+schema_config:
+  configs:
+    - from: 2021-08-01
+      store: tsdb
+      object_store: filesystem
+      schema: v12
+      index:
+        prefix: index_
+        period: 24h
+common:
+  path_prefix: /loki

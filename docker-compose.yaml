@@ -1,5 +1,7 @@
 version: '3.8'
 
+name: myapp
+
 x-jellyfish-template: &jellyfish-template
   image: "ghcr.io/jellyfish-dev/jellyfish:${JELLYFISH_VERSION:-0.2.0}"
   restart: unless-stopped
@@ -130,7 +132,26 @@ services:
       - --path.rootfs=/host
     volumes:
       - /:/host:ro,rslave
+  loki:
+    image: grafana/loki:2.9.0
+    volumes:
+      # directory must be created first, with uid:gid 10001:10001
+      - ./loki-config.yaml:/etc/loki/config.yaml
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    volumes:
+      # custom config will read logs from the containers of
+      # this project
+      - ./loki/promtail-config.yaml:/etc/promtail/config.yml
+      # to read container labels and logs
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
 
 volumes:
   grafana_data: {}
   prometheus_data: {}
+  loki_data: {}
