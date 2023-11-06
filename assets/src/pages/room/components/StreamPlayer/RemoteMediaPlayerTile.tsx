@@ -1,4 +1,4 @@
-import { ComponentProps, FC, useEffect } from "react";
+import { ComponentProps, FC } from "react";
 import { TrackEncoding } from "@jellyfish-dev/membrane-webrtc-js";
 import { useAutomaticEncodingSwitching } from "../../hooks/useAutomaticEncodingSwitching";
 import { SimulcastEncodingToReceive } from "./simulcast/SimulcastEncodingToReceive";
@@ -40,10 +40,6 @@ const RemoteMediaPlayerTile: FC<Props> = (
       !track?.simulcastConfig?.enabled,
       forceEncoding
     );
-
-  useEffect(() => {
-    console.log({ track });
-  }, [track]);
 
   return (
     <GenericMediaPlayerTile
