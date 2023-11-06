@@ -143,6 +143,11 @@ services:
 
   promtail:
     image: grafana/promtail:2.9.0
+    command:
+      - "-config.expand-env=true"
+      - "-config.file=/etc/promtail/config.yml"
+    environment:
+      LOKI_ADDRESS: loki
     volumes:
       # custom config will read logs from the containers of
       # this project

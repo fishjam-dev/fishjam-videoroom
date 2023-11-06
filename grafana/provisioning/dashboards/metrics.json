@@ -943,7 +943,7 @@
                         "uid": "${logs_ds}"
                     },
                     "editorMode": "code",
-                    "expr": "{container=~\".+\"}",
+                    "expr": "{container=~\"backend|jellyfish1|jellyfish2\"}",
                     "queryType": "range",
                     "refId": "A"
                 }
