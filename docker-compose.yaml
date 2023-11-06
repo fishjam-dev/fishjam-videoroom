@@ -149,12 +149,12 @@ services:
     environment:
       LOKI_ADDRESS: loki
     volumes:
-      # custom config will read logs from the containers of
-      # this project
-      - ./loki/promtail-config.yaml:/etc/promtail/config.yml
       # to read container labels and logs
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers:/var/lib/docker/containers
+      # custom config will read logs from the containers of
+      # this project
+      - ./loki/promtail-config.yaml:/etc/promtail/config.yml
 
 volumes:
   grafana_data: {}
