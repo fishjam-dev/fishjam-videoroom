@@ -45,6 +45,11 @@ export const BACKEND_URL = isDevEnv ?
   new URL(window.location.origin) :
   new URL(`${protocol}://${import.meta.env.VITE_BE_HOST}`)
 
+  // @ts-ignore
+export const JELLYFISH_VERSION = import.meta.env.VITE_JELLYFISH_VERSION
+// @ts-ignore
+export const JELLYROOM_VERSION = import.meta.env.VITE_JELLYROOM_VERSION
+
 // videoroom_backend should return this address (host and port)
 // @ts-ignore
 const origin_websocket_url = new URL(window.location.origin)
