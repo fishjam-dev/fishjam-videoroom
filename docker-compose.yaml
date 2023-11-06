@@ -83,8 +83,8 @@ services:
       context: ./prometheus
       dockerfile: Dockerfile
       args:
-        JELLYFISH_TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
-        NODE_TARGETS: '172.17.0.1:9100'
+        PROM_JELLYFISH_TARGETS: ${PROM_JELLYFISH_TARGETS:-jellyfish1:9568,jellyfish2:9568}
+        PROM_NODE_TARGETS: '172.17.0.1:9100'
     container_name: prometheus
     restart: on-failure
     command:

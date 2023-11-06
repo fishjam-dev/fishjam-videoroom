@@ -7,8 +7,8 @@ global:
 scrape_configs:
   - job_name: 'jellyfishes'
     static_configs:
-      - targets: [$JELLYFISH_TARGETS]
+      - targets: [$PROM_JELLYFISH_TARGETS]
   
   - job_name: 'nodes'
     static_configs:
-      - targets: [$NODE_TARGETS]
+      - targets: [$PROM_NODE_TARGETS]
