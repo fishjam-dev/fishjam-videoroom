@@ -1,9 +1,3 @@
-#
-# configure promtail to scrape docker logs for a specific
-# docker compose project
-# https://cylab.be/blog/241/use-loki-to-monitor-the-logs-of-your-docker-compose-application
-#
-
 server:
   http_listen_port: 9080
   grpc_listen_port: 0

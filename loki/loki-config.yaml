@@ -12,5 +12,11 @@ schema_config:
       index:
         prefix: index_
         period: 24h
+      chunks:
+        prefix: chunk_
+        period: 24h
+      deletes:
+        retention_deletes_enabled: true
+        retention_period: 720h  
 common:
   path_prefix: /loki
