@@ -133,28 +133,24 @@ services:
     volumes:
       - /:/host:ro,rslave
   loki:
-    image: grafana/loki:2.9.0
+    build:
+      context: ./loki
+      dockerfile: Dockerfile
     volumes:
-      # directory must be created first, with uid:gid 10001:10001
-      - ./loki-config.yaml:/etc/loki/config.yaml
       - loki_data:/loki
     ports:
       - "3100:3100"
 
   promtail:
-    image: grafana/promtail:2.9.0
-    command:
-      - "-config.expand-env=true"
-      - "-config.file=/etc/promtail/config.yml"
-    environment:
-      LOKI_ADDRESS: loki
+    build:
+      context: ./promtail
+      dockerfile: Dockerfile
+      args:
+        LOKI_ADDRESS: loki
     volumes:
       # to read container labels and logs
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers:/var/lib/docker/containers
-      # custom config will read logs from the containers of
-      # this project
-      - ./loki/promtail-config.yaml:/etc/promtail/config.yml
 
 volumes:
   grafana_data: {}
