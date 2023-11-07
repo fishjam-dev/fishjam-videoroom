@@ -83,7 +83,7 @@ jobs:
           JF_PORT=5002
           JF1_IP=${{secrets.STAGING_IP}}
           JF2_IP=${{secrets.STAGING2_IP}}
-          LOKI_ADDRESS=${{secrets.SANDBOX_IP}}
+          LOKI_ADDRESS=${{secrets.STAGING_IP}}
           JF2_HOST=${{env.JF2_HOST}}" > .env
       - name: Remove old containers on second host
         uses: JimCronqvist/action-ssh@master

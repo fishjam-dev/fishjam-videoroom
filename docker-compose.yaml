@@ -1,7 +1,5 @@
 version: '3.8'
 
-name: myapp
-
 x-jellyfish-template: &jellyfish-template
   image: "ghcr.io/jellyfish-dev/jellyfish:${JELLYFISH_VERSION:-0.2.0}"
   restart: unless-stopped
