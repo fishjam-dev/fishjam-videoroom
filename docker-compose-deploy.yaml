@@ -20,6 +20,15 @@ x-jellyfish-template: &jellyfish-template
     - "9568:9568"
     - "50000-50500:50000-50500/udp"
 
+x-node-exporter: &node-exporter-template
+  image: prom/node-exporter:v1.6.1
+  restart: on-failure
+  network_mode: host
+  command:
+    - --path.rootfs=/host
+  volumes:
+    - /:/host:ro,rslave
+
 services:
   jellyfish1:
     <<: *jellyfish-template
@@ -78,7 +87,8 @@ services:
       context: ./prometheus
       dockerfile: Dockerfile
       args:
-        TARGETS: ${PROMETHEUS_TARGETS:-jellyfish1:9568,jellyfish2:9568}
+        PROM_JELLYFISH_TARGETS: ${PROM_JELLYFISH_TARGETS:-jellyfish1:9568,jellyfish2:9568}
+        PROM_NODE_TARGETS: ${PROM_NODE_TARGETS:-node_exporter:9100}
     container_name: prometheus
     restart: on-failure
     command:
@@ -108,6 +118,14 @@ services:
       - '3000:3000'
     expose:
       - 3000
+
+  node-exporter1:
+    <<: *node-exporter-template
+    container_name: node_exporter1
+
+  node-exporter2:
+    <<: *node-exporter-template
+    container_name: node_exporter2
 
 volumes:
   grafana_data: {}
