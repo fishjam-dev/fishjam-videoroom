@@ -1,8 +1,13 @@
 ---
 server:
   http_listen_port: 3100
-query_range:
-  deny_queries_without_filters: false
+  log_format: json
+compactor:
+  working_directory: /data/retention
+  shared_store: filesystem
+  retention_enabled: true
+  retention_delete_delay: 2h
+  delete_request_cancel_period: 720h
 schema_config:
   configs:
     - from: 2021-08-01
@@ -15,8 +20,5 @@ schema_config:
       chunks:
         prefix: chunk_
         period: 24h
-      deletes:
-        retention_deletes_enabled: true
-        retention_period: 720h  
 common:
   path_prefix: /loki

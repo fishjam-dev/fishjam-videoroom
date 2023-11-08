@@ -1347,8 +1347,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green",
-                                        "value": null
+                                        "color": "green"
                                     }
                                 ]
                             },
@@ -1411,6 +1410,7 @@
                         "type": "loki",
                         "uid": "${logs_ds}"
                     },
+                    "description": "Logs from selected containers",
                     "gridPos": {
                         "h": 10,
                         "w": 24,
@@ -1435,12 +1435,12 @@
                                 "uid": "${logs_ds}"
                             },
                             "editorMode": "code",
-                            "expr": "{container=~\"backend|jellyfish1|jellyfish2\"}",
+                            "expr": "{container=~\"$container\"}",
                             "queryType": "range",
                             "refId": "A"
                         }
                     ],
-                    "title": "Logs data",
+                    "title": "Logs",
                     "type": "logs"
                 }
             ],
@@ -1540,7 +1540,7 @@
                 "current": {
                     "selected": false,
                     "text": "Loki",
-                    "value": "f0542573-b8aa-4b1b-8ac7-780f24b827c1"
+                    "value": "f1146f90-cd6e-40a3-97bc-834ec46d3167"
                 },
                 "description": "",
                 "hide": 0,
@@ -1554,6 +1554,43 @@
                 "regex": "",
                 "skipUrlSync": false,
                 "type": "datasource"
+            },
+            {
+                "current": {
+                    "selected": true,
+                    "text": [
+                        "backend",
+                        "jellyfish1",
+                        "jellyfish2"
+                    ],
+                    "value": [
+                        "backend",
+                        "jellyfish1",
+                        "jellyfish2"
+                    ]
+                },
+                "datasource": {
+                    "type": "loki",
+                    "uid": "f1146f90-cd6e-40a3-97bc-834ec46d3167"
+                },
+                "definition": "",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Container",
+                "multi": true,
+                "name": "container",
+                "options": [],
+                "query": {
+                    "label": "container",
+                    "refId": "LokiVariableQueryEditor-VariableQuery",
+                    "stream": "",
+                    "type": 1
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
             }
         ]
     },
@@ -1565,6 +1602,6 @@
     "timezone": "",
     "title": "Jellyfishes dashboard",
     "uid": "ef7bdb94-c912-49ac-a273-e7a31598001a",
-    "version": 10,
+    "version": 37,
     "weekStart": ""
 }
