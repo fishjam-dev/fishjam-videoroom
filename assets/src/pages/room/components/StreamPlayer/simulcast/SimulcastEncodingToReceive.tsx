@@ -13,15 +13,16 @@ type Props = {
   disabled: boolean;
 };
 
-export const SimulcastEncodingToReceive: FC<Props> = ({
-                                                        currentEncoding,
-                                                        targetEncoding,
-                                                        setTargetEncoding,
-                                                        smartEncoding,
-                                                        localSmartEncodingStatus,
-                                                        setLocalSmartEncodingStatus,
-                                                        disabled
-                                                      }: Props) => {
+export const SimulcastEncodingToReceive: FC<Props> = (
+  {
+    currentEncoding,
+    targetEncoding,
+    setTargetEncoding,
+    smartEncoding,
+    localSmartEncodingStatus,
+    setLocalSmartEncodingStatus,
+    disabled
+  }: Props) => {
   return (
     <div className="absolute right-0 top-0 z-50 w-full text-sm text-gray-700 md:text-base">
       <div className="flex flex-row justify-between">
@@ -33,7 +34,7 @@ export const SimulcastEncodingToReceive: FC<Props> = ({
 
         <div className="flex flex-row justify-end rounded-bl-xl bg-white/80 p-2">
           <LayerButton
-            selected={localSmartEncodingStatus}
+            selected={localSmartEncodingStatus && !disabled}
             disabled={disabled}
             text={smartEncoding ? `Smart (${smartEncoding})` : "Smart"}
             onClick={() => setLocalSmartEncodingStatus(true)}

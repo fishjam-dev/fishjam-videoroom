@@ -22,9 +22,14 @@ type TrackIds = {
 
 export const useMembraneMediaStreaming = (
   mode: StreamingMode,
-  {type, device}: {type: "screensharing",
-  device: UseScreenshareResult<TrackMetadata>} | {type: "camera", device: UseCameraResult<TrackMetadata>} | {type: "audio", device: UseMicrophoneResult<TrackMetadata>},
-  isConnected: boolean,
+  { type, device }: {
+    type: "screensharing",
+    device: UseScreenshareResult<TrackMetadata>
+  } | { type: "camera", device: UseCameraResult<TrackMetadata> } | {
+    type: "audio",
+    device: UseMicrophoneResult<TrackMetadata>
+  },
+  isConnected: boolean
 ): MembraneStreaming => {
   const [trackIds, setTrackIds] = useState<TrackIds | null>(null);
 
@@ -40,9 +45,12 @@ export const useMembraneMediaStreaming = (
       const simulcast = simulcastEnabled && type === "camera";
       const trackMetadata = { active: device.enabled, type };
       if (type === "camera") {
-        device.addTrack(trackMetadata, simulcast ? { enabled: true, active_encodings: ["l", "m", "h"]} : undefined, selectBandwidthLimit(type, simulcast));
+        device.addTrack(trackMetadata, simulcast ? {
+          enabled: true,
+          activeEncodings: ["l", "m", "h"]
+        } : undefined, selectBandwidthLimit(type, simulcast));
       } else {
-        device.addTrack(trackMetadata, selectBandwidthLimit(type, simulcast))
+        device.addTrack(trackMetadata, selectBandwidthLimit(type, simulcast));
       }
       setTrackMetadata(defaultTrackMetadata);
     },
@@ -88,7 +96,7 @@ export const useMembraneMediaStreaming = (
       removeTracks();
     }
   }, [api, device.stream, device.enabled, isConnected, addTracks, mode, removeTracks, trackIds, replaceTrack, type]);
-  
+
   useEffect(() => {
     if (device.track?.id && device.broadcast?.trackId) {
       setTrackIds({ localId: device.track?.id, remoteId: device.broadcast?.trackId });

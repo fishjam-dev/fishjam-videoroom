@@ -22,6 +22,7 @@ export const {
   useCamera,
   useMicrophone,
   useScreenshare,
+  useTracks,
   JellyfishContextProvider,
   useApi,
 } = create<PeerMetadata, TrackMetadata>();

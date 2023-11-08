@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useReducer } from "react";
-import { toLocalTrackSelector, TrackType, useJellyfishClient, useSelector } from "../../../jellyfish.types";
+import {
+  toLocalTrackSelector,
+  TrackMetadata,
+  TrackType,
+  useJellyfishClient,
+  useSelector
+} from "../../../jellyfish.types";
 import useEffectOnChange from "../../../features/shared/hooks/useEffectOnChange";
 import { MessageEvents } from "@jellyfish-dev/ts-client-sdk";
 import { LOCAL_SCREEN_SHARING_ID, LOCAL_VIDEO_ID } from "../consts";
@@ -31,7 +37,7 @@ const INITIAL_STATE: PinState = {
   unpinnedTilesIds: [],
   autoPinned: [],
   autoUnpinned: [LOCAL_VIDEO_ID],
-  autoPictureInPicture: [],
+  autoPictureInPicture: []
 };
 
 type VideoTrackType = Exclude<TrackType, "audio">;
@@ -48,12 +54,12 @@ type Action =
 const pin = (state: PinState, tileId: string): PinState =>
   !state.pinnedTilesIds.includes(tileId)
     ? {
-        ...state,
-        pinnedTilesIds: [...state.pinnedTilesIds, tileId],
-        unpinnedTilesIds: state.unpinnedTilesIds.filter((unpinned) => unpinned !== tileId),
-        autoPinned: state.autoPinned.filter((unpinned) => unpinned !== tileId),
-        autoUnpinned: state.autoUnpinned.filter((unpinned) => unpinned !== tileId),
-      }
+      ...state,
+      pinnedTilesIds: [...state.pinnedTilesIds, tileId],
+      unpinnedTilesIds: state.unpinnedTilesIds.filter((unpinned) => unpinned !== tileId),
+      autoPinned: state.autoPinned.filter((unpinned) => unpinned !== tileId),
+      autoUnpinned: state.autoUnpinned.filter((unpinned) => unpinned !== tileId)
+    }
     : state;
 
 const autoPin = (state: PinState, tileId: string): PinState =>
@@ -66,19 +72,19 @@ const unpin = (state: PinState, tileId: string): PinState =>
   state.unpinnedTilesIds.includes(tileId)
     ? state
     : {
-        ...state,
-        unpinnedTilesIds: [...state.unpinnedTilesIds, tileId],
-        pinnedTilesIds: state.pinnedTilesIds.filter((pinnedTileId) => pinnedTileId !== tileId),
-        autoPinned: state.autoPinned.filter((pinnedTileId) => pinnedTileId !== tileId),
-        autoUnpinned: state.autoUnpinned.filter((pinnedTileId) => pinnedTileId !== tileId),
-      };
+      ...state,
+      unpinnedTilesIds: [...state.unpinnedTilesIds, tileId],
+      pinnedTilesIds: state.pinnedTilesIds.filter((pinnedTileId) => pinnedTileId !== tileId),
+      autoPinned: state.autoPinned.filter((pinnedTileId) => pinnedTileId !== tileId),
+      autoUnpinned: state.autoUnpinned.filter((pinnedTileId) => pinnedTileId !== tileId)
+    };
 
 const remove = (state: PinState, tileId: string): PinState => ({
   ...state,
   unpinnedTilesIds: state.unpinnedTilesIds.filter((currentTileId) => currentTileId !== tileId),
   pinnedTilesIds: state.pinnedTilesIds.filter((currentTileId) => currentTileId !== tileId),
   autoPinned: state.autoPinned.filter((currentTileId) => currentTileId !== tileId),
-  autoUnpinned: state.autoUnpinned.filter((currentTileId) => currentTileId !== tileId),
+  autoUnpinned: state.autoUnpinned.filter((currentTileId) => currentTileId !== tileId)
 });
 
 const reducer = (state: PinState, action: Action): PinState => {
@@ -141,24 +147,24 @@ const useTilePinning = (): TilePinningApi => {
   useEffect(() => {
     if (!client) return;
 
-    const onPeerJoined: MessageEvents["peerJoined"] = (peer) => {
+    const onPeerJoined: MessageEvents<TrackMetadata>["peerJoined"] = (peer) => {
       dispatch({ type: "remotePeerAdded", tileId: peer.id });
     };
 
-    const onJoinSuccess: MessageEvents["joined"] = (_, peersInRoom) => {
+    const onJoinSuccess: MessageEvents<TrackMetadata>["joined"] = (_, peersInRoom) => {
       peersInRoom.forEach((peer) => {
         dispatch({ type: "remotePeerAdded", tileId: peer.id });
       });
     };
 
-    const onTrackReady: MessageEvents["trackReady"] = (ctx) => {
+    const onTrackReady: MessageEvents<TrackMetadata>["trackReady"] = (ctx) => {
       const trackType: TrackType | null = parseTrackMetadata(ctx)?.type || null;
       if (trackType === "camera" || trackType === "screensharing") {
         dispatch({ type: "remoteTrackAdded", trackType, tileId: ctx.trackId });
       }
     };
 
-    const onTrackRemoved: MessageEvents["trackRemoved"] = (ctx) => {
+    const onTrackRemoved: MessageEvents<TrackMetadata>["trackRemoved"] = (ctx) => {
       const trackType: TrackType | null = parseTrackMetadata(ctx)?.type || null;
       if (trackType === "camera" || trackType === "screensharing") {
         dispatch({ type: "remoteTrackRemoved", tileId: ctx.trackId });
@@ -188,10 +194,10 @@ const useTilePinning = (): TilePinningApi => {
       pinningFlags: {
         blockPinning: effectivelyPinned.length + effectivelyUnpinned.length === 1,
         isAnyPinned: effectivelyPinned.length > 0,
-        isAnyUnpinned: effectivelyUnpinned.length > 0,
+        isAnyUnpinned: effectivelyUnpinned.length > 0
       },
       pinnedTilesIds: effectivelyPinned,
-      unpinnedTilesIds: effectivelyUnpinned,
+      unpinnedTilesIds: effectivelyUnpinned
     };
   }, [state]);
 };
