@@ -59,7 +59,7 @@
                         "h": 8,
                         "w": 10,
                         "x": 0,
-                        "y": 1
+                        "y": 9
                     },
                     "id": 6,
                     "options": {
@@ -156,7 +156,7 @@
                         "h": 8,
                         "w": 14,
                         "x": 10,
-                        "y": 1
+                        "y": 9
                     },
                     "id": 1,
                     "options": {
@@ -265,7 +265,7 @@
                         "h": 8,
                         "w": 12,
                         "x": 0,
-                        "y": 2
+                        "y": 10
                     },
                     "id": 3,
                     "options": {
@@ -361,7 +361,7 @@
                         "h": 8,
                         "w": 12,
                         "x": 12,
-                        "y": 2
+                        "y": 10
                     },
                     "id": 2,
                     "options": {
@@ -473,7 +473,7 @@
                         "h": 10,
                         "w": 24,
                         "x": 0,
-                        "y": 10
+                        "y": 18
                     },
                     "id": 8,
                     "options": {
@@ -601,7 +601,7 @@
                         "h": 8,
                         "w": 24,
                         "x": 0,
-                        "y": 11
+                        "y": 19
                     },
                     "id": 10,
                     "options": {
@@ -693,7 +693,7 @@
                         "h": 8,
                         "w": 24,
                         "x": 0,
-                        "y": 19
+                        "y": 27
                     },
                     "id": 14,
                     "options": {
@@ -785,7 +785,7 @@
                         "h": 8,
                         "w": 24,
                         "x": 0,
-                        "y": 27
+                        "y": 35
                     },
                     "id": 15,
                     "options": {
@@ -877,7 +877,7 @@
                         "h": 8,
                         "w": 24,
                         "x": 0,
-                        "y": 35
+                        "y": 43
                     },
                     "id": 16,
                     "options": {
@@ -1347,8 +1347,7 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green",
-                                        "value": null
+                                        "color": "green"
                                     }
                                 ]
                             },
@@ -1394,6 +1393,58 @@
                 }
             ],
             "title": "Node stats",
+            "type": "row"
+        },
+        {
+            "collapsed": true,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 4
+            },
+            "id": 25,
+            "panels": [
+                {
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "${logs_ds}"
+                    },
+                    "description": "Logs from selected containers",
+                    "gridPos": {
+                        "h": 10,
+                        "w": 24,
+                        "x": 0,
+                        "y": 5
+                    },
+                    "id": 26,
+                    "options": {
+                        "dedupStrategy": "none",
+                        "enableLogDetails": false,
+                        "prettifyLogMessage": false,
+                        "showCommonLabels": false,
+                        "showLabels": true,
+                        "showTime": false,
+                        "sortOrder": "Descending",
+                        "wrapLogMessage": true
+                    },
+                    "targets": [
+                        {
+                            "datasource": {
+                                "type": "loki",
+                                "uid": "${logs_ds}"
+                            },
+                            "editorMode": "code",
+                            "expr": "{container=~\"$container\"}",
+                            "queryType": "range",
+                            "refId": "A"
+                        }
+                    ],
+                    "title": "Logs",
+                    "type": "logs"
+                }
+            ],
+            "title": "Logs",
             "type": "row"
         }
     ],
@@ -1484,6 +1535,62 @@
                 "skipUrlSync": false,
                 "sort": 0,
                 "type": "query"
+            },
+            {
+                "current": {
+                    "selected": false,
+                    "text": "Loki",
+                    "value": "f1146f90-cd6e-40a3-97bc-834ec46d3167"
+                },
+                "description": "",
+                "hide": 0,
+                "includeAll": false,
+                "label": "Logs Data Source",
+                "multi": false,
+                "name": "logs_ds",
+                "options": [],
+                "query": "loki",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "type": "datasource"
+            },
+            {
+                "current": {
+                    "selected": true,
+                    "text": [
+                        "backend",
+                        "jellyfish1",
+                        "jellyfish2"
+                    ],
+                    "value": [
+                        "backend",
+                        "jellyfish1",
+                        "jellyfish2"
+                    ]
+                },
+                "datasource": {
+                    "type": "loki",
+                    "uid": "f1146f90-cd6e-40a3-97bc-834ec46d3167"
+                },
+                "definition": "",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Container",
+                "multi": true,
+                "name": "container",
+                "options": [],
+                "query": {
+                    "label": "container",
+                    "refId": "LokiVariableQueryEditor-VariableQuery",
+                    "stream": "",
+                    "type": 1
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
             }
         ]
     },
@@ -1495,6 +1602,6 @@
     "timezone": "",
     "title": "Jellyfishes dashboard",
     "uid": "ef7bdb94-c912-49ac-a273-e7a31598001a",
-    "version": 8,
+    "version": 37,
     "weekStart": ""
 }

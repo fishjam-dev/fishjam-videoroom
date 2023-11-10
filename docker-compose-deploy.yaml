@@ -127,6 +127,28 @@ services:
     <<: *node-exporter-template
     container_name: node_exporter2
 
+  loki:
+    image: grafana/loki:2.9.0
+    build:
+      context: ./loki
+      dockerfile: Dockerfile
+    volumes:
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  promtail:
+    build:
+      context: ./promtail
+      dockerfile: Dockerfile
+      args:
+        LOKI_ADDRESS: $LOKI_ADDRESS
+    volumes:
+      # to read container labels and logs
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
+
 volumes:
   grafana_data: {}
   prometheus_data: {}
+  loki_data: {}

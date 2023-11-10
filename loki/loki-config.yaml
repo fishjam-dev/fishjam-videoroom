@@ -1,0 +1,24 @@
+---
+server:
+  http_listen_port: 3100
+  log_format: json
+compactor:
+  working_directory: /data/retention
+  shared_store: filesystem
+  retention_enabled: true
+  retention_delete_delay: 2h
+  delete_request_cancel_period: 720h
+schema_config:
+  configs:
+    - from: 2021-08-01
+      store: tsdb
+      object_store: filesystem
+      schema: v12
+      index:
+        prefix: index_
+        period: 24h
+      chunks:
+        prefix: chunk_
+        period: 24h
+common:
+  path_prefix: /loki

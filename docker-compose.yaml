@@ -130,7 +130,27 @@ services:
       - --path.rootfs=/host
     volumes:
       - /:/host:ro,rslave
+  loki:
+    build:
+      context: ./loki
+      dockerfile: Dockerfile
+    volumes:
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  promtail:
+    build:
+      context: ./promtail
+      dockerfile: Dockerfile
+      args:
+        LOKI_ADDRESS: loki
+    volumes:
+      # to read container labels and logs
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
 
 volumes:
   grafana_data: {}
   prometheus_data: {}
+  loki_data: {}
