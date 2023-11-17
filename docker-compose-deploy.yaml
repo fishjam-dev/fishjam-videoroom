@@ -24,7 +24,6 @@ x-node-exporter: &node-exporter-template
   image: prom/node-exporter:v1.6.1
   restart: on-failure
   network_mode: host
-  pid: host
   command:
     - --path.rootfs=/host
   volumes:

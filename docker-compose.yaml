@@ -126,7 +126,6 @@ services:
     container_name: node_exporter
     restart: on-failure
     network_mode: host
-    pid: host
     command:
       - --path.rootfs=/host
     volumes:
