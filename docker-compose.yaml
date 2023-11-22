@@ -130,6 +130,7 @@ services:
       - --path.rootfs=/host
     volumes:
       - /:/host:ro,rslave
+
   loki:
     build:
       context: ./loki
