@@ -120,7 +120,7 @@ const getAutomaticControls = (
     hover: "Leave the room",
     buttonClassName: redButtonStyle,
     onClick: () => {
-      navigate(`/room/${roomId}`, { state: { isLeavingRoom: true } });
+      navigate(`/room/${roomId}`, { state: { isLeavingRoom: true, wasCameraDisabled: !local.video.enabled, wasMicrophoneDisabled: !local.audio.enabled } });
     },
   },
 ];

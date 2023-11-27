@@ -11,13 +11,20 @@ const RoomPageWrapper: React.FC = () => {
   const roomId: string | undefined = match?.roomId;
   const { state } = useLocation();
   const isLeavingRoom = !!state?.isLeavingRoom;
+  const wasCameraDisabled = !!state?.wasCameraDisabled;
+  const wasMicrophoneDisabled = !!state?.wasMicrophoneDisabled;
+  
   const { username } = useUser();
 
   if (isLeavingRoom && roomId) {
-    return <LeavingRoomScreen roomId={roomId} />;
+    return <LeavingRoomScreen roomId={roomId} wasCameraDisabled={wasCameraDisabled} wasMicrophoneDisabled={wasMicrophoneDisabled} />;
   }
 
-  return username && roomId ? <RoomPage roomId={roomId} /> : <VideoroomHomePage />;
+  return username && roomId ? (
+    <RoomPage roomId={roomId} wasCameraDisabled={wasCameraDisabled} wasMicrophoneDisabled={wasMicrophoneDisabled} />
+  ) : (
+    <VideoroomHomePage />
+  );
 };
 
 export const router = createBrowserRouter([

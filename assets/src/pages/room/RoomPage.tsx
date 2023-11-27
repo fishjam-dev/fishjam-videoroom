@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import MediaControlButtons from "./components/MediaControlButtons";
 import { useToggle } from "./hooks/useToggle";
 import { VideochatSection } from "./VideochatSection";
@@ -11,15 +11,30 @@ import { useUser } from "../../contexts/UserContext";
 import { getSignalingAddress } from "./consts";
 import { getTokenAndAddress } from "../../room.api";
 import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
+import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 
 type ConnectComponentProps = {
   username: string;
   roomId: string;
+  wasMicrophoneDisabled: boolean;
+  wasCameraDisabled: boolean;
 };
 
-const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
+const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId, wasCameraDisabled, wasMicrophoneDisabled }) => {
   const connect = useConnect();
   const streaming = useStreaming();
+
+  const localPeer = useLocalPeer();
+  const localPeerRef = useRef(localPeer);
+  useEffect(() => {
+    localPeerRef.current = localPeer;
+  }, [localPeer]);
+
+  const { video, audio } = localPeer;
+  useEffect(() => {
+    if (!wasCameraDisabled && !video.stream) video.start();
+    if (!wasMicrophoneDisabled && !audio.stream) audio.start();
+  }, [video.stream, audio.stream])
 
   useEffect(() => {
     const disconnectCallback = getTokenAndAddress(roomId).then((tokenAndAddress) => {
@@ -34,6 +49,10 @@ const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
       streaming.camera.removeTracks();
       streaming.microphone.removeTracks();
       streaming.screenShare.removeTracks();
+      const { video, audio, screenShare } = localPeerRef.current;
+      video.stop();
+      audio.stop();
+      screenShare.stop();
       disconnectCallback.then((disconnect) => {
         disconnect();
       });
@@ -46,9 +65,11 @@ const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId }) => {
 
 type Props = {
   roomId: string;
+  wasCameraDisabled: boolean;
+  wasMicrophoneDisabled: boolean;
 };
 
-const RoomPage: FC<Props> = ({ roomId }: Props) => {
+const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled }: Props) => {
   useAcquireWakeLockAutomatically();
 
   const [showSimulcastMenu, toggleSimulcastMenu] = useToggle(false);
@@ -56,10 +77,10 @@ const RoomPage: FC<Props> = ({ roomId }: Props) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { username } = useUser();
-
+  
   return (
     <PageLayout>
-      {username && <ConnectComponent username={username} roomId={roomId} />}
+      {username && <ConnectComponent username={username} roomId={roomId} wasCameraDisabled={wasCameraDisabled} wasMicrophoneDisabled={wasMicrophoneDisabled} />}
       <div className="flex h-full w-full flex-col gap-y-4">
         {/* main grid - videos + future chat */}
         <section

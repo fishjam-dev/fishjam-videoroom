@@ -1,5 +1,5 @@
-import { FC, useCallback, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext";
 import { useUser } from "../../../contexts/UserContext";
 import { DEFAULT_MANUAL_MODE_CHECKBOX_VALUE, DEFAULT_SMART_LAYER_SWITCHING_CHECKBOX_VALUE } from "../../../pages/room/consts";
@@ -11,6 +11,7 @@ import { MobileLoginStep, MobileLoginStepType } from "../types";
 import HomePageLayout from "./HomePageLayout";
 
 import HomePageVideoTile from "./HomePageVideoTile";
+import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
 
 const VideoroomHomePage: FC = () => {
   const lastDisplayName: string | null = localStorage.getItem("displayName");
@@ -56,16 +57,25 @@ const VideoroomHomePage: FC = () => {
     },
   ];
 
-  // const { join } = useRoom();
+  const navigate = useNavigate();
+  const { audio, video } = useLocalPeer();
 
-  const onJoin = useCallback(() => {
+  useEffect(() => {
+    if (!video.stream) video.start();
+    if (!audio.stream) audio.start();
+  }, []);
+  
+  const onJoin = useCallback((e: React.SyntheticEvent) => {
+    e.preventDefault();
+
     localStorage.setItem("displayName", displayNameInput);
     setUsername(displayNameInput);
     smartLayerSwitching.setSmartLayerSwitching(smartLayerSwitchingInput);
     simulcast.setSimulcast(simulcastInput);
     manualMode.setManualMode(manualModeInput);
 
-    // join(joiningExistingRoom ? roomId : roomIdInput);
+    const href = (e.target as HTMLAnchorElement).pathname;
+    navigate(href, {state: {wasCameraDisabled: !video.enabled, wasMicrophoneDisabled: !audio.enabled}});
   }, [
     displayNameInput,
     manualMode,
@@ -75,6 +85,9 @@ const VideoroomHomePage: FC = () => {
     simulcastInput,
     smartLayerSwitching,
     smartLayerSwitchingInput,
+    navigate,
+    video,
+    audio
   ]);
 
   const inputs = useMemo(() => {
