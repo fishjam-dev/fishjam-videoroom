@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext";
 import { useUser } from "../../../contexts/UserContext";
@@ -59,12 +59,20 @@ const VideoroomHomePage: FC = () => {
 
   const navigate = useNavigate();
   const { audio, video } = useLocalPeer();
+  const wasVideoStarted = useRef(false);
+  const wasAudioStarted = useRef(false);
 
   useEffect(() => {
-    if (!video.stream) video.start();
-    if (!audio.stream) audio.start();
-  }, []);
-  
+    if (!wasVideoStarted.current && !video.stream) {
+      video.start();
+      wasVideoStarted.current = true;
+    }
+    if (!wasAudioStarted.current && !audio.stream) {
+      audio.start();
+      wasAudioStarted.current = true;
+    }
+  }, [audio.stream, video.stream]);
+
   const onJoin = useCallback((e: React.SyntheticEvent) => {
     e.preventDefault();
 
