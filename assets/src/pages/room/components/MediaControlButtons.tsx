@@ -26,7 +26,7 @@ type Sidebar = {
 };
 
 const getAutomaticControls = (
-  { microphone, camera, screenShare }: StreamingContext,
+  { microphone, camera }: StreamingContext,
   local: LocalPeerContext,
   navigate: NavigateFunction,
   roomId: string | null,
@@ -53,10 +53,10 @@ const getAutomaticControls = (
         onClick: () => {
           if (local.video.stream) {
             local.video.setEnable(true);
+            camera.setActive(true);
           } else {
             local.video.start();
           }
-          camera.setActive(true);
         },
       },
   local.audio.enabled
@@ -78,13 +78,13 @@ const getAutomaticControls = (
         onClick: () => {
           if (local.audio.stream) {
             local.audio.setEnable(true);
+            microphone.setActive(true);
           } else {
             local.audio.start();
           }
-          microphone.setActive(true);
         },
       },
-  local.screenShare.stream
+  local.screenShare.enabled
     ? {
         id: "screenshare-stop",
         icon: Screenshare,
@@ -93,7 +93,6 @@ const getAutomaticControls = (
         hideOnMobile: true,
         onClick: () => {
           local.screenShare.stop();
-          screenShare.setActive(false);
         },
       }
     : {
@@ -104,7 +103,6 @@ const getAutomaticControls = (
         hideOnMobile: true,
         onClick: () => {
           local.screenShare.start();
-          screenShare.setActive(true);
         },
       },
   {
