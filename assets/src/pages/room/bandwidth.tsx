@@ -1,4 +1,4 @@
-import { BandwidthLimit, SimulcastBandwidthLimit, TrackBandwidthLimit } from "@jellyfish-dev/membrane-webrtc-js";
+import { BandwidthLimit, SimulcastBandwidthLimit, TrackBandwidthLimit } from "@jellyfish-dev/react-client-sdk";
 import type { TrackType } from "../types";
 
 const NO_LIMIT: BandwidthLimit = 0;

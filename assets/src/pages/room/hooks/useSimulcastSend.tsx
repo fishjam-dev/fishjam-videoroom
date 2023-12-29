@@ -1,5 +1,5 @@
 import { useToggle } from "./useToggle";
-import { TrackEncoding } from "@jellyfish-dev/membrane-webrtc-js";
+import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
 import { useApi, useCurrentUserVideoTrackId } from "../../../jellyfish.types";
 
 export type UseSimulcastLocalEncoding = {

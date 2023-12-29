@@ -1,5 +1,5 @@
 import { ComponentProps, FC } from "react";
-import { TrackEncoding } from "@jellyfish-dev/membrane-webrtc-js";
+import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
 import { useAutomaticEncodingSwitching } from "../../hooks/useAutomaticEncodingSwitching";
 import { SimulcastEncodingToReceive } from "./simulcast/SimulcastEncodingToReceive";
 import GenericMediaPlayerTile from "./GenericMediaPlayerTile";

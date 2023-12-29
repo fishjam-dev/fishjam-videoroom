@@ -7,9 +7,9 @@ import {
   useSelector
 } from "../../../jellyfish.types";
 import useEffectOnChange from "../../../features/shared/hooks/useEffectOnChange";
-import { MessageEvents } from "@jellyfish-dev/ts-client-sdk";
+import { MessageEvents } from "@jellyfish-dev/react-client-sdk";
 import { LOCAL_SCREEN_SHARING_ID, LOCAL_VIDEO_ID } from "../consts";
-import { TrackContext } from "@jellyfish-dev/membrane-webrtc-js";
+import { TrackContext } from "@jellyfish-dev/react-client-sdk";
 import { isTrackType } from "../../types";
 
 const parseTrackMetadata = (context: TrackContext) => {
