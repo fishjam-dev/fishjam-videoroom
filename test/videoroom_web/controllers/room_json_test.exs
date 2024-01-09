@@ -12,8 +12,8 @@ defmodule VideoroomWeb.RoomJsonTest do
 
   setup context do
     client = Jellyfish.Client.new()
-    {:ok, notifier} = Jellyfish.Notifier.start()
-    :ok = Jellyfish.Notifier.subscribe_server_notifications(notifier)
+    {:ok, notifier} = Jellyfish.WSNotifier.start()
+    :ok = Jellyfish.WSNotifier.subscribe_server_notifications(notifier)
 
     prev_env = Application.get_all_env(:videoroom)
 
