@@ -9,6 +9,7 @@ x-jellyfish-template: &jellyfish-template
     JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
     JF_DIST_ENABLED: "${JF_DIST_ENABLED:-true}"
     JF_DIST_NODES: "app@$JF1_IP app@$JF2_IP"
+    JF_DIST_MODE: "name"
     JF_WEBRTC_TURN_LISTEN_IP: "0.0.0.0"
     JF_WEBRTC_TURN_PORT_RANGE: "50000-50500"
     JF_WEBRTC_TURN_TCP_PORT: "49999"
