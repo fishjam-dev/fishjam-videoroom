@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { TrackEncoding } from "@jellyfish-dev/membrane-webrtc-js";
+import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
 import { useApi } from "../../../jellyfish.types";
 
 export type UseSimulcastRemoteEncodingResult = {

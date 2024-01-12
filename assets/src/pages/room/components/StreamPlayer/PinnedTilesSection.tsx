@@ -1,6 +1,6 @@
 import { FC, ReactNode } from "react";
 import { MediaPlayerTileConfig } from "../../../types";
-import { TrackEncoding } from "@jellyfish-dev/membrane-webrtc-js";
+import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
 import { PinTileLayer } from "../../../../features/room-page/components/PinComponents";
 import { getGridConfig, GridConfigType } from "../../../../features/room-page/utils/getVideoGridConfig";
 import clsx from "clsx";
