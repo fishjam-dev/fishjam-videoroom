@@ -25,16 +25,17 @@ type Props = {
   horizontal: boolean;
 };
 
-const UnpinnedTilesSection: FC<Props> = ({
-                                           tileConfigs,
-                                           showSimulcast,
-                                           isAnyTilePinned,
-                                           pin,
-                                           videoInVideo,
-                                           blockPinning,
-                                           forceEncoding,
-                                           horizontal
-                                         }: Props) => {
+const UnpinnedTilesSection: FC<Props> = (
+  {
+    tileConfigs,
+    showSimulcast,
+    isAnyTilePinned,
+    pin,
+    videoInVideo,
+    blockPinning,
+    forceEncoding,
+    horizontal
+  }: Props) => {
   const gridConfig = getGridConfig(tileConfigs.length);
   const isSmartphone = useSmartphoneViewport().isSmartphone || false;
   const videoGridStyle = useMemo(
