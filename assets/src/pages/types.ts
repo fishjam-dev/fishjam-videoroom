@@ -2,7 +2,7 @@ import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
 
 // todo Change TrackEncoding to something like EncodingType in "@jellyfish-dev/membrane-webrtc-js"
 const EncodingValues = ["l", "m", "h"] as const;
-// @ts-ignore§
+// @ts-ignore
 type EncodingType = (typeof EncodingValues)[number]; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export const isTrackEncoding = (value: string): value is TrackEncoding =>
