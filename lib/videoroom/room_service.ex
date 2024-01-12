@@ -3,7 +3,7 @@ defmodule Videoroom.RoomService do
   use GenServer
 
   require Logger
-  alias Jellyfish.Notifier
+  alias Jellyfish.WSNotifier
 
   alias Videoroom.Meeting
   alias Videoroom.RoomRegistry
@@ -29,10 +29,10 @@ defmodule Videoroom.RoomService do
       :videoroom
       |> Application.fetch_env!(:jellyfish_addresses)
       |> Enum.reduce_while(nil, fn jellyfish_address, nil ->
-        case Notifier.start_link(server_address: jellyfish_address) do
+        case WSNotifier.start_link(server_address: jellyfish_address) do
           {:ok, notifier} ->
             Logger.info("Successfully connected to #{jellyfish_address}")
-            Notifier.subscribe_server_notifications(notifier)
+            WSNotifier.subscribe_server_notifications(notifier)
             Process.monitor(notifier)
             {:halt, {jellyfish_address, notifier}}
 
@@ -88,7 +88,7 @@ defmodule Videoroom.RoomService do
 
   @impl true
   def handle_info({:DOWN, _ref, :process, _object, _reason}, state) do
-    Logger.warning("Jellyfish Notifier exited")
+    Logger.warning("Jellyfish WSNotifier exited")
     {:noreply, state}
   end
 

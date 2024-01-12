@@ -42,7 +42,7 @@ defmodule Videoroom.MixProject do
       {:cors_plug, "~> 2.0"},
 
       # Jellyfish deps
-      {:jellyfish_server_sdk, "~> 0.2.0"},
+      {:jellyfish_server_sdk, "~> 0.3.0"},
 
       # Dev
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
