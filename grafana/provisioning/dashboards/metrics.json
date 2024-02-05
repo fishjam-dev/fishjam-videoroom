@@ -214,7 +214,7 @@
                     "fieldConfig": {
                         "defaults": {
                             "color": {
-                                "mode": "continuous-BlYlRd"
+                                "mode": "palette-classic"
                             },
                             "custom": {
                                 "axisBorderShow": false,
@@ -253,11 +253,13 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green"
+                                        "color": "green",
+                                        "value": null
                                     }
                                 ]
                             },
-                            "unit": "Bps"
+                            "unit": "Bps",
+                            "unitScale": true
                         },
                         "overrides": []
                     },
@@ -291,7 +293,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "jellyfish_traffic_ingress_throughput_bytes_per_second{instance=~\"$instance\"}",
+                            "expr": "irate(jellyfish_traffic_ingress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+ \nirate(jellyfish_traffic_ingress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
                             "instant": false,
                             "legendFormat": "{{instance}}",
                             "range": true,
@@ -310,7 +312,7 @@
                     "fieldConfig": {
                         "defaults": {
                             "color": {
-                                "mode": "continuous-BlYlRd"
+                                "mode": "palette-classic"
                             },
                             "custom": {
                                 "axisBorderShow": false,
@@ -349,11 +351,13 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green"
+                                        "color": "green",
+                                        "value": null
                                     }
                                 ]
                             },
-                            "unit": "Bps"
+                            "unit": "Bps",
+                            "unitScale": true
                         },
                         "overrides": []
                     },
@@ -387,7 +391,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "jellyfish_traffic_egress_throughput_bytes_per_second{instance=~\"$instance\"}",
+                            "expr": "irate(jellyfish_traffic_egress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+\nirate(jellyfish_traffic_egress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
                             "instant": false,
                             "legendFormat": "{{instance}}",
                             "range": true,
@@ -445,11 +449,13 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green"
+                                        "color": "green",
+                                        "value": null
                                     }
                                 ]
                             },
-                            "unit": "Bps"
+                            "unit": "Bps",
+                            "unitScale": true
                         },
                         "overrides": [
                             {
@@ -499,7 +505,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "jellyfish_traffic_ingress_throughput_bytes_per_second{instance=~\"$instance\"}",
+                            "expr": "irate(jellyfish_traffic_ingress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+\nirate(jellyfish_traffic_ingress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
                             "instant": false,
                             "legendFormat": "{{instance}} ingress",
                             "range": true,
@@ -511,7 +517,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "jellyfish_traffic_egress_throughput_bytes_per_second{instance=~\"$instance\"}",
+                            "expr": "irate(jellyfish_traffic_egress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+\nirate(jellyfish_traffic_egress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
                             "hide": false,
                             "instant": false,
                             "legendFormat": "{{instance}} egress",
@@ -1445,7 +1451,7 @@
         }
     ],
     "refresh": "",
-    "schemaVersion": 38,
+    "schemaVersion": 39,
     "tags": [],
     "templating": {
         "list": [
@@ -1536,7 +1542,7 @@
                 "current": {
                     "selected": false,
                     "text": "Loki",
-                    "value": "f1146f90-cd6e-40a3-97bc-834ec46d3167"
+                    "value": "P8E80F9AEF21F6940"
                 },
                 "description": "",
                 "hide": 0,
@@ -1598,6 +1604,6 @@
     "timezone": "",
     "title": "Jellyfishes dashboard",
     "uid": "ef7bdb94-c912-49ac-a273-e7a31598001a",
-    "version": 41,
+    "version": 22,
     "weekStart": ""
 }
