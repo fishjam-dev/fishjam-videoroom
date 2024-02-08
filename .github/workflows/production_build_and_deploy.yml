@@ -38,7 +38,7 @@ jobs:
       - name: Remove old containers on first host
         uses: JimCronqvist/action-ssh@master
         with:
-          hosts: ${{ secrets.PRODUCTION_IP }}
+          hosts: ${{ secrets.PRODUCTION_IP }}:${{ secrets.SSH_PROD_PORT }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
             docker ps -aq | xargs -r docker stop | xargs -r docker rm 
@@ -49,5 +49,6 @@ jobs:
           remote_docker_host: ${{ secrets.PRODUCTION_IP }}
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
+          ssh_port: ${{ secrets.SSH_PROD_PORT }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
           args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build frontend backend
