@@ -5,11 +5,11 @@ import { LOCAL_PEER_NAME, LOCAL_SCREEN_SHARING_ID, LOCAL_VIDEO_ID } from "./cons
 import clsx from "clsx";
 import { computeInitials } from "../../features/room-page/components/InitialsImage";
 
-import { MediaPlayerTileConfig, PeerTileConfig, ScreenShareTileConfig, TrackType, TrackWithId } from "../types";
+import { MediaPlayerTileConfig, PeerTileConfig, ScreenShareTileConfig, TrackWithId } from "../types";
 import UnpinnedTilesSection from "./components/StreamPlayer/UnpinnedTilesSection";
 import PinnedTilesSection from "./components/StreamPlayer/PinnedTilesSection";
 import useTilePinning from "./hooks/useTilePinning";
-import { toLocalTrackSelector, toRemotePeerSelector, useSelector } from "../../jellyfish.types";
+import { toLocalTrackSelector, toRemotePeerSelector, TrackType, useSelector } from "../../jellyfish.types";
 
 type Props = {
   showSimulcast: boolean;

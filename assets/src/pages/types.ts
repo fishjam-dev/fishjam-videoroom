@@ -1,16 +1,5 @@
 import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
 
-// todo Change TrackEncoding to something like EncodingType in "@jellyfish-dev/membrane-webrtc-js"
-const EncodingValues = ["l", "m", "h"] as const;
-// @ts-ignore
-type EncodingType = (typeof EncodingValues)[number]; // eslint-disable-line @typescript-eslint/no-unused-vars
-
-export const isTrackEncoding = (value: string): value is TrackEncoding =>
-  EncodingValues.includes(value as TrackEncoding);
-
-const TrackTypeValues = ["screensharing", "camera", "audio"] as const;
-export type TrackType = (typeof TrackTypeValues)[number];
-
 const StreamSourceValues = ["local", "remote"] as const;
 export type StreamSource = (typeof StreamSourceValues)[number];
 

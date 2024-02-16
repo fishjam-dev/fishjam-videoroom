@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { TrackEncoding, VadStatus} from "@jellyfish-dev/react-client-sdk";
-import { TrackType } from "../../types";
-import { PeerMetadata } from "../../../jellyfish.types.ts";
+import { PeerMetadata, TrackType } from "../../../jellyfish.types.ts";
 
 export type ApiTrack = {
   trackId: string;
