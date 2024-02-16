@@ -26,6 +26,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       defaultSimulcastConfig: {
         enabled: true,
         activeEncodings: ["l", "m", "h"],
+        disabledEncodings: []
       },
     },
     microphone: {

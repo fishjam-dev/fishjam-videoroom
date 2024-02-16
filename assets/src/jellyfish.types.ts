@@ -2,17 +2,23 @@ import { toPairs } from "ramda";
 import { TrackWithId } from "./pages/types";
 import { ApiTrack, RemotePeer } from "./pages/room/hooks/usePeerState";
 import { State, JellyfishClient, create } from "@jellyfish-dev/react-client-sdk";
+import { z } from "zod";
 
-const TrackTypeValues = ["screensharing", "camera", "audio"] as const;
-export type TrackType = (typeof TrackTypeValues)[number];
+const trackTypeSchema = z.union([z.literal("screensharing"), z.literal("camera"), z.literal("audio")]);
+export type TrackType = z.infer<typeof trackTypeSchema>
 
-export type PeerMetadata = {
-  name: string;
-};
-export type TrackMetadata = {
-  type: TrackType;
-  active: boolean;
-};
+const peerMetadataSchema = z.object({
+  name: z.string()
+});
+
+export type PeerMetadata = z.infer<typeof peerMetadataSchema>
+
+const trackMetadataSchema = z.object({
+  type: trackTypeSchema,
+  active: z.boolean()
+});
+
+export type TrackMetadata = z.infer<typeof trackMetadataSchema>;
 
 export const {
   useSelector,
@@ -24,8 +30,11 @@ export const {
   useScreenshare,
   useTracks,
   JellyfishContextProvider,
-  useApi,
-} = create<PeerMetadata, TrackMetadata>();
+  useApi
+} = create<PeerMetadata, TrackMetadata>({
+  peerMetadataParser: (obj) => peerMetadataSchema.parse(obj),
+  trackMetadataParser: (obj) => trackMetadataSchema.parse(obj)
+});
 
 export const useJellyfishClient = (): JellyfishClient<PeerMetadata, TrackMetadata> | null =>
   useSelector((s) => s.connectivity.client);
@@ -49,7 +58,7 @@ export const toLocalTrackSelector = (state: State<PeerMetadata, TrackMetadata>, 
         metadata,
         isSpeaking: true,
         enabled: true,
-        encodingQuality: encoding,
+        encodingQuality: encoding
       };
     })[0] || null;
 
@@ -62,7 +71,7 @@ export const toRemotePeerSelector = (state: State<PeerMetadata, TrackMetadata>):
         isSpeaking: track.vadStatus === "speech",
         encoding: track.encoding || undefined,
         mediaStream: track.stream || undefined,
-        mediaStreamTrack: track.track || undefined,
+        mediaStreamTrack: track.track || undefined
       };
     });
 
@@ -70,7 +79,7 @@ export const toRemotePeerSelector = (state: State<PeerMetadata, TrackMetadata>):
       id: peerId,
       displayName: peer?.metadata?.name || "",
       source: "remote",
-      tracks,
+      tracks
     };
   });
 };

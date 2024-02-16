@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer } from "react";
 import {
+  PeerMetadata,
   toLocalTrackSelector,
   TrackMetadata,
   TrackType,
@@ -7,15 +8,8 @@ import {
   useSelector
 } from "../../../jellyfish.types";
 import useEffectOnChange from "../../../features/shared/hooks/useEffectOnChange";
-import { MessageEvents, TrackContext } from "@jellyfish-dev/react-client-sdk";
+import { MessageEvents } from "@jellyfish-dev/react-client-sdk";
 import { LOCAL_SCREEN_SHARING_ID, LOCAL_VIDEO_ID } from "../consts";
-import { isTrackType } from "../../types";
-
-const parseTrackMetadata = (context: TrackContext) => {
-  const type = context.metadata.type;
-  const active = context.metadata.active;
-  return isTrackType(type) ? { type, active } : { active };
-};
 
 type PinningFlags = {
   blockPinning: boolean;
@@ -146,25 +140,30 @@ const useTilePinning = (): TilePinningApi => {
   useEffect(() => {
     if (!client) return;
 
-    const onPeerJoined: MessageEvents<TrackMetadata>["peerJoined"] = (peer) => {
+    const onPeerJoined: MessageEvents<PeerMetadata, TrackMetadata>["peerJoined"] = (peer) => {
       dispatch({ type: "remotePeerAdded", tileId: peer.id });
     };
 
-    const onJoinSuccess: MessageEvents<TrackMetadata>["joined"] = (_, peersInRoom) => {
+    const onJoinSuccess: MessageEvents<PeerMetadata, TrackMetadata>["joined"] = (_, peersInRoom) => {
       peersInRoom.forEach((peer) => {
         dispatch({ type: "remotePeerAdded", tileId: peer.id });
       });
     };
 
-    const onTrackReady: MessageEvents<TrackMetadata>["trackReady"] = (ctx) => {
-      const trackType: TrackType | null = parseTrackMetadata(ctx)?.type || null;
+    const onTrackReady: MessageEvents<PeerMetadata, TrackMetadata>["trackReady"] = (ctx) => {
+      if (!ctx.metadata) return;
+
+      const trackType: TrackType = ctx.metadata.type;
+
       if (trackType === "camera" || trackType === "screensharing") {
         dispatch({ type: "remoteTrackAdded", trackType, tileId: ctx.trackId });
       }
     };
 
-    const onTrackRemoved: MessageEvents<TrackMetadata>["trackRemoved"] = (ctx) => {
-      const trackType: TrackType | null = parseTrackMetadata(ctx)?.type || null;
+    const onTrackRemoved: MessageEvents<PeerMetadata, TrackMetadata>["trackRemoved"] = (ctx) => {
+      if (!ctx.metadata) return;
+
+      const trackType: TrackType = ctx.metadata.type;
       if (trackType === "camera" || trackType === "screensharing") {
         dispatch({ type: "remoteTrackRemoved", tileId: ctx.trackId });
       }

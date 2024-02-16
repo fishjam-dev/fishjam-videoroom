@@ -78,6 +78,7 @@ type UsePeersStateResult = {
   api: PeersApi;
 };
 
+// todo remove this duplicate of PeerMetadata
 export type PeerMetadata = {
   emoji?: string;
   displayName?: string;
