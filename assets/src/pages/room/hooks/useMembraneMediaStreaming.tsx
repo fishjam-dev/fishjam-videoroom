@@ -46,9 +46,9 @@ export const useMembraneMediaStreaming = (
   const defaultTrackMetadata = useMemo(() => ({ active: device.enabled, type }), [device.enabled, type]);
 
   const addTracks = useCallback(
-    () => {
+    async () => {
       if (type === "camera") {
-        device.addTrack(
+        await device.addTrack(
           defaultTrackMetadata,
           simulcastEnabled ? {
             enabled: true,
@@ -57,7 +57,7 @@ export const useMembraneMediaStreaming = (
           } : undefined,
           selectBandwidthLimit(type, simulcastEnabled));
       } else {
-        device.addTrack(
+        await device.addTrack(
           defaultTrackMetadata,
           selectBandwidthLimit(type, simulcastEnabled)
         );
@@ -68,14 +68,14 @@ export const useMembraneMediaStreaming = (
   );
 
   const replaceTrack = useCallback(
-    () => {
+    async () => {
       if (!trackIds || !device.stream) return;
       if (!device.track) {
         console.error({ stream: device.stream, type });
         throw Error("Stream has no tracks!");
       }
 
-      device.replaceTrack(device.track, device.stream);
+      await device.replaceTrack(device.track, device.stream);
     },
     [device.stream, device.track, trackIds, type]
   );
@@ -86,20 +86,22 @@ export const useMembraneMediaStreaming = (
   }, []);
 
   useEffect(() => {
-    if (!api || !isConnected || mode !== "automatic") {
-      return;
-    }
-    const stream = device.stream;
+    (async () => {
+      if (!api || !isConnected || mode !== "automatic") {
+        return;
+      }
+      const stream = device.stream;
 
-    const localTrackId: string | undefined = device.track?.id;
+      const localTrackId: string | undefined = device.track?.id;
 
-    if (stream && !trackIds) {
-      addTracks();
-    } else if (stream && trackIds && trackIds.localId !== localTrackId) {
-      replaceTrack();
-    } else if (!stream && trackIds) {
-      removeTracks();
-    }
+      if (stream && !trackIds) {
+        await addTracks();
+      } else if (stream && trackIds && trackIds.localId !== localTrackId) {
+        await replaceTrack();
+      } else if (!stream && trackIds) {
+        removeTracks();
+      }
+    })();
   }, [api, device.stream, device.track, device.enabled, isConnected, addTracks, mode, removeTracks, trackIds, replaceTrack, type]);
 
   useEffect(() => {
