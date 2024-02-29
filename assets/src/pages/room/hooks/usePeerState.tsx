@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { TrackEncoding, VadStatus} from "@jellyfish-dev/react-client-sdk";
-import { TrackType } from "../../types";
+import { PeerMetadata, TrackType } from "../../../jellyfish.types.ts";
 
 export type ApiTrack = {
   trackId: string;
@@ -76,11 +76,6 @@ export type PeersApi = {
 type UsePeersStateResult = {
   state: PeersState;
   api: PeersApi;
-};
-
-export type PeerMetadata = {
-  emoji?: string;
-  displayName?: string;
 };
 
 const copyTrack = (peer: RemotePeer, trackId: string) => peer.tracks.find((track) => track.trackId === trackId);
