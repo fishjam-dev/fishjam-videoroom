@@ -17,7 +17,7 @@ type HomePageVideoTileProps = {
 
 const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
   const { audio, video } = useLocalPeer();
-
+  
   const initials = computeInitials(displayName);
   const { setOpen } = useModal();
 

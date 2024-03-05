@@ -1,13 +1,20 @@
-import React, { useContext } from "react";
-import { AUDIO_TRACK_CONSTRAINTS, SCREENSHARING_TRACK_CONSTRAINTS, VIDEO_TRACK_CONSTRAINTS } from "../../pages/room/consts";
-import { TrackMetadata, useCamera, useMicrophone, useScreenshare, useSetupMedia } from "../../jellyfish.types";
+import React, { useCallback, useContext, useEffect, useReducer, useRef, useState } from "react";
+import {
+  AUDIO_TRACK_CONSTRAINTS,
+  SCREENSHARING_TRACK_CONSTRAINTS,
+  VIDEO_TRACK_CONSTRAINTS,
+} from "../../pages/room/consts";
+import { TrackMetadata, useApi, useCamera, useMicrophone, useScreenshare, useSetupMedia } from "../../jellyfish.types";
 import { UseCameraResult, UseMicrophoneResult, UseScreenshareResult } from "@jellyfish-dev/react-client-sdk";
+import { FilesetResolver, ImageSegmenter, ImageSegmenterCallback } from "@mediapipe/tasks-vision";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
   audio: UseMicrophoneResult<TrackMetadata>;
   screenShare: UseScreenshareResult<TrackMetadata>;
   init: () => void;
+  blur: boolean;
+  setBlur: (status: boolean) => void;
 };
 
 const LocalPeerMediaContext = React.createContext<LocalPeerContext | undefined>(undefined);
@@ -20,7 +27,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const { init } = useSetupMedia({
     camera: {
       trackConstraints: VIDEO_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: {active: true, type: "camera"},
+      defaultTrackMetadata: { active: true, type: "camera" },
       autoStreaming: false,
       preview: true,
       defaultSimulcastConfig: {
@@ -31,13 +38,13 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     },
     microphone: {
       trackConstraints: AUDIO_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: {active: true, type: "audio"},
+      defaultTrackMetadata: { active: true, type: "audio" },
       autoStreaming: false,
       preview: true,
     },
     screenshare: {
       trackConstraints: SCREENSHARING_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: {active: true, type: "screensharing"},
+      defaultTrackMetadata: { active: true, type: "screensharing" },
       autoStreaming: false,
       preview: true,
     },
@@ -49,13 +56,17 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const audio = useMicrophone();
   const screenShare = useScreenshare();
 
+  const { video: blurVideo, blur, setBlur } = useBlur(video);
+  
   return (
     <LocalPeerMediaContext.Provider
       value={{
-        video,
+        video: blur ? blurVideo : video,
         audio,
         screenShare,
         init,
+        blur,
+        setBlur
       }}
     >
       {children}
@@ -68,3 +79,242 @@ export const useLocalPeer = (): LocalPeerContext => {
   if (!context) throw new Error("useLocalPeer must be used within a LocalPeerMediaContext");
   return context;
 };
+
+function useBlur<T>(video: UseCameraResult<T>): { blur: boolean, setBlur: (status: boolean) => void, video: UseCameraResult<T> } {
+  const [blur, setBlur] = useState(false);
+  const [prevStream, setPrevStream] = useState(video.stream);
+  const processor = useRef<BlurProcessor | null>(null);
+  const [, rerender] = useReducer((p) => p + 1, 0);
+  const api = useApi();
+  const apiRef = useRef(api);
+  
+  useEffect(() => {
+    apiRef.current = api;
+  }, [api])
+
+  useEffect(() => {
+    if (!video.stream) {
+      if (processor.current) {
+        processor.current.destroy();
+        processor.current = null;
+        setPrevStream(null);
+      }
+      return;
+    }
+
+    if (prevStream === video.stream) return;
+    setPrevStream(video.stream);
+    processor.current = new BlurProcessor(video.stream);
+
+    return () => {
+      processor.current?.destroy();
+      processor.current = null;
+      setPrevStream(null);
+    };
+  }, [video.stream]);
+
+  const stream = processor.current?.stream ?? null;
+  const track = processor.current?.track ?? null;
+  
+  const setEnable = useCallback((enabled: boolean) => {
+    if(track) track.enabled = enabled;
+    rerender();
+  }, [track])
+  
+  const noop: () => Promise<any> = useCallback((..._args) => Promise.resolve(), []); 
+  
+  return { blur, setBlur, video: {
+    stream,
+    track,
+    addTrack: noop,
+    removeTrack: noop,
+    replaceTrack: noop,
+    broadcast: video.broadcast,
+    deviceInfo: video.deviceInfo,
+    devices: video.devices,
+    enabled: track?.enabled ?? false,
+    error: video.error,
+    setEnable: setEnable,
+    start: video.start,
+    status: video.status,
+    stop: video.stop,
+  }};
+}
+
+const wasm = await FilesetResolver.forVisionTasks(
+  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm"
+);
+
+class BlurProcessor {
+  private width: number;
+  private height: number;
+
+  // stores frames of the video
+  private canvas: HTMLCanvasElement;
+  private canvasCtx: CanvasRenderingContext2D;
+
+  // downsamples camera feed, used to blur background
+  private resizedCanvas: HTMLCanvasElement;
+  private resizedCanvasCtx: CanvasRenderingContext2D;
+
+  private webglCanvas: HTMLCanvasElement;
+  private webglCanvasCtx: WebGL2RenderingContext;
+
+  segmenter: ImageSegmenter | null = null;
+  prevVideoTime: number = 0;
+  stream: MediaStream;
+  track: MediaStreamTrack;
+  video: HTMLVideoElement;
+
+  constructor(video: MediaStream) {
+    const trackSettings = video.getVideoTracks()[0].getSettings();
+    this.width = trackSettings.width ?? 1280;
+    this.height = trackSettings.height ?? 720;
+
+    this.canvas = document.createElement("canvas");
+    this.canvas.setAttribute("width", "" + this.width / 2);
+    this.canvas.setAttribute("height", "" + this.height / 2);
+    this.canvasCtx = this.canvas.getContext("2d", { willReadFrequently: true })!;
+
+    this.resizedCanvas = document.createElement("canvas");
+    this.resizedCanvas.setAttribute("width", "" + this.width / 4);
+    this.resizedCanvas.setAttribute("height", "" + this.height / 4);
+    this.resizedCanvasCtx = this.resizedCanvas.getContext("2d", { willReadFrequently: true })!;
+
+    this.webglCanvas = document.createElement("canvas");
+    this.webglCanvas.setAttribute("width", "" + this.width);
+    this.webglCanvas.setAttribute("height", "" + this.height);
+    this.webglCanvasCtx = this.webglCanvas.getContext("webgl2")!;
+
+    this.stream = this.webglCanvas.captureStream(trackSettings.frameRate ?? 24);
+    this.track = this.stream.getVideoTracks()[0];
+    
+    this.video = document.createElement("video");
+    this.video.srcObject = video;
+    this.video.muted = true;
+    this.video.play();
+    
+    this.initMediaPipe();
+    this.initWebgl();
+    this.video.requestVideoFrameCallback(this.onFrameCallback);
+  }
+
+  async initMediaPipe() {
+    this.segmenter = await ImageSegmenter.createFromOptions(wasm, {
+      baseOptions: {
+        modelAssetPath:
+          "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter_landscape/float16/latest/selfie_segmenter_landscape.tflite",
+      },
+      runningMode: "VIDEO",
+      outputCategoryMask: true,
+      outputConfidenceMasks: true,
+    });
+  }
+
+  private async initWebgl() {
+    const gl = this.webglCanvasCtx;
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    const program = gl.createProgram()!;
+    const vs = await this.loadShader(gl, gl.VERTEX_SHADER, "/shaders/blur/vertex.glsl");
+    const fs = await this.loadShader(gl, gl.FRAGMENT_SHADER, "/shaders/blur/fragment.glsl");
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+    gl.viewport(0, 0, this.width, this.height);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    const vertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, -1, 1, -1, -1, 1, 1, 1]), gl.STREAM_DRAW);
+    const a_Position = gl.getAttribLocation(program, "a_Position");
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_Position);
+
+    const texture = gl.createTexture()!;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    const textureLoc = gl.getUniformLocation(program, "texture");
+    gl.uniform1i(textureLoc, 0);
+
+    const confidenceTexture = gl.createTexture()!;
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, confidenceTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    const confidenceTextureLoc = gl.getUniformLocation(program, "confidenceTexture");
+    gl.uniform1i(confidenceTextureLoc, 1);
+
+    const resizedTexture = gl.createTexture()!;
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, resizedTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    const resizedTextureLoc = gl.getUniformLocation(program, "resizedTexture");
+    gl.uniform1i(resizedTextureLoc, 2);
+  }
+
+  private async loadShader(gl: WebGL2RenderingContext, type: number, path: string): Promise<WebGLShader> {
+    const shader = gl.createShader(type)!;
+    gl.shaderSource(shader, await (await fetch(path)).text());
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error("Failed to compile shader", {
+        path: path,
+        error: gl.getShaderInfoLog(shader),
+      });
+
+      throw "Failed to compile shader";
+    }
+
+    return shader;
+  }
+
+  destroy() {
+    this.canvas.remove();
+    this.resizedCanvas.remove();
+    this.webglCanvas.remove();
+    this.video.remove();
+    
+    this.track.stop();
+    this.segmenter?.close();
+  }
+
+  private onFrameCallback = () => {
+    if (!this.segmenter || this.prevVideoTime >= this.video.currentTime) {
+      this.video.requestVideoFrameCallback(this.onFrameCallback);
+      return;
+    }
+    this.canvasCtx.drawImage(this.video, 0, 0, this.width/2, this.height/2);
+
+    this.resizedCanvasCtx.drawImage(this.canvas, 0, 0, this.width / 4, this.height / 4);
+
+    this.prevVideoTime = this.video.currentTime;
+    this.segmenter.segmentForVideo(this.canvas, this.video.currentTime * 1000, this.onSegmentationReady);
+
+    this.video.requestVideoFrameCallback(this.onFrameCallback);
+  };
+
+  private onSegmentationReady: ImageSegmenterCallback = (result) => {
+    const t = result.confidenceMasks![0];
+    const og = t.getAsUint8Array();
+
+    const gl = this.webglCanvasCtx;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, t.width, t.height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, og);
+
+    gl.activeTexture(gl.TEXTURE2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.resizedCanvas);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  };
+}
