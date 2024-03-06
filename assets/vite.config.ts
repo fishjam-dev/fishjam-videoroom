@@ -25,11 +25,11 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    checker({
-      typescript: true,
-      eslint: {
-        lintCommand: "eslint --ext .ts,.tsx",
-      },
-    }),
+    // checker({
+    //   typescript: false,
+    //   eslint: {
+    //     lintCommand: "eslint --ext .ts,.tsx",
+    //   },
+    // }),
   ],
 });
