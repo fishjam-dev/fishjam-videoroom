@@ -64,7 +64,7 @@ function calculateScore(stats: { audio: Partial<ScoreInputAudio>, video: Partial
         base -
         expectedLog -
         delay * 0.002;
-      console.log({ base, MOS, delay, bPPPF, expectedLog, codecFactor });
+      // console.log({ base, MOS, delay, bPPPF, expectedLog, codecFactor });
       scores.video = clamp(Math.round(MOS * 100) / 100, 1, 5);
     } else {
       scores.video = 1;
@@ -155,16 +155,7 @@ const RemoteMediaPlayerTile: FC<Props> = (
   const tracks = useTracks();
   const { stats } = useDeveloperInfo();
 
-  useEffect(() => {
-    Object.values(tracks).forEach((track) => {
-      console.log({ track });
-    });
-
-    console.log({ stats });
-  }, [tracks, stats]);
-
   const track = tracks[remoteTrackId ?? ""];
-
 
   const { ref, setTargetEncoding, targetEncoding, smartEncoding, smartEncodingStatus, setSmartEncodingStatus } =
     useAutomaticEncodingSwitching(
@@ -186,11 +177,11 @@ const RemoteMediaPlayerTile: FC<Props> = (
   const height = stats[track?.track?.id || ""]?.height;
   const packetLoss = stats[track?.track?.id || ""]?.packetLoss;
   const roundTripTime = stats[track?.track?.id || ""]?.roundTripTime;
-  const frameRate = video?.getVideoTracks()?.[0]?.getSettings()?.frameRate;
+  const frameRate = stats[track?.track?.id || ""]?.frameRate;
 
   useEffect(() => {
     const id = setInterval(() => {
-      console.log({ settings: video?.getVideoTracks()?.[0]?.getSettings()?.frameRate });
+      // console.log({ settings: video?.getVideoTracks()?.[0]?.getSettings()?.frameRate });
     }, 1000);
 
     return () => {

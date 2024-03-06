@@ -121,7 +121,7 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
 
       // console.log({ dx, currTime, prevTime });
 
-      console.log({ stats });
+      // console.log({ stats });
 
       const result: Record<string, any> = {};
 
@@ -130,7 +130,7 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
       });
 
       // console.log({ result });
-      // console.log(JSON.stringify(result, undefined, 2));
+      console.log(JSON.stringify(result, undefined, 2));
 
       // const outbound: Record<OutboundRtpId, any> = getGroupedStats(result, "outbound-rtp");
 
@@ -170,7 +170,7 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
           const prevBytesReceived: number = lastReport.bytesReceived;
 
           const bitrate = 8 * (currentBytesReceived - prevBytesReceived); // bits per seconds
-          console.log({ bitrate, currentBytesReceived, prevBytesReceived });
+          // console.log({ bitrate, currentBytesReceived, prevBytesReceived });
           const packetLoss = report.packetsLost / report.packetsReceived * 100; // in %
 
           const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
@@ -187,7 +187,8 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
             width: report.frameWidth,
             height: report.frameHeight,
             bufferDelay: report.jitterBufferDelay,
-            roundTripTime: currentRoundTripTime
+            roundTripTime: currentRoundTripTime,
+            frameRate: report.framesPerSecond
           });
         });
       }
