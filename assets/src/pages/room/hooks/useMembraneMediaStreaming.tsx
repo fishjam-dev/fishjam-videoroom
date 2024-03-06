@@ -40,7 +40,7 @@ export const useMembraneMediaStreaming = (
 
   const api = useApi();
 
-  const deviceRemoveTrackRef = useRef<typeof device.removeTrack | null>(null);
+  const deviceRemoveTrackRef = useRef(device.removeTrack);
   useEffect(() => {
     deviceRemoveTrackRef.current = device.removeTrack;
   }, [device.removeTrack]);
@@ -74,7 +74,7 @@ export const useMembraneMediaStreaming = (
 
   const removeTracks = useCallback(() => {
     setTrackMetadata(null);
-    deviceRemoveTrackRef.current?.();
+    deviceRemoveTrackRef.current();
   }, []);
 
   useEffect(() => {
