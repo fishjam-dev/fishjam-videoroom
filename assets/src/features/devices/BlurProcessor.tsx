@@ -76,7 +76,7 @@ export function useBlur<T>(video: UseCameraResult<T>): {
 }
 
 export const wasm = await FilesetResolver.forVisionTasks(
-  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm"
+  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.11/wasm"
 );
 
 export class BlurProcessor {
