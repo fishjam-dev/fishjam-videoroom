@@ -3,17 +3,21 @@ import { FilesetResolver, ImageSegmenter, ImageSegmenterCallback } from "@mediap
 import { useState, useRef, useReducer, useEffect, useCallback } from "react";
 import { useApi } from "../../jellyfish.types";
 
-export function useBlur<T>(video: UseCameraResult<T>): { blur: boolean, setBlur: (status: boolean) => void, video: UseCameraResult<T> } {
+export function useBlur<T>(video: UseCameraResult<T>): {
+  blur: boolean;
+  setBlur: (status: boolean) => void;
+  video: UseCameraResult<T>;
+} {
   const [blur, setBlur] = useState(false);
   const [prevStream, setPrevStream] = useState(video.stream);
   const processor = useRef<BlurProcessor | null>(null);
   const [, rerender] = useReducer((p) => p + 1, 0);
   const api = useApi();
   const apiRef = useRef(api);
-  
+
   useEffect(() => {
     apiRef.current = api;
-  }, [api])
+  }, [api]);
 
   useEffect(() => {
     if (!video.stream) {
@@ -38,30 +42,37 @@ export function useBlur<T>(video: UseCameraResult<T>): { blur: boolean, setBlur:
 
   const stream = processor.current?.stream ?? null;
   const track = processor.current?.track ?? null;
-  
-  const setEnable = useCallback((enabled: boolean) => {
-    if(track) track.enabled = enabled;
-    rerender();
-  }, [track])
-  
-  const noop: () => Promise<any> = useCallback((..._args) => Promise.resolve(), []); 
-  
-  return { blur, setBlur, video: {
-    stream,
-    track,
-    addTrack: noop,
-    removeTrack: noop,
-    replaceTrack: noop,
-    broadcast: video.broadcast,
-    deviceInfo: video.deviceInfo,
-    devices: video.devices,
-    enabled: track?.enabled ?? false,
-    error: video.error,
-    setEnable: setEnable,
-    start: video.start,
-    status: video.status,
-    stop: video.stop,
-  }};
+
+  const setEnable = useCallback(
+    (enabled: boolean) => {
+      if (track) track.enabled = enabled;
+      rerender();
+    },
+    [track]
+  );
+
+  const noop: () => Promise<any> = useCallback((..._args) => Promise.resolve(), []);
+
+  return {
+    blur,
+    setBlur,
+    video: {
+      stream,
+      track,
+      addTrack: noop,
+      removeTrack: noop,
+      replaceTrack: noop,
+      broadcast: video.broadcast,
+      deviceInfo: video.deviceInfo,
+      devices: video.devices,
+      enabled: track?.enabled ?? false,
+      error: video.error,
+      setEnable: setEnable,
+      start: video.start,
+      status: video.status,
+      stop: video.stop,
+    },
+  };
 }
 
 export const wasm = await FilesetResolver.forVisionTasks(
@@ -125,7 +136,8 @@ export class BlurProcessor {
   async initMediaPipe() {
     this.segmenter = await ImageSegmenter.createFromOptions(wasm, {
       baseOptions: {
-        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter_landscape/float16/latest/selfie_segmenter_landscape.tflite",
+        modelAssetPath:
+          "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter_landscape/float16/latest/selfie_segmenter_landscape.tflite",
       },
       runningMode: "VIDEO",
       outputCategoryMask: true,
@@ -148,7 +160,7 @@ export class BlurProcessor {
 
     const vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, -1, 1, -1, -1, 1, 1, 1]), gl.STREAM_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -3, -1, 1, 3, 1]), gl.STREAM_DRAW);
     const a_Position = gl.getAttribLocation(program, "a_Position");
     gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_Position);
@@ -231,11 +243,21 @@ export class BlurProcessor {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
 
     gl.activeTexture(gl.TEXTURE1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, confidenceMask.width, confidenceMask.height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, confidenceMask.getAsUint8Array());
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.LUMINANCE,
+      confidenceMask.width,
+      confidenceMask.height,
+      0,
+      gl.LUMINANCE,
+      gl.UNSIGNED_BYTE,
+      confidenceMask.getAsUint8Array()
+    );
 
     gl.activeTexture(gl.TEXTURE2);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.resizedCanvas);
 
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 }
