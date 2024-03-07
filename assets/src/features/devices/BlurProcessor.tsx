@@ -2,6 +2,8 @@ import { UseCameraResult } from "@jellyfish-dev/react-client-sdk";
 import { FilesetResolver, ImageSegmenter, ImageSegmenterCallback } from "@mediapipe/tasks-vision";
 import { useState, useRef, useReducer, useEffect, useCallback } from "react";
 import { useApi } from "../../jellyfish.types";
+import VideoWorker from "./videoWorker.ts?worker";
+
 
 export function useBlur<T>(video: UseCameraResult<T>): {
   blur: boolean;
@@ -70,8 +72,8 @@ export function useBlur<T>(video: UseCameraResult<T>): {
       setEnable: setEnable,
       start: video.start,
       status: video.status,
-      stop: video.stop,
-    },
+      stop: video.stop
+    }
   };
 }
 
@@ -82,6 +84,7 @@ export const wasm = await FilesetResolver.forVisionTasks(
 export class BlurProcessor {
   private width: number;
   private height: number;
+  private worker: any;
 
   // stores frames of the video
   private canvas: HTMLCanvasElement;
@@ -104,6 +107,7 @@ export class BlurProcessor {
     const trackSettings = video.getVideoTracks()[0].getSettings();
     this.width = trackSettings.width ?? 1280;
     this.height = trackSettings.height ?? 720;
+    this.worker = new VideoWorker();
 
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("width", "" + this.width / 2);
@@ -130,18 +134,27 @@ export class BlurProcessor {
 
     this.initMediaPipe();
     this.initWebgl();
-    this.video.requestVideoFrameCallback(this.onFrameCallback);
+
+    this.worker.onmessage = () => {
+      this.onFrameCallback();
+    };
+
+    this.worker.postMessage(
+      {
+        action: "start"
+      },
+      []);
   }
 
   async initMediaPipe() {
     this.segmenter = await ImageSegmenter.createFromOptions(wasm, {
       baseOptions: {
         modelAssetPath:
-          "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter_landscape/float16/latest/selfie_segmenter_landscape.tflite",
+          "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter_landscape/float16/latest/selfie_segmenter_landscape.tflite"
       },
       runningMode: "VIDEO",
       outputCategoryMask: true,
-      outputConfidenceMasks: true,
+      outputConfidenceMasks: true
     });
   }
 
@@ -201,7 +214,7 @@ export class BlurProcessor {
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
       console.error("Failed to compile shader", {
         path: path,
-        error: gl.getShaderInfoLog(shader),
+        error: gl.getShaderInfoLog(shader)
       });
 
       throw "Failed to compile shader";
@@ -222,7 +235,6 @@ export class BlurProcessor {
 
   private onFrameCallback = () => {
     if (!this.segmenter || this.prevVideoTime >= this.video.currentTime) {
-      this.video.requestVideoFrameCallback(this.onFrameCallback);
       return;
     }
     this.canvasCtx.drawImage(this.video, 0, 0, this.width / 2, this.height / 2);
@@ -231,8 +243,6 @@ export class BlurProcessor {
 
     this.prevVideoTime = this.video.currentTime;
     this.segmenter.segmentForVideo(this.canvas, this.video.currentTime * 1000, this.onSegmentationReady);
-
-    this.video.requestVideoFrameCallback(this.onFrameCallback);
   };
 
   private onSegmentationReady: ImageSegmenterCallback = (result) => {
