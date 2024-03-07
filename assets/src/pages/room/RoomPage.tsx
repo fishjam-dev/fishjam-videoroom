@@ -17,6 +17,20 @@ import {
   useDeveloperInfo
 } from "../../contexts/DeveloperInfoContext.tsx";
 
+import { z } from "zod"
+
+const RTCScoreVideoParamsSchema = z.object({
+    bitrate: z.number().default(0),
+    roundTripTime: z.number().default(0),
+    bufferDelay: z.number().default(0),
+  //   codec: string,
+  //   expectedWidth: number;
+  //   expectedHeight: number;
+  //   frameRate: number;
+  //   expectedFrameRate: number;
+  //   packetLoss?: number
+});
+
 type ConnectComponentProps = {
   username: string;
   roomId: string;
@@ -169,9 +183,9 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
           const currentBytesReceived: number = report.bytesReceived ?? 0;
           const prevBytesReceived: number = lastReport.bytesReceived;
 
-          const bitrate = 8 * (currentBytesReceived - prevBytesReceived); // bits per seconds
+          const rawBitrate = 8 * (currentBytesReceived - prevBytesReceived); // bits per seconds
           // console.log({ bitrate, currentBytesReceived, prevBytesReceived });
-          const packetLoss = report.packetsLost / report.packetsReceived * 100; // in %
+          const rawPacketLoss = report.packetsLost / report.packetsReceived * 100; // in %
 
           const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
           const currentRoundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
@@ -179,16 +193,16 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
           const codec = result[report.codecId].mimeType.split("/")?.[1];
 
           // console.log({ selectedCandidatePairId });
+          const bitrate: number = Number.isFinite(rawBitrate) ? rawBitrate : 0;
+          const packetLoss: number = Number.isFinite(rawPacketLoss) ? rawPacketLoss : 0
 
           setStats(report.trackIdentifier, {
             bitrate,
-            packetLoss,
-            codec: codec,
-            width: report.frameWidth,
-            height: report.frameHeight,
-            bufferDelay: report.jitterBufferDelay,
-            roundTripTime: currentRoundTripTime,
-            frameRate: report.framesPerSecond
+            packetLoss: ,
+            codec: codec ?? "unknown",
+            bufferDelay: Number.isFinite(report.jitterBufferDelay) ? report.jitterBufferDelay : 0,
+            roundTripTime: Number.isFinite(currentRoundTripTime) ? currentRoundTripTime : 0,
+            frameRate: Number.isFinite(report.framesPerSecond) ? report.framesPerSecond : 0
           });
         });
       }
