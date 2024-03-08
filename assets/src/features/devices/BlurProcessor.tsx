@@ -143,11 +143,11 @@ export class BlurProcessor {
   
   private visibilityListener = () => {
       if (document.visibilityState === "visible") {
-        this.worksInForeground = false;
+        this.worksInForeground = true;
         this.video.requestVideoFrameCallback(this.onFrameCallback);
         this.worker.postMessage({type: "stop"});
       } else {
-        this.worksInForeground = true;
+        this.worksInForeground = false;
         this.worker.postMessage({type: "start", fps: this.fps});
       }
     }
