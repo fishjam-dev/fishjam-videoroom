@@ -2,6 +2,7 @@ import { UseCameraResult } from "@jellyfish-dev/react-client-sdk";
 import { FilesetResolver, ImageSegmenter, ImageSegmenterCallback } from "@mediapipe/tasks-vision";
 import { useState, useRef, useReducer, useEffect, useCallback } from "react";
 import { useApi } from "../../jellyfish.types";
+import BlurWorker from "./BlurProcessorWorker?worker";
 
 export function useBlur<T>(video: UseCameraResult<T>): {
   blur: boolean;
@@ -94,11 +95,14 @@ export class BlurProcessor {
   private webglCanvas: HTMLCanvasElement;
   private webglCanvasCtx: WebGL2RenderingContext;
 
-  segmenter: ImageSegmenter | null = null;
-  prevVideoTime: number = 0;
+  private segmenter: ImageSegmenter | null = null;
+  private prevVideoTime: number = 0;
   stream: MediaStream;
   track: MediaStreamTrack;
-  video: HTMLVideoElement;
+  private video: HTMLVideoElement;
+  private worker = new BlurWorker();
+  private worksInForeground = true;
+  private fps: number;
 
   constructor(video: MediaStream) {
     const trackSettings = video.getVideoTracks()[0].getSettings();
@@ -120,7 +124,8 @@ export class BlurProcessor {
     this.webglCanvas.setAttribute("height", "" + this.height);
     this.webglCanvasCtx = this.webglCanvas.getContext("webgl2")!;
 
-    this.stream = this.webglCanvas.captureStream(trackSettings.frameRate ?? 24);
+    this.fps = trackSettings.frameRate ?? 24;
+    this.stream = this.webglCanvas.captureStream(this.fps);
     this.track = this.stream.getVideoTracks()[0];
 
     this.video = document.createElement("video");
@@ -130,10 +135,24 @@ export class BlurProcessor {
 
     this.initMediaPipe();
     this.initWebgl();
+    
+    document.addEventListener("visibilitychange", this.visibilityListener)
+    this.worker.onmessage = this.onFrameCallback;
     this.video.requestVideoFrameCallback(this.onFrameCallback);
   }
+  
+  private visibilityListener = () => {
+      if (document.visibilityState === "visible") {
+        this.worksInForeground = false;
+        this.video.requestVideoFrameCallback(this.onFrameCallback);
+        this.worker.postMessage({type: "stop"});
+      } else {
+        this.worksInForeground = true;
+        this.worker.postMessage({type: "start", fps: this.fps});
+      }
+    }
 
-  async initMediaPipe() {
+  private async initMediaPipe() {
     this.segmenter = await ImageSegmenter.createFromOptions(wasm, {
       baseOptions: {
         modelAssetPath:
@@ -218,13 +237,19 @@ export class BlurProcessor {
 
     this.track.stop();
     this.segmenter?.close();
+
+    this.worker.terminate();
+    document.removeEventListener("visibilitychange", this.visibilityListener);
   }
 
   private onFrameCallback = () => {
     if (!this.segmenter || this.prevVideoTime >= this.video.currentTime) {
-      this.video.requestVideoFrameCallback(this.onFrameCallback);
+      if (this.worksInForeground) {
+        this.video.requestVideoFrameCallback(this.onFrameCallback);
+      }
       return;
     }
+
     this.canvasCtx.drawImage(this.video, 0, 0, this.width / 2, this.height / 2);
 
     this.resizedCanvasCtx.drawImage(this.canvas, 0, 0, this.width / 4, this.height / 4);
@@ -232,7 +257,9 @@ export class BlurProcessor {
     this.prevVideoTime = this.video.currentTime;
     this.segmenter.segmentForVideo(this.canvas, this.video.currentTime * 1000, this.onSegmentationReady);
 
-    this.video.requestVideoFrameCallback(this.onFrameCallback);
+    if (this.worksInForeground) {
+      this.video.requestVideoFrameCallback(this.onFrameCallback);
+    }
   };
 
   private onSegmentationReady: ImageSegmenterCallback = (result) => {
