@@ -1,17 +1,24 @@
 // This is rewritten implementation of https://github.com/ggarber/rtcscore
 
+import { z } from "zod";
+
+const RTCScoreVideoParamsSchema = z.object({
+  bitrate: z.number().default(0),
+  roundTripTime: z.number().default(0),
+  bufferDelay: z.number().default(0),
+  codec: z.string().optional(),
+  frameRate: z.number().default(0),
+  packetLoss: z.number().default(0)
+});
+
+
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
 
-export type RTCScoreVideoParams = {
-  bitrate: number;
-  roundTripTime: number;
-  bufferDelay: number;
-  codec: string,
+export type RTCScoreVideoParams = z.infer<typeof RTCScoreVideoParamsSchema>
+export type ScoreVideoParams = RTCScoreVideoParams & {
   expectedWidth: number;
   expectedHeight: number;
-  frameRate: number;
   expectedFrameRate: number;
-  packetLoss?: number
 }
 
 export const calculateVideoScore = (
@@ -24,7 +31,7 @@ export const calculateVideoScore = (
     expectedHeight,
     frameRate,
     expectedFrameRate
-  }: RTCScoreVideoParams) => {
+  }: ScoreVideoParams) => {
   const pixels = expectedWidth * expectedHeight;
   const codecFactor = codec === "vp9" ? 1.2 : 1.0;
   const delay = bufferDelay + roundTripTime / 2;

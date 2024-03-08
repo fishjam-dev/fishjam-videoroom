@@ -17,20 +17,6 @@ import {
   useDeveloperInfo
 } from "../../contexts/DeveloperInfoContext.tsx";
 
-import { z } from "zod"
-
-const RTCScoreVideoParamsSchema = z.object({
-    bitrate: z.number().default(0),
-    roundTripTime: z.number().default(0),
-    bufferDelay: z.number().default(0),
-  //   codec: string,
-  //   expectedWidth: number;
-  //   expectedHeight: number;
-  //   frameRate: number;
-  //   expectedFrameRate: number;
-  //   packetLoss?: number
-});
-
 type ConnectComponentProps = {
   username: string;
   roomId: string;
@@ -194,11 +180,11 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
 
           // console.log({ selectedCandidatePairId });
           const bitrate: number = Number.isFinite(rawBitrate) ? rawBitrate : 0;
-          const packetLoss: number = Number.isFinite(rawPacketLoss) ? rawPacketLoss : 0
+          const packetLoss: number = Number.isFinite(rawPacketLoss) ? rawPacketLoss : 0;
 
           setStats(report.trackIdentifier, {
             bitrate,
-            packetLoss: ,
+            packetLoss:,
             codec: codec ?? "unknown",
             bufferDelay: Number.isFinite(report.jitterBufferDelay) ? report.jitterBufferDelay : 0,
             roundTripTime: Number.isFinite(currentRoundTripTime) ? currentRoundTripTime : 0,
