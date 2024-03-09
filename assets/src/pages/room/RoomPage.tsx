@@ -12,10 +12,8 @@ import { getSignalingAddress } from "./consts";
 import { getTokenAndAddress } from "../../room.api";
 import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
 import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
-import {
-  InboundRtpId,
-  useDeveloperInfo
-} from "../../contexts/DeveloperInfoContext.tsx";
+import { InboundRtpId, useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
+import { AudioStats, AudioStatsSchema, VideoStats, VideoStatsSchema } from "./components/StreamPlayer/rtcMosScore.ts";
 
 type ConnectComponentProps = {
   username: string;
@@ -95,147 +93,81 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
   const client = useJellyfishClient();
   const { setStats } = useDeveloperInfo();
 
-
-  // useEffect(() => {
-  //   if(client.n)
-  // }, []);
-  //
-
   const showStats = async () => {
     if (!client) return;
-
-    const connection = client.getConnection();
 
     let prevTime: number = 0;
     // let lastOutbound: Record<OutboundRtpId, any> | null = null;
     let lastInbound: Record<InboundRtpId, any> | null = null;
 
     setInterval(async () => {
-      // An RTCStatsReport instance is a read-only Map-like object,
-      // in which each key is an identifier for an object for which statistics are being reported,
-      // and the corresponding value is a dictionary object providing the statistics.
-      const stats: RTCStatsReport = await client.getStats();
-      const currentDate = new Date();
-      const currTime = currentDate.getTime();
+      const currTime = new Date().getTime();
       const dx = currTime - prevTime;
 
-      // console.log({ dx, currTime, prevTime });
-
-      // console.log({ stats });
-
+      const stats: RTCStatsReport = await client.getStats();
       const result: Record<string, any> = {};
-
       stats.forEach((report, id) => {
         result[id] = report;
       });
 
-      // console.log({ result });
-      console.log(JSON.stringify(result, undefined, 2));
-
-      // const outbound: Record<OutboundRtpId, any> = getGroupedStats(result, "outbound-rtp");
-
-      // console.log({ outbound });
-
-      // if (lastOutbound !== null) {
-      //   Object.entries(outbound)
-      //     .filter(([_, report]) => {
-      //       return report.kind === "video";
-      //     }).forEach(([key, report]) => {
-      //     // console.log(report);
-      //     // const currentBytesSent: number = report.bytesSent ?? 0;
-      //     // const prevBytesSent: number = lastOutbound[key].bytesSent;
-      //     //
-      //     // console.log({ prevBytesSent, currentBytesSent });
-      //     // trackReport[report.trackIdentifier] = {
-      //     //
-      //     // }
-      //   });
-      // }
+      // console.log(JSON.stringify(result, undefined, 2));
 
       const inbound: Record<InboundRtpId, any> = getGroupedStats(result, "inbound-rtp");
 
-      // console.log({ outbound });
-
-      if (lastInbound) {
-        Object.entries(inbound)
-          .filter(([_, report]) => {
-            return report.kind === "video";
-          }).forEach(([key, report]) => {
+      Object.entries(inbound)
+        .forEach(([id, report]) => {
           if (!lastInbound) return;
 
-          const lastReport = lastInbound[key];
-          // console.log({ report, lastReport });
+          const lastReport = lastInbound[id];
 
-          const currentBytesReceived: number = report.bytesReceived ?? 0;
-          const prevBytesReceived: number = lastReport.bytesReceived;
+          if (report.kind === "video") {
+            const currentBytesReceived: number = report.bytesReceived ?? 0;
+            const prevBytesReceived: number = lastReport.bytesReceived;
 
-          const rawBitrate = 8 * (currentBytesReceived - prevBytesReceived); // bits per seconds
-          // console.log({ bitrate, currentBytesReceived, prevBytesReceived });
-          const rawPacketLoss = report.packetsLost / report.packetsReceived * 100; // in %
+            const rawBitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
+            const rawPacketLoss = report.packetsLost / report.packetsReceived * 100; // in %
 
-          const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
-          const currentRoundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
+            const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
+            const currentRoundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
 
-          const codec = result[report.codecId].mimeType.split("/")?.[1];
+            const codec = result[report.codecId]?.mimeType?.split("/")?.[1];
 
-          // console.log({ selectedCandidatePairId });
-          const bitrate: number = Number.isFinite(rawBitrate) ? rawBitrate : 0;
-          const packetLoss: number = Number.isFinite(rawPacketLoss) ? rawPacketLoss : 0;
+            const videoStats: VideoStats = VideoStatsSchema.parse({
+              bitrate: rawBitrate,
+              packetLoss: rawPacketLoss,
+              codec,
+              bufferDelay: report.jitterBufferDelay,
+              roundTripTime: currentRoundTripTime,
+              frameRate: report.framesPerSecond
+            });
 
-          setStats(report.trackIdentifier, {
-            bitrate,
-            packetLoss:,
-            codec: codec ?? "unknown",
-            bufferDelay: Number.isFinite(report.jitterBufferDelay) ? report.jitterBufferDelay : 0,
-            roundTripTime: Number.isFinite(currentRoundTripTime) ? currentRoundTripTime : 0,
-            frameRate: Number.isFinite(report.framesPerSecond) ? report.framesPerSecond : 0
-          });
+            setStats(report.trackIdentifier, { ...videoStats, type: "video" });
+          } else {
+            const currentBytesReceived: number = report.bytesReceived ?? 0;
+            const prevBytesReceived: number = lastReport.bytesReceived;
+
+            const rawBitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
+            const rawPacketLoss = report.packetsLost / report.packetsReceived * 100; // in %
+
+            const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
+            const currentRoundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
+
+            const audioStats: AudioStats = AudioStatsSchema.parse({
+              bitrate: rawBitrate,
+              packetLoss: rawPacketLoss,
+              bufferDelay: report.jitterBufferDelay,
+              roundTripTime: currentRoundTripTime,
+            });
+
+            setStats(report.trackIdentifier, { ...audioStats, type: "audio" });
+          }
         });
-      }
 
-      const candidatePair: Record<string, any> = getGroupedStats(result, "candidate-pair");
-
-      const roundTripTimes = Object.entries(candidatePair)
-        .filter(([_, report]) => {
-          return report.state === "succeeded";
-        }).map(([_key, report]) => {
-          // console.log({ _key, currentRoundTripTime: report.currentRoundTripTime });
-          return report.totalRoundTripTime;
-        });
-
-      const averageTotalRoundTripTimes = roundTripTimes.reduce((prev, acc) => prev + acc, 0) / roundTripTimes.length;
-
-      console.log({ averageTotalRoundTripTimes });
-
-      const senders = connection?.getSenders() ?? [];
-      const transcievers = connection?.getTransceivers() ?? [];
-      const recievers = connection?.getReceivers() ?? [];
-
-
-      console.log({ senders, transcievers, recievers });
-      // lastOutbound = outbound;
       lastInbound = inbound;
       prevTime = currTime;
     }, 1000);
 
   };
-
-  // todo:
-  //  * packetLoss: 0-100%
-  //  * bitrate: bps
-  //  * roundTripTime: ms
-  //  * bufferDelay: ms
-  //  * codec: opus / vp8 / vp9 / h264 (only used for video)
-  //  * fec: boolean (ony used for audio)
-  //  * dtx: boolean (ony used for audio)
-  //  * qp: number (not used yet)
-  //  * keyFrames: number (not used yet)
-  //  * width: number; Resolution of the video received
-  //  * expectedWidth: number; Resolution of the rendering widget
-  //  * height: number; Resolution of the video received
-  //  * expectedHeight: number; Resolution of the rendering widget
-  //  * frameRate: number; FrameRate of the video received
-  //  * expectedFrameRate: number; FrameRate of the video source
 
   const { username } = useUser();
 

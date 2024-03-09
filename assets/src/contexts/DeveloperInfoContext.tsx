@@ -1,12 +1,14 @@
 import React, { useCallback, useContext, useState } from "react";
-import { RTCScoreVideoParams } from "../pages/room/components/StreamPlayer/rtcMosScore.ts";
+import { AudioStats, VideoStats } from "../pages/room/components/StreamPlayer/rtcMosScore.ts";
+
+export type Statistics = (VideoStats & { type: "video" }) | (AudioStats & { type: "audio" })
 
 export type DeveloperInfo = {
   simulcast: { status: boolean; setSimulcast: (status: boolean) => void };
   manualMode: { status: boolean; setManualMode: (status: boolean) => void };
   smartLayerSwitching: { status: boolean; setSmartLayerSwitching: (status: boolean) => void };
-  stats: Record<TrackIdentifier, RTCScoreVideoParams>;
-  setStats: (id: TrackIdentifier, stats: RTCScoreVideoParams) => void;
+  stats: Record<TrackIdentifier, VideoStats>;
+  setStats: (id: TrackIdentifier, stats: Statistics) => void;
 };
 
 export const DeveloperInfoContext = React.createContext<DeveloperInfo | undefined>(undefined);
@@ -24,7 +26,7 @@ export const DeveloperInfoProvider = ({ children }: Props) => {
   const [manualMode, setManualMode] = useState<boolean>(false);
   const [smartLayerSwitching, setSmartLayerSwitching] = useState<boolean>(false);
   const [scoreInput, setScoreInput] = useState<Record<TrackIdentifier, Partial<ScoreInputVideo>>>({});
-  const updateStat = useCallback((id: TrackIdentifier, stats: RTCScoreVideoParams) => {
+  const updateStat = useCallback((id: TrackIdentifier, stats: VideoStats) => {
     setScoreInput((prev) => {
       return {
         ...prev, [id]: {

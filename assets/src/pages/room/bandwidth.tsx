@@ -3,7 +3,7 @@ import { TrackType } from "../../jellyfish.types.ts";
 
 const NO_LIMIT: BandwidthLimit = 0;
 const DEFAULT_LIMIT: BandwidthLimit = 1500;
-const SIMULCAST_BANDWIDTH_LIMITS: SimulcastBandwidthLimit = new Map([
+export const SIMULCAST_BANDWIDTH_LIMITS: SimulcastBandwidthLimit = new Map([
   ["h", 1500],
   ["m", 500],
   ["l", 100],

@@ -5,7 +5,8 @@ import { SimulcastEncodingToReceive } from "./simulcast/SimulcastEncodingToRecei
 import GenericMediaPlayerTile from "./GenericMediaPlayerTile";
 import { useTracks } from "../../../../jellyfish.types.ts";
 import { useDeveloperInfo } from "../../../../contexts/DeveloperInfoContext.tsx";
-import { calculateVideoScore } from "./rtcMosScore.ts";
+import { calculateAudioScore, calculateVideoScore } from "./rtcMosScore.ts";
+import { SIMULCAST_BANDWIDTH_LIMITS } from "../../bandwidth.tsx";
 
 export type Props = {
   peerId: string | null;
@@ -14,6 +15,43 @@ export type Props = {
   showSimulcast: boolean;
   forceEncoding: TrackEncoding | null;
 } & ComponentProps<typeof GenericMediaPlayerTile>;
+
+const maxScoreHighLayer = calculateVideoScore({
+  codec: "",
+  bitrate: SIMULCAST_BANDWIDTH_LIMITS.get("h")!,
+  bufferDelay: 0,
+  roundTripTime: 0,
+  frameRate: 30,
+  expectedFrameRate: 30,
+  expectedWidth: 1280,
+  expectedHeight: 720
+});
+
+const maxScoreMediumLayer = calculateVideoScore({
+  codec: "",
+  bitrate: SIMULCAST_BANDWIDTH_LIMITS.get("m")!,
+  bufferDelay: 0,
+  roundTripTime: 0,
+  frameRate: 30,
+  expectedFrameRate: 30,
+  expectedWidth: 1280,
+  expectedHeight: 720
+  // expectedWidth: 640,
+  // expectedHeight: 360
+});
+
+const maxScoreLowLayer = calculateVideoScore({
+  codec: "",
+  bitrate: SIMULCAST_BANDWIDTH_LIMITS.get("l")!,
+  bufferDelay: 0,
+  roundTripTime: 0,
+  frameRate: 30,
+  expectedFrameRate: 30,
+  expectedWidth: 1280,
+  expectedHeight: 720
+  // expectedWidth: 320,
+  // expectedHeight: 180
+});
 
 // todo divide to ScreenShare and RemoteTile
 const RemoteMediaPlayerTile: FC<Props> = (
@@ -45,27 +83,30 @@ const RemoteMediaPlayerTile: FC<Props> = (
       forceEncoding
     );
 
-  const expectedWidth = 1280;
-  const expectedHeight = 720;
-  const expectedFrameRate = 24;
+  const videoStats = stats[track?.track?.id || ""];
+  const audioStats = stats[track?.track?.id || ""];
 
-  const codec = stats[track?.track?.id || ""]?.codec ?? "";
-  const bitrate = stats[track?.track?.id || ""]?.bitrate ?? 0;
-  const bufferDelay = stats[track?.track?.id || ""]?.bufferDelay ?? 0;
-  const roundTripTime = stats[track?.track?.id || ""]?.roundTripTime ?? 0;
-  const frameRate = stats[track?.track?.id || ""]?.frameRate ?? 0;
-
-  const videoScore = calculateVideoScore(
+  const videoScore = videoStats ? calculateVideoScore(
     {
-      codec,
-      bitrate,
-      bufferDelay,
-      roundTripTime,
-      frameRate,
-      expectedWidth,
-      expectedFrameRate,
-      expectedHeight
-    });
+      codec: videoStats.codec,
+      bitrate: videoStats.bitrate,
+      bufferDelay: videoStats.bufferDelay,
+      roundTripTime: videoStats.roundTripTime,
+      frameRate: videoStats.frameRate,
+      expectedWidth: 1280,
+      expectedFrameRate: 24,
+      expectedHeight: 720
+    }) : 0;
+
+  const audioScore = videoStats ? calculateAudioScore(
+    {
+      bitrate: audioStats.bitrate,
+      bufferDelay: audioStats.bufferDelay,
+      roundTripTime: audioStats.roundTripTime,
+      packetLoss: audioStats.packetLoss,
+      fec: false,
+      dtx: false,
+    }) : 0;
 
   return (
     <GenericMediaPlayerTile
@@ -78,16 +119,15 @@ const RemoteMediaPlayerTile: FC<Props> = (
       layers={
         <>
           <div className="absolute right-0 top-0 z-50 w-full text-sm text-gray-700 md:text-base">
-            Additional layer
-            <div className="flex">codec ID: {codec ?? "Unknown"}</div>
-            <div className="flex">bitrate: {bitrate ?? "Unknown"}</div>
-            <div className="flex">bufferDelay: {bufferDelay ?? "Unknown"}</div>
-            <div className="flex">width: {width ?? "Unknown"}</div>
-            <div className="flex">height: {height ?? "Unknown"}</div>
-            <div className="flex">packetLoss: {packetLoss ?? "Unknown"}</div>
-            <div className="flex">roundTripTime: {roundTripTime ?? "Unknown"}</div>
-            <div className="flex">frameRate: {frameRate ?? "Unknown"}</div>
-            <div className="flex">score: {videoScore ?? "Unknown"}</div>
+            <div className="flex">Max score: h {maxScoreHighLayer}, m {maxScoreMediumLayer}, l: {maxScoreLowLayer}</div>
+            <div className="flex">codec ID: {videoStats?.codec}</div>
+            <div className="flex">bitrate: {videoStats?.bitrate}</div>
+            <div className="flex">bufferDelay: {videoStats?.bufferDelay}</div>
+            <div className="flex">roundTripTime: {videoStats?.roundTripTime}</div>
+            <div className="flex">frameRate: {videoStats?.frameRate}</div>
+            <div className="flex">Video score: {videoScore}</div>
+
+            <div className="flex">Audio score: {audioScore}</div>
           </div>
           {layers}
           {showSimulcast && (

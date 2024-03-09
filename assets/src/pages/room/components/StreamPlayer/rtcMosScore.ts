@@ -2,20 +2,28 @@
 
 import { z } from "zod";
 
-const RTCScoreVideoParamsSchema = z.object({
+export const VideoStatsSchema = z.object({
   bitrate: z.number().default(0),
   roundTripTime: z.number().default(0),
   bufferDelay: z.number().default(0),
   codec: z.string().optional(),
   frameRate: z.number().default(0),
-  packetLoss: z.number().default(0)
+  packetLoss: z.number().optional().default(0)
 });
 
+export const AudioStatsSchema = z.object({
+  bitrate: z.number().default(0),
+  roundTripTime: z.number().default(0),
+  bufferDelay: z.number().default(0),
+  packetLoss: z.number().optional().default(0)
+});
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
 
-export type RTCScoreVideoParams = z.infer<typeof RTCScoreVideoParamsSchema>
-export type ScoreVideoParams = RTCScoreVideoParams & {
+export type VideoStats = z.infer<typeof VideoStatsSchema>
+export type AudioStats = z.infer<typeof AudioStatsSchema>
+
+export type ScoreVideoParams = Omit<VideoStats, "packetLoss"> & {
   expectedWidth: number;
   expectedHeight: number;
   expectedFrameRate: number;
@@ -54,7 +62,6 @@ export type ScoreInputAudio = {
   packetLoss: number;
   bitrate: number;
   roundTripTime: number;
-  codec: string;
   fec: boolean;
   dtx: boolean;
 }
