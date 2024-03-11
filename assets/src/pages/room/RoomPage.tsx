@@ -13,7 +13,7 @@ import { getTokenAndAddress } from "../../room.api";
 import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
 import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 import { InboundRtpId, useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
-import { AudioStats, AudioStatsSchema, VideoStats, VideoStatsSchema } from "./components/StreamPlayer/rtcMosScore.ts";
+import { AudioStatsSchema, VideoStatsSchema } from "./components/StreamPlayer/rtcMosScore.ts";
 
 type ConnectComponentProps = {
   username: string;
@@ -94,7 +94,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
             const dxJitterBufferDelay = (report?.jitterBufferDelay ?? 0) - (lastReport?.jitterBufferDelay ?? 0);
             const bufferDelay = dxJitterBufferEmittedCount > 0 ? dxJitterBufferDelay / dxJitterBufferEmittedCount : NaN;
 
-            const codecId = report.codecId;
+            const codecId = report?.codecId || "";
 
             if (report.kind === "video") {
               const codec = result[codecId]?.mimeType?.split("/")?.[1];

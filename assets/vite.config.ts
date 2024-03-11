@@ -14,22 +14,22 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "http://127.0.0.1:5004",
-        changeOrigin: false,
+        changeOrigin: false
       },
       "/socket/peer/websocket": {
         ws: true,
         target: "ws://127.0.0.1:5002",
-        changeOrigin: false,
-      },
-    },
+        changeOrigin: false
+      }
+    }
   },
   plugins: [
     react(),
-    // checker({
-    //   typescript: false,
-    //   eslint: {
-    //     lintCommand: "eslint --ext .ts,.tsx",
-    //   },
-    // }),
-  ],
+    checker({
+      typescript: false,
+      eslint: {
+        lintCommand: "eslint --ext .ts,.tsx"
+      }
+    })
+  ]
 });
