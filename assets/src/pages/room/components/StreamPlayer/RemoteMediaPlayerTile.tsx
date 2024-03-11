@@ -5,6 +5,7 @@ import { SimulcastEncodingToReceive } from "./simulcast/SimulcastEncodingToRecei
 import GenericMediaPlayerTile from "./GenericMediaPlayerTile";
 import { useTracks } from "../../../../jellyfish.types.ts";
 import { StatisticsLayer } from "./StatisticsLayer.tsx";
+import { useDeveloperInfo } from "../../../../contexts/DeveloperInfoContext.tsx";
 
 export type Props = {
   peerId: string | null;
@@ -45,6 +46,8 @@ const RemoteMediaPlayerTile: FC<Props> = (
       forceEncoding
     );
 
+  const { statistics } = useDeveloperInfo();
+
   return (
     <GenericMediaPlayerTile
       ref={ref}
@@ -56,10 +59,10 @@ const RemoteMediaPlayerTile: FC<Props> = (
       layers={
         <>
           {layers}
-          <StatisticsLayer
+          {statistics.status && <StatisticsLayer
             videoTrackId={tracks[remoteVideoTrackId ?? ""]?.track?.id || null}
             audioTrackId={tracks[remoteAudioTrackId ?? ""]?.track?.id || null}
-          />
+          />}
           {showSimulcast && (
             <SimulcastEncodingToReceive
               currentEncoding={encodingQuality}

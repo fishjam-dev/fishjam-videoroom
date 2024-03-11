@@ -44,6 +44,107 @@ const ConnectComponent: FC<ConnectComponentProps> = (
     if (!wasMicrophoneDisabled && !audio.stream) audio.start();
   }, [video.stream, audio.stream]);
 
+  const client = useJellyfishClient();
+  const { statistics } = useDeveloperInfo();
+
+  let intervalId: NodeJS.Timer | null = null;
+
+  useEffect(() => {
+    const callback = () => {
+      let prevTime: number = 0;
+      let lastInbound: Record<InboundRtpId, any> | null = null;
+
+      intervalId = setInterval(async () => {
+        if (!client) return;
+
+        const currTime = new Date().getTime();
+        const dx = currTime - prevTime;
+
+        if (!dx) return;
+
+        const stats: RTCStatsReport = await client.getStats();
+        const result: Record<string, any> = {};
+
+        stats.forEach((report, id) => {
+          result[id] = report;
+        });
+
+        const inbound: Record<InboundRtpId, any> = getGroupedStats(result, "inbound-rtp");
+
+        Object.entries(inbound)
+          .forEach(([id, report]) => {
+            if (!lastInbound) return;
+
+            const lastReport = lastInbound[id];
+
+            const currentBytesReceived: number = report?.bytesReceived ?? 0;
+
+            if (!currentBytesReceived) return;
+
+            const prevBytesReceived: number = lastReport?.bytesReceived ?? 0;
+
+            const bitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
+
+            const packetLoss = report?.packetsReceived ? report?.packetsLost / report?.packetsReceived * 100 : NaN; // in %
+
+            const selectedCandidatePairId = result[report.transportId]?.selectedCandidatePairId;
+            const roundTripTime = result[selectedCandidatePairId]?.currentRoundTripTime;
+
+            const dxJitterBufferEmittedCount = (report?.jitterBufferEmittedCount ?? 0) - (lastReport?.jitterBufferEmittedCount ?? 0);
+            const dxJitterBufferDelay = (report?.jitterBufferDelay ?? 0) - (lastReport?.jitterBufferDelay ?? 0);
+            const bufferDelay = dxJitterBufferEmittedCount > 0 ? dxJitterBufferDelay / dxJitterBufferEmittedCount : NaN;
+
+            const codecId = report.codecId;
+
+            if (report.kind === "video") {
+              const codec = result[codecId]?.mimeType?.split("/")?.[1];
+
+              const videoStats = VideoStatsSchema.safeParse({
+                bitrate,
+                packetLoss,
+                codec,
+                bufferDelay,
+                roundTripTime,
+                frameRate: report.framesPerSecond
+              });
+
+              if (videoStats.success) {
+                statistics.setData(report.trackIdentifier, { ...videoStats.data, type: "video" });
+              }
+
+            } else {
+              const fec: boolean = codecId.split(";")
+                .filter((param: string) => param.startsWith("useinbandfec"))
+                .map((param: string) => param.endsWith("1"))?.[0];
+
+              const audioStats = AudioStatsSchema.safeParse({
+                bitrate,
+                packetLoss,
+                bufferDelay,
+                roundTripTime,
+                fec,
+                dtx: false
+              });
+
+              if (audioStats.success) {
+                statistics.setData(report.trackIdentifier, { ...audioStats.data, type: "audio" });
+              }
+            }
+          });
+
+        lastInbound = inbound;
+        prevTime = currTime;
+      }, 1000);
+    };
+
+    client?.on("joined", callback);
+
+    return () => {
+      client?.removeListener("joined", callback);
+      intervalId && clearInterval(intervalId);
+    };
+  }, [client]);
+
   useEffect(() => {
     const disconnectCallback = getTokenAndAddress(roomId).then((tokenAndAddress) => {
       return connect({
@@ -90,93 +191,14 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
   const [showSimulcastMenu, toggleSimulcastMenu] = useToggle(false);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const client = useJellyfishClient();
+
+  const { username } = useUser();
+
   const { statistics } = useDeveloperInfo();
 
   const showStats = async () => {
-    if (!client) return;
-
-    let prevTime: number = 0;
-    let lastInbound: Record<InboundRtpId, any> | null = null;
-
-    setInterval(async () => {
-      const currTime = new Date().getTime();
-      const dx = currTime - prevTime;
-
-      if (!dx) return;
-
-      const stats: RTCStatsReport = await client.getStats();
-      const result: Record<string, any> = {};
-
-      stats.forEach((report, id) => {
-        result[id] = report;
-      });
-
-      const inbound: Record<InboundRtpId, any> = getGroupedStats(result, "inbound-rtp");
-
-      Object.entries(inbound)
-        .forEach(([id, report]) => {
-          if (!lastInbound) return;
-
-          const lastReport = lastInbound[id];
-
-          const currentBytesReceived: number = report.bytesReceived ?? 0;
-
-          if (!currentBytesReceived) return;
-
-          const prevBytesReceived: number = lastReport?.bytesReceived ?? 0;
-
-          const bitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
-
-          const packetLoss = report.packetsReceived ? report.packetsLost / report.packetsReceived * 100 : NaN; // in %
-
-          const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
-          const roundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
-
-          const dxJitterBufferEmittedCount = (report.jitterBufferEmittedCount ?? 0) - (lastReport.jitterBufferEmittedCount ?? 0);
-          const dxJitterBufferDelay = (report.jitterBufferDelay ?? 0) - (lastReport.jitterBufferDelay ?? 0);
-          const bufferDelay = dxJitterBufferEmittedCount > 0 ? dxJitterBufferDelay / dxJitterBufferEmittedCount : NaN;
-
-          const codecId = report.codecId;
-
-          if (report.kind === "video") {
-            const codec = result[codecId]?.mimeType?.split("/")?.[1];
-
-            const videoStats: VideoStats = VideoStatsSchema.parse({
-              bitrate,
-              packetLoss,
-              codec,
-              bufferDelay,
-              roundTripTime,
-              frameRate: report.framesPerSecond
-            });
-
-            statistics.setData(report.trackIdentifier, { ...videoStats, type: "video" });
-          } else {
-            const fec: boolean = codecId.split(";")
-              .filter((param: string) => param.startsWith("useinbandfec"))
-              .map((param: string) => param.endsWith("1"))?.[0];
-
-            const audioStats: AudioStats = AudioStatsSchema.parse({
-              bitrate,
-              packetLoss,
-              bufferDelay,
-              roundTripTime,
-              fec,
-              dtx: false
-            });
-
-            statistics.setData(report.trackIdentifier, { ...audioStats, type: "audio" });
-          }
-        });
-
-      lastInbound = inbound;
-      prevTime = currTime;
-    }, 1000);
-
+    statistics.setStatus(!statistics.status);
   };
-
-  const { username } = useUser();
 
   return (
     <PageLayout>

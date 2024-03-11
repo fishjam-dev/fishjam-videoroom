@@ -103,33 +103,33 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
       </thead>
       <tbody>
       <tr>
-        <th>Score</th>
-        <td>{videoScore}</td>
-        <td>{audioScore}</td>
+        <th>score</th>
+        <td>{videoScore.toString()}</td>
+        <td>{audioScore.toString()}</td>
       </tr>
       <tr>
         <th>bitrate</th>
-        <td>{numberFormatter.format(videoStats?.bitrate ?? NaN)}</td>
-        <td>{numberFormatter.format(audioStats?.bitrate ?? NaN)}</td>
+        <td>{numberFormatter.format(videoStats?.bitrate ?? NaN).toString()}</td>
+        <td>{numberFormatter.format(audioStats?.bitrate ?? NaN).toString()}</td>
       </tr>
       <tr>
         <th>bufferDelay</th>
-        <td>{numberFormatter.format(videoStats?.bufferDelay ?? NaN)}</td>
-        <td>{numberFormatter.format(audioStats?.bufferDelay ?? NaN)}</td>
+        <td>{numberFormatter.format(videoStats?.bufferDelay ?? NaN).toString()}</td>
+        <td>{numberFormatter.format(audioStats?.bufferDelay ?? NaN).toString()}</td>
       </tr>
       <tr>
         <th>roundTripTime</th>
-        <td>{numberFormatter.format(videoStats?.roundTripTime ?? NaN)}</td>
-        <td>{numberFormatter.format(audioStats?.roundTripTime ?? NaN)}</td>
+        <td>{numberFormatter.format(videoStats?.roundTripTime ?? NaN).toString()}</td>
+        <td>{numberFormatter.format(audioStats?.roundTripTime ?? NaN).toString()}</td>
       </tr>
       <tr>
         <th>packetLoss</th>
-        <td>{videoStats?.packetLoss ?? NaN}</td>
-        <td>{audioStats?.packetLoss ?? NaN}</td>
+        <td>{videoStats?.packetLoss ?? NaN.toString()}</td>
+        <td>{audioStats?.packetLoss ?? NaN.toString()}</td>
       </tr>
       <tr>
         <th>frameRate</th>
-        <td>{videoStats?.frameRate ?? NaN}</td>
+        <td>{videoStats?.frameRate ?? NaN.toString()}</td>
         <td></td>
       </tr>
       <tr>
@@ -143,7 +143,7 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
         <td>{audioStats?.fec?.toString()}</td>
       </tr>
       <tr>
-        <th>Max score</th>
+        <th>max score</th>
         <td>{maxScoreHighLayer}, {maxScoreMediumLayer}, {maxScoreLowLayer}</td>
         <td>{maxAudioScore}</td>
       </tr>
