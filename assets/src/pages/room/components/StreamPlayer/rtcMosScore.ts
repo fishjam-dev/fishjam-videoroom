@@ -1,4 +1,4 @@
-// This is rewritten implementation of https://github.com/ggarber/rtcscore
+// This is a rewritten implementation of https://github.com/ggarber/rtcscore
 
 import { z } from "zod";
 
