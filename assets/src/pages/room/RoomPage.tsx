@@ -110,7 +110,7 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
         result[id] = report;
       });
 
-      // console.log(JSON.stringify(result, undefined, 2));
+      console.log(JSON.stringify(result, undefined, 2));
 
       const inbound: Record<InboundRtpId, any> = getGroupedStats(result, "inbound-rtp");
 
@@ -120,44 +120,51 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
 
           const lastReport = lastInbound[id];
 
+          console.log({ report });
+
+          if(report.bytesReceived === 0) return;
+
+          const currentBytesReceived: number = report.bytesReceived ?? 0;
+          const prevBytesReceived: number = lastReport.bytesReceived;
+
+          const bitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
+
+          const packetLoss = report.packetsLost / report.packetsReceived * 100; // in %
+
+          const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
+          const roundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
+
+          const bufferDelay = report.jitterBufferEmittedCount > 0 ? report.jitterBufferDelay / report.jitterBufferEmittedCount : 0;
+          const codecId = report.codecId
+
           if (report.kind === "video") {
-            const currentBytesReceived: number = report.bytesReceived ?? 0;
-            const prevBytesReceived: number = lastReport.bytesReceived;
-
-            const rawBitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
-            const rawPacketLoss = report.packetsLost / report.packetsReceived * 100; // in %
-
-            const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
-            const currentRoundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
-
-            const codec = result[report.codecId]?.mimeType?.split("/")?.[1];
+            const codec = result[codecId]?.mimeType?.split("/")?.[1];
 
             const videoStats: VideoStats = VideoStatsSchema.parse({
-              bitrate: rawBitrate,
-              packetLoss: rawPacketLoss,
+              bitrate,
+              packetLoss,
               codec,
-              bufferDelay: report.jitterBufferDelay,
-              roundTripTime: currentRoundTripTime,
+              bufferDelay,
+              roundTripTime,
               frameRate: report.framesPerSecond
             });
 
             setStats(report.trackIdentifier, { ...videoStats, type: "video" });
           } else {
-            const currentBytesReceived: number = report.bytesReceived ?? 0;
-            const prevBytesReceived: number = lastReport.bytesReceived;
-
-            const rawBitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
-            const rawPacketLoss = report.packetsLost / report.packetsReceived * 100; // in %
-
-            const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
-            const currentRoundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
+            const fec: boolean = codecId.split(";")
+              .filter((param: string) => param.startsWith("useinbandfec"))
+              .map((param: string) => param.endsWith("1"))?.[0]
 
             const audioStats: AudioStats = AudioStatsSchema.parse({
-              bitrate: rawBitrate,
-              packetLoss: rawPacketLoss,
-              bufferDelay: report.jitterBufferDelay,
-              roundTripTime: currentRoundTripTime,
+              bitrate,
+              packetLoss,
+              bufferDelay,
+              roundTripTime,
+              fec,
+              dtx: false,
             });
+
+            console.log({ audioStats });
 
             setStats(report.trackIdentifier, { ...audioStats, type: "audio" });
           }

@@ -43,7 +43,8 @@ const Tile: FC<TileProps> = ({ tile, className, forceEncoding, showSimulcast, pi
         blockFillContent={true}
         forceEncoding={forceEncoding || null}
         encodingQuality={null}
-        remoteTrackId={tile.video?.remoteTrackId || null}
+        remoteVideoTrackId={tile.video?.remoteTrackId || null}
+        remoteAudioTrackId={null}
       />
     );
   }
@@ -80,7 +81,8 @@ const Tile: FC<TileProps> = ({ tile, className, forceEncoding, showSimulcast, pi
       showSimulcast={showSimulcast}
       forceEncoding={forceEncoding || null}
       encodingQuality={tile.video?.encodingQuality || null}
-      remoteTrackId={tile.video?.remoteTrackId || null}
+      remoteVideoTrackId={tile.video?.remoteTrackId || null}
+      remoteAudioTrackId={tile?.audio?.remoteTrackId || null}
     />
   );
 };

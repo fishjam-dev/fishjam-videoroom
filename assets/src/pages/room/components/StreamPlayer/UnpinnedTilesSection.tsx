@@ -94,7 +94,8 @@ const UnpinnedTilesSection: FC<Props> = (
               blockFillContent={true}
               forceEncoding={forceEncoding || null}
               encodingQuality={video?.encodingQuality || null}
-              remoteTrackId={video?.remoteTrackId || null}
+              remoteVideoTrackId={video?.remoteTrackId || null}
+              remoteAudioTrackId={null}
             />
           );
         }
@@ -133,7 +134,8 @@ const UnpinnedTilesSection: FC<Props> = (
             showSimulcast={showSimulcast}
             forceEncoding={forceEncoding || null}
             encodingQuality={video?.encodingQuality || null}
-            remoteTrackId={video?.remoteTrackId || null}
+            remoteVideoTrackId={video?.remoteTrackId || null}
+            remoteAudioTrackId={config?.audio?.remoteTrackId || null}
           />
         );
       })}

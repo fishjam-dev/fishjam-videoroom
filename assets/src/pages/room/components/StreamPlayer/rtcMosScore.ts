@@ -15,7 +15,9 @@ export const AudioStatsSchema = z.object({
   bitrate: z.number().default(0),
   roundTripTime: z.number().default(0),
   bufferDelay: z.number().default(0),
-  packetLoss: z.number().optional().default(0)
+  packetLoss: z.number().optional().default(0),
+  fec: z.boolean().optional().default(false),
+  dtx: z.boolean().optional().default(false)
 });
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
@@ -85,5 +87,6 @@ export const calculateAudioScore = ({ bitrate, roundTripTime, bufferDelay, fec, 
   const R = clamp(R0 - Ipl - Id, 0, 100);
   const MOS = 1 + 0.035 * R + (R * (R - 60) * (100 - R) * 7) / 1000000;
 
+  console.log({ MOS, R, Id, Ipl, Bpl, Ie });
   return clamp(Math.round(MOS * 100) / 100, 1, 5);
 };
