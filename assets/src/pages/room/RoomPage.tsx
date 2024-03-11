@@ -103,7 +103,7 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
       const currTime = new Date().getTime();
       const dx = currTime - prevTime;
 
-      if(!dx) return;
+      if (!dx) return;
 
       const stats: RTCStatsReport = await client.getStats();
       const result: Record<string, any> = {};
@@ -133,7 +133,10 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
           const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
           const roundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
 
-          const bufferDelay = report.jitterBufferEmittedCount > 0 ? report.jitterBufferDelay / report.jitterBufferEmittedCount : 0;
+          const dxJitterBufferEmittedCount = (report.jitterBufferEmittedCount ?? 0) - (lastReport.jitterBufferEmittedCount ?? 0);
+          const dxJitterBufferDelay = (report.jitterBufferDelay ?? 0) - (lastReport.jitterBufferDelay ?? 0);
+          const bufferDelay = dxJitterBufferEmittedCount > 0 ? dxJitterBufferDelay / dxJitterBufferEmittedCount : NaN;
+
           const codecId = report.codecId;
 
           if (report.kind === "video") {
@@ -207,7 +210,7 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
             onClick={showStats}
             className="m-1 w-full rounded bg-brand-grey-80 px-4 py-2 text-white hover:bg-brand-grey-100"
             type="submit"
-          >Show stats
+          >Show statistics
           </button>
         </div>
       </div>

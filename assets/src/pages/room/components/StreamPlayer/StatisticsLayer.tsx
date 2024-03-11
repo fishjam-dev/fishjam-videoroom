@@ -39,16 +39,18 @@ const maxScoreLowLayer = calculateVideoScore({
 
 const maxAudioScore = calculateAudioScore(
   {
-    bitrate: 15000,
+    bitrate: 30_000,
     bufferDelay: 0,
     roundTripTime: 0,
     packetLoss: 0,
-    fec: false,
+    fec: true,
     dtx: false
   });
 
 
 export type Props = { videoTrackId: string | null, audioTrackId: string | null }
+
+const numberFormatter = new Intl.NumberFormat("pl-PL", { minimumFractionDigits: 3 });
 
 export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
 
@@ -90,21 +92,62 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
       });
   }, [audioStats]);
 
-  return <div className="absolute right-0 top-0 z-50 w-full text-sm text-gray-700 md:text-base">
-    <div className="flex">Video estimated max score: h {maxScoreHighLayer}, m {maxScoreMediumLayer},
-      l: {maxScoreLowLayer}</div>
-    <div className="flex">Video score: {videoScore}</div>
-    <div className="flex">Video codec: {videoStats?.codec}</div>
-    <div className="flex">Video bitrate: {videoStats?.bitrate}</div>
-    <div className="flex">Video bufferDelay: {videoStats?.bufferDelay}</div>
-    <div className="flex">Video roundTripTime: {videoStats?.roundTripTime}</div>
-    <div className="flex">Video frameRate: {videoStats?.frameRate}</div>
-
-    <div className="flex">Audio estimated max score: {maxAudioScore}</div>
-    <div className="flex">Audio score: {audioScore}</div>
-    <div className="flex">Audio bitrate: {audioStats?.bitrate}</div>
-    <div className="flex">Audio bufferDelay: {audioStats?.bufferDelay}</div>
-    <div className="flex">Audio roundTripTime: {audioStats?.roundTripTime}</div>
-    <div className="flex">Audio packetLoss: {audioStats?.packetLoss}</div>
+  return <div className="absolute right-0 bottom-0 z-50 !text-xs text-black md:text-base bg-white/50 p-2">
+    <table className="border-separate border-spacing-x-2">
+      <thead>
+      <tr>
+        <th></th>
+        <th>Video</th>
+        <th>Audio</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <th>Score</th>
+        <td>{videoScore}</td>
+        <td>{audioScore}</td>
+      </tr>
+      <tr>
+        <th>bitrate</th>
+        <td>{numberFormatter.format(videoStats?.bitrate ?? NaN)}</td>
+        <td>{numberFormatter.format(audioStats?.bitrate ?? NaN)}</td>
+      </tr>
+      <tr>
+        <th>bufferDelay</th>
+        <td>{numberFormatter.format(videoStats?.bufferDelay ?? NaN)}</td>
+        <td>{numberFormatter.format(audioStats?.bufferDelay ?? NaN)}</td>
+      </tr>
+      <tr>
+        <th>roundTripTime</th>
+        <td>{numberFormatter.format(videoStats?.roundTripTime ?? NaN)}</td>
+        <td>{numberFormatter.format(audioStats?.roundTripTime ?? NaN)}</td>
+      </tr>
+      <tr>
+        <th>packetLoss</th>
+        <td>{videoStats?.packetLoss ?? NaN}</td>
+        <td>{audioStats?.packetLoss ?? NaN}</td>
+      </tr>
+      <tr>
+        <th>frameRate</th>
+        <td>{videoStats?.frameRate ?? NaN}</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>videoCodec</th>
+        <td>{videoStats?.codec}</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>fec</th>
+        <td></td>
+        <td>{audioStats?.fec?.toString()}</td>
+      </tr>
+      <tr>
+        <th>Max score</th>
+        <td>{maxScoreHighLayer}, {maxScoreMediumLayer}, {maxScoreLowLayer}</td>
+        <td>{maxAudioScore}</td>
+      </tr>
+      </tbody>
+    </table>
   </div>;
 };
