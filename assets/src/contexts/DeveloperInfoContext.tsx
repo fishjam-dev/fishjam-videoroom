@@ -4,13 +4,19 @@ import { AudioStats, VideoStats } from "../pages/room/components/StreamPlayer/rt
 export type VideoStatistics = VideoStats & { type: "video" }
 export type AudioStatistics = AudioStats & { type: "audio" }
 export type Statistics = VideoStatistics | AudioStatistics
+export type InboundRtpId = string
+export type TrackIdentifier = string
 
 export type DeveloperInfo = {
   simulcast: { status: boolean; setSimulcast: (status: boolean) => void };
   manualMode: { status: boolean; setManualMode: (status: boolean) => void };
   smartLayerSwitching: { status: boolean; setSmartLayerSwitching: (status: boolean) => void };
-  stats: Record<TrackIdentifier, Statistics>;
-  setStats: (id: TrackIdentifier, stats: Statistics) => void;
+  statistics: {
+    data: Record<TrackIdentifier, Statistics>;
+    setData: (id: TrackIdentifier, stats: Statistics) => void;
+    status: boolean;
+    setStatus: (status: boolean) => void;
+  }
 };
 
 export const DeveloperInfoContext = React.createContext<DeveloperInfo | undefined>(undefined);
@@ -19,17 +25,15 @@ type Props = {
   children: React.ReactNode;
 };
 
-export type InboundRtpId = string
-export type OutboundRtpId = string
-export type TrackIdentifier = string
-
 export const DeveloperInfoProvider = ({ children }: Props) => {
   const [simulcast, setSimulcast] = useState<boolean>(false);
   const [manualMode, setManualMode] = useState<boolean>(false);
   const [smartLayerSwitching, setSmartLayerSwitching] = useState<boolean>(false);
-  const [scoreInput, setScoreInput] = useState<Record<TrackIdentifier, Statistics>>({});
-  const updateStat = useCallback((id: TrackIdentifier, stats: VideoStats | AudioStats) => {
-    setScoreInput((prev) => {
+
+  const [statisticsStatus, setStatisticStatus] = useState<boolean>(false);
+  const [statisticsData, setStatisticsData] = useState<Record<TrackIdentifier, Statistics>>({});
+  const updateStatisticsData = useCallback((id: TrackIdentifier, stats: VideoStats | AudioStats) => {
+    setStatisticsData((prev) => {
       return {
         ...prev, [id]: {
           ...prev[id],
@@ -37,7 +41,7 @@ export const DeveloperInfoProvider = ({ children }: Props) => {
         }
       };
     });
-  }, [setScoreInput]);
+  }, [setStatisticsData]);
 
   return (
     <DeveloperInfoContext.Provider
@@ -45,8 +49,12 @@ export const DeveloperInfoProvider = ({ children }: Props) => {
         simulcast: { status: simulcast, setSimulcast },
         manualMode: { status: manualMode, setManualMode },
         smartLayerSwitching: { status: smartLayerSwitching, setSmartLayerSwitching },
-        stats: scoreInput,
-        setStats: updateStat
+        statistics: {
+          data: statisticsData,
+          setData: updateStatisticsData,
+          status: statisticsStatus,
+          setStatus: setStatisticStatus,
+        }
       }}
     >
       {children}

@@ -77,7 +77,7 @@ type Props = {
   wasMicrophoneDisabled: boolean;
 };
 
-const getGroupedStats = (result: Record<string, any>, type: string = "outbound-rtp") => Object.entries(result)
+const getGroupedStats = (result: Record<string, any>, type: string) => Object.entries(result)
   .filter(([_, value]) => value.type === type)
   .reduce((prev, [key, value]) => {
     prev[key] = value;
@@ -91,26 +91,26 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const client = useJellyfishClient();
-  const { setStats } = useDeveloperInfo();
+  const { statistics } = useDeveloperInfo();
 
   const showStats = async () => {
     if (!client) return;
 
     let prevTime: number = 0;
-    // let lastOutbound: Record<OutboundRtpId, any> | null = null;
     let lastInbound: Record<InboundRtpId, any> | null = null;
 
     setInterval(async () => {
       const currTime = new Date().getTime();
       const dx = currTime - prevTime;
 
+      if(!dx) return;
+
       const stats: RTCStatsReport = await client.getStats();
       const result: Record<string, any> = {};
+
       stats.forEach((report, id) => {
         result[id] = report;
       });
-
-      console.log(JSON.stringify(result, undefined, 2));
 
       const inbound: Record<InboundRtpId, any> = getGroupedStats(result, "inbound-rtp");
 
@@ -120,22 +120,21 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
 
           const lastReport = lastInbound[id];
 
-          console.log({ report });
-
-          if(report.bytesReceived === 0) return;
-
           const currentBytesReceived: number = report.bytesReceived ?? 0;
-          const prevBytesReceived: number = lastReport.bytesReceived;
+
+          if (!currentBytesReceived) return;
+
+          const prevBytesReceived: number = lastReport?.bytesReceived ?? 0;
 
           const bitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
 
-          const packetLoss = report.packetsLost / report.packetsReceived * 100; // in %
+          const packetLoss = report.packetsReceived ? report.packetsLost / report.packetsReceived * 100 : NaN; // in %
 
           const selectedCandidatePairId = result[report.transportId].selectedCandidatePairId;
           const roundTripTime = result[selectedCandidatePairId].currentRoundTripTime;
 
           const bufferDelay = report.jitterBufferEmittedCount > 0 ? report.jitterBufferDelay / report.jitterBufferEmittedCount : 0;
-          const codecId = report.codecId
+          const codecId = report.codecId;
 
           if (report.kind === "video") {
             const codec = result[codecId]?.mimeType?.split("/")?.[1];
@@ -149,11 +148,11 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
               frameRate: report.framesPerSecond
             });
 
-            setStats(report.trackIdentifier, { ...videoStats, type: "video" });
+            statistics.setData(report.trackIdentifier, { ...videoStats, type: "video" });
           } else {
             const fec: boolean = codecId.split(";")
               .filter((param: string) => param.startsWith("useinbandfec"))
-              .map((param: string) => param.endsWith("1"))?.[0]
+              .map((param: string) => param.endsWith("1"))?.[0];
 
             const audioStats: AudioStats = AudioStatsSchema.parse({
               bitrate,
@@ -161,12 +160,10 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
               bufferDelay,
               roundTripTime,
               fec,
-              dtx: false,
+              dtx: false
             });
 
-            console.log({ audioStats });
-
-            setStats(report.trackIdentifier, { ...audioStats, type: "audio" });
+            statistics.setData(report.trackIdentifier, { ...audioStats, type: "audio" });
           }
         });
 
