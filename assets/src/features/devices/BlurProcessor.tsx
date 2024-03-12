@@ -103,6 +103,7 @@ export class BlurProcessor {
   private worker = new BlurWorker();
   private worksInForeground = true;
   private fps: number;
+  private destroyed = false;
 
   constructor(video: MediaStream) {
     const trackSettings = video.getVideoTracks()[0].getSettings();
@@ -144,7 +145,6 @@ export class BlurProcessor {
   private visibilityListener = () => {
       if (document.visibilityState === "visible") {
         this.worksInForeground = true;
-        this.video.requestVideoFrameCallback(this.onFrameCallback);
         this.worker.postMessage({type: "stop"});
       } else {
         this.worksInForeground = false;
@@ -230,19 +230,21 @@ export class BlurProcessor {
   }
 
   destroy() {
+    document.removeEventListener("visibilitychange", this.visibilityListener);
+    this.worker.terminate();
+    this.track.stop();
+    this.segmenter?.close();
+    this.destroyed = true;
+
     this.canvas.remove();
     this.resizedCanvas.remove();
     this.webglCanvas.remove();
     this.video.remove();
-
-    this.track.stop();
-    this.segmenter?.close();
-
-    this.worker.terminate();
-    document.removeEventListener("visibilitychange", this.visibilityListener);
   }
 
   private onFrameCallback = () => {
+    if (this.destroyed) return;
+    
     if (!this.segmenter || this.prevVideoTime >= this.video.currentTime) {
       if (this.worksInForeground) {
         this.video.requestVideoFrameCallback(this.onFrameCallback);
