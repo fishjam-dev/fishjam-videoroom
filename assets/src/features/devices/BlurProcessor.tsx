@@ -20,7 +20,7 @@ export function useBlur<T>(video: UseCameraResult<T>): {
     apiRef.current = api;
   }, [api]);
 
-  useEffect(() => {
+useEffect(() => {
     if (!video.stream) {
       if (processor.current) {
         processor.current.destroy();
@@ -29,6 +29,7 @@ export function useBlur<T>(video: UseCameraResult<T>): {
       }
       return;
     }
+    if(!blur) return;
 
     if (prevStream === video.stream) return;
     setPrevStream(video.stream);
@@ -39,7 +40,7 @@ export function useBlur<T>(video: UseCameraResult<T>): {
       processor.current = null;
       setPrevStream(null);
     };
-  }, [video.stream]);
+  }, [video.stream, blur]);
 
   const stream = processor.current?.stream ?? null;
   const track = processor.current?.track ?? null;
