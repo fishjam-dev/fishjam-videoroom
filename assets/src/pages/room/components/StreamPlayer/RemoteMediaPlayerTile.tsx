@@ -4,10 +4,13 @@ import { useAutomaticEncodingSwitching } from "../../hooks/useAutomaticEncodingS
 import { SimulcastEncodingToReceive } from "./simulcast/SimulcastEncodingToReceive";
 import GenericMediaPlayerTile from "./GenericMediaPlayerTile";
 import { useTracks } from "../../../../jellyfish.types.ts";
+import { StatisticsLayer } from "./StatisticsLayer.tsx";
+import { useDeveloperInfo } from "../../../../contexts/DeveloperInfoContext.tsx";
 
 export type Props = {
   peerId: string | null;
-  remoteTrackId: string | null;
+  remoteVideoTrackId: string | null;
+  remoteAudioTrackId: string | null;
   encodingQuality: TrackEncoding | null;
   showSimulcast: boolean;
   forceEncoding: TrackEncoding | null;
@@ -20,7 +23,8 @@ const RemoteMediaPlayerTile: FC<Props> = (
     video,
     audio,
     flipHorizontally,
-    remoteTrackId,
+    remoteVideoTrackId,
+    remoteAudioTrackId,
     encodingQuality,
     showSimulcast,
     layers,
@@ -30,16 +34,19 @@ const RemoteMediaPlayerTile: FC<Props> = (
   }: Props
 ) => {
   const tracks = useTracks();
-  const track = tracks[remoteTrackId ?? ""];
+
+  const videoTrack = tracks[remoteVideoTrackId ?? ""];
 
   const { ref, setTargetEncoding, targetEncoding, smartEncoding, smartEncodingStatus, setSmartEncodingStatus } =
     useAutomaticEncodingSwitching(
       encodingQuality,
       peerId,
-      remoteTrackId,
-      !track?.simulcastConfig?.enabled,
+      remoteVideoTrackId,
+      !videoTrack?.simulcastConfig?.enabled,
       forceEncoding
     );
+
+  const { statistics } = useDeveloperInfo();
 
   return (
     <GenericMediaPlayerTile
@@ -52,10 +59,14 @@ const RemoteMediaPlayerTile: FC<Props> = (
       layers={
         <>
           {layers}
+          {statistics.status && <StatisticsLayer
+            videoTrackId={tracks[remoteVideoTrackId ?? ""]?.track?.id || null}
+            audioTrackId={tracks[remoteAudioTrackId ?? ""]?.track?.id || null}
+          />}
           {showSimulcast && (
             <SimulcastEncodingToReceive
               currentEncoding={encodingQuality}
-              disabled={!video || !track?.simulcastConfig?.enabled}
+              disabled={!video || !videoTrack?.simulcastConfig?.enabled}
               targetEncoding={targetEncoding || null}
               smartEncoding={smartEncoding}
               localSmartEncodingStatus={smartEncodingStatus}

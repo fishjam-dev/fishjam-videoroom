@@ -17,7 +17,7 @@ export const VIDEO_TRACK_CONSTRAINTS: MediaTrackConstraints = {
     max: 30,
     ideal: 24,
   },
-};
+} as const;
 
 export const SCREENSHARING_TRACK_CONSTRAINTS: MediaTrackConstraints = {
   frameRate: { ideal: 20, max: 25 },

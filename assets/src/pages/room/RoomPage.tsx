@@ -6,12 +6,14 @@ import PageLayout from "../../features/room-page/components/PageLayout";
 import { useAcquireWakeLockAutomatically } from "./hooks/useAcquireWakeLockAutomatically";
 import clsx from "clsx";
 import RoomSidebar from "./RoomSidebar";
-import { useConnect } from "../../jellyfish.types.ts";
+import { useConnect, useJellyfishClient } from "../../jellyfish.types.ts";
 import { useUser } from "../../contexts/UserContext";
 import { getSignalingAddress } from "./consts";
 import { getTokenAndAddress } from "../../room.api";
 import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
 import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
+import { InboundRtpId, useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
+import { AudioStatsSchema, VideoStatsSchema } from "./components/StreamPlayer/rtcMosScore.ts";
 
 type ConnectComponentProps = {
   username: string;
@@ -20,7 +22,13 @@ type ConnectComponentProps = {
   wasCameraDisabled: boolean;
 };
 
-const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId, wasCameraDisabled, wasMicrophoneDisabled }) => {
+const ConnectComponent: FC<ConnectComponentProps> = (
+  {
+    username,
+    roomId,
+    wasCameraDisabled,
+    wasMicrophoneDisabled
+  }) => {
   const connect = useConnect();
   const streaming = useStreaming();
 
@@ -34,7 +42,108 @@ const ConnectComponent: FC<ConnectComponentProps> = ({ username, roomId, wasCame
   useEffect(() => {
     if (!wasCameraDisabled && !video.stream) video.start();
     if (!wasMicrophoneDisabled && !audio.stream) audio.start();
-  }, [video.stream, audio.stream])
+  }, [video.stream, audio.stream]);
+
+  const client = useJellyfishClient();
+  const { statistics } = useDeveloperInfo();
+
+  let intervalId: NodeJS.Timer | null = null;
+
+  useEffect(() => {
+    const callback = () => {
+      let prevTime: number = 0;
+      let lastInbound: Record<InboundRtpId, any> | null = null;
+
+      intervalId = setInterval(async () => {
+        if (!client) return;
+
+        const currTime = Date.now();
+        const dx = currTime - prevTime;
+
+        if (!dx) return;
+
+        const stats: RTCStatsReport = await client.getStatistics();
+        const result: Record<string, any> = {};
+
+        stats.forEach((report, id) => {
+          result[id] = report;
+        });
+
+        const inbound: Record<InboundRtpId, any> = getGroupedStats(result, "inbound-rtp");
+
+        Object.entries(inbound)
+          .forEach(([id, report]) => {
+            if (!lastInbound) return;
+
+            const lastReport = lastInbound[id];
+
+            const currentBytesReceived: number = report?.bytesReceived ?? 0;
+
+            if (!currentBytesReceived) return;
+
+            const prevBytesReceived: number = lastReport?.bytesReceived ?? 0;
+
+            const bitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
+
+            const packetLoss = report?.packetsReceived ? report?.packetsLost / report?.packetsReceived * 100 : NaN; // in %
+
+            const selectedCandidatePairId = result[report.transportId]?.selectedCandidatePairId;
+            const roundTripTime = result[selectedCandidatePairId]?.currentRoundTripTime;
+
+            const dxJitterBufferEmittedCount = (report?.jitterBufferEmittedCount ?? 0) - (lastReport?.jitterBufferEmittedCount ?? 0);
+            const dxJitterBufferDelay = (report?.jitterBufferDelay ?? 0) - (lastReport?.jitterBufferDelay ?? 0);
+            const bufferDelay = dxJitterBufferEmittedCount > 0 ? dxJitterBufferDelay / dxJitterBufferEmittedCount : NaN;
+
+            const codecId = report?.codecId || "";
+
+            if (report.kind === "video") {
+              const codec = result[codecId]?.mimeType?.split("/")?.[1];
+
+              const videoStats = VideoStatsSchema.safeParse({
+                bitrate,
+                packetLoss,
+                codec,
+                bufferDelay,
+                roundTripTime,
+                frameRate: report.framesPerSecond
+              });
+
+              if (videoStats.success) {
+                statistics.setData(report.trackIdentifier, { ...videoStats.data, type: "video" });
+              }
+
+            } else {
+              const fec: boolean = codecId.split(";")
+                .filter((param: string) => param.startsWith("useinbandfec"))
+                .map((param: string) => param.endsWith("1"))?.[0];
+
+              const audioStats = AudioStatsSchema.safeParse({
+                bitrate,
+                packetLoss,
+                bufferDelay,
+                roundTripTime,
+                fec,
+                dtx: false
+              });
+
+              if (audioStats.success) {
+                statistics.setData(report.trackIdentifier, { ...audioStats.data, type: "audio" });
+              }
+            }
+          });
+
+        lastInbound = inbound;
+        prevTime = currTime;
+      }, 1000);
+    };
+
+    client?.on("joined", callback);
+
+    return () => {
+      client?.removeListener("joined", callback);
+      intervalId && clearInterval(intervalId);
+    };
+  }, [client]);
 
   useEffect(() => {
     const disconnectCallback = getTokenAndAddress(roomId).then((tokenAndAddress) => {
@@ -69,6 +178,13 @@ type Props = {
   wasMicrophoneDisabled: boolean;
 };
 
+const getGroupedStats = (result: Record<string, any>, type: string) => Object.entries(result)
+  .filter(([_, value]) => value.type === type)
+  .reduce((prev, [key, value]) => {
+    prev[key] = value;
+    return prev;
+  }, {});
+
 const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled }: Props) => {
   useAcquireWakeLockAutomatically();
 
@@ -77,10 +193,17 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { username } = useUser();
-  
+
+  const { statistics } = useDeveloperInfo();
+
+  const showStats = async () => {
+    statistics.setStatus(!statistics.status);
+  };
+
   return (
     <PageLayout>
-      {username && <ConnectComponent username={username} roomId={roomId} wasCameraDisabled={wasCameraDisabled} wasMicrophoneDisabled={wasMicrophoneDisabled} />}
+      {username && <ConnectComponent username={username} roomId={roomId} wasCameraDisabled={wasCameraDisabled}
+                                     wasMicrophoneDisabled={wasMicrophoneDisabled} />}
       <div className="flex h-full w-full flex-col gap-y-4">
         {/* main grid - videos + future chat */}
         <section
@@ -104,6 +227,12 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
             type="submit"
           >
             Show simulcast controls
+          </button>
+          <button
+            onClick={showStats}
+            className="m-1 w-full rounded bg-brand-grey-80 px-4 py-2 text-white hover:bg-brand-grey-100"
+            type="submit"
+          >Show statistics
           </button>
         </div>
       </div>
