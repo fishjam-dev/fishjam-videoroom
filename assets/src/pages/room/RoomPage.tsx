@@ -57,12 +57,12 @@ const ConnectComponent: FC<ConnectComponentProps> = (
       intervalId = setInterval(async () => {
         if (!client) return;
 
-        const currTime = new Date().getTime();
+        const currTime = Date.now();
         const dx = currTime - prevTime;
 
         if (!dx) return;
 
-        const stats: RTCStatsReport = await client.getStats();
+        const stats: RTCStatsReport = await client.getStatistics();
         const result: Record<string, any> = {};
 
         stats.forEach((report, id) => {

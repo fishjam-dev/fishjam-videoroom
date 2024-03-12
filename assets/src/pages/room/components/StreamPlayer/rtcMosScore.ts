@@ -8,16 +8,16 @@ export const VideoStatsSchema = z.object({
   bufferDelay: z.number().default(0),
   codec: z.string().optional(),
   frameRate: z.number().default(0),
-  packetLoss: z.number().optional().default(0)
+  packetLoss: z.number().default(0)
 });
 
 export const AudioStatsSchema = z.object({
   bitrate: z.number().default(0),
   roundTripTime: z.number().default(0),
   bufferDelay: z.number().default(0),
-  packetLoss: z.number().optional().default(0),
-  fec: z.boolean().optional().default(false),
-  dtx: z.boolean().optional().default(false)
+  packetLoss: z.number().default(0),
+  fec: z.boolean().default(false),
+  dtx: z.boolean().default(false)
 });
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));

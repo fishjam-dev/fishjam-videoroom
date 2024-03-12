@@ -1,5 +1,4 @@
 import { AudioStatistics, useDeveloperInfo, VideoStatistics } from "../../../../contexts/DeveloperInfoContext.tsx";
-import { useMemo } from "react";
 import { calculateAudioScore, calculateVideoScore } from "./rtcMosScore.ts";
 import { SIMULCAST_BANDWIDTH_LIMITS } from "../../bandwidth.tsx";
 
@@ -59,38 +58,30 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
   const videoRawStats = statistics.data[videoTrackId || ""];
   const videoStats: VideoStatistics | undefined = videoRawStats?.type === "video" ? videoRawStats : undefined;
 
-  const videoScore = useMemo(() => {
-    if (!videoStats) return 0;
-
-    return calculateVideoScore(
-      {
-        codec: videoStats.codec,
-        bitrate: videoStats.bitrate,
-        bufferDelay: videoStats.bufferDelay,
-        roundTripTime: videoStats.roundTripTime,
-        frameRate: videoStats.frameRate,
-        expectedWidth: 1280,
-        expectedFrameRate: 24,
-        expectedHeight: 720
-      });
-  }, [videoStats]);
+  const videoScore = !videoStats ? 0 : calculateVideoScore(
+    {
+      codec: videoStats.codec,
+      bitrate: videoStats.bitrate,
+      bufferDelay: videoStats.bufferDelay,
+      roundTripTime: videoStats.roundTripTime,
+      frameRate: videoStats.frameRate,
+      expectedWidth: 1280,
+      expectedFrameRate: 24,
+      expectedHeight: 720
+    });
 
   const audioRawStats = statistics.data[audioTrackId || ""];
   const audioStats: AudioStatistics | undefined = audioRawStats?.type === "audio" ? audioRawStats : undefined;
 
-  const audioScore = useMemo(() => {
-    if (!audioStats) return 0;
-
-    return calculateAudioScore(
-      {
-        bitrate: audioStats.bitrate,
-        bufferDelay: audioStats.bufferDelay,
-        roundTripTime: audioStats.roundTripTime,
-        packetLoss: audioStats.packetLoss,
-        fec: audioStats.fec,
-        dtx: audioStats.dtx
-      });
-  }, [audioStats]);
+  const audioScore = !audioStats ? 0 : calculateAudioScore(
+    {
+      bitrate: audioStats.bitrate,
+      bufferDelay: audioStats.bufferDelay,
+      roundTripTime: audioStats.roundTripTime,
+      packetLoss: audioStats.packetLoss,
+      fec: audioStats.fec,
+      dtx: audioStats.dtx
+    });
 
   return <div className="absolute right-0 bottom-0 z-50 !text-xs text-black md:text-base bg-white/50 p-2">
     <table className="border-separate border-spacing-x-2">

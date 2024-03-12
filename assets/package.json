@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@jellyfish-dev/react-client-sdk": "file:../../react-client-sdk",
+    "@jellyfish-dev/react-client-sdk": "^0.2.1",
     "axios": "^1.6.5",
     "chartist": "^1.3.0",
     "clsx": "^2.1.0",

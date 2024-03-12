@@ -32,6 +32,7 @@ export const DeveloperInfoProvider = ({ children }: Props) => {
 
   const [statisticsStatus, setStatisticStatus] = useState<boolean>(false);
   const [statisticsData, setStatisticsData] = useState<Record<TrackIdentifier, Statistics>>({});
+
   const updateStatisticsData = useCallback((id: TrackIdentifier, stats: VideoStats | AudioStats) => {
     setStatisticsData((prev) => {
       return {
@@ -41,7 +42,7 @@ export const DeveloperInfoProvider = ({ children }: Props) => {
         }
       };
     });
-  }, [setStatisticsData]);
+  }, []);
 
   return (
     <DeveloperInfoContext.Provider
