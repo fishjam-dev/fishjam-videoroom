@@ -20,7 +20,7 @@ export function useBlur<T>(video: UseCameraResult<T>): {
     apiRef.current = api;
   }, [api]);
 
-useEffect(() => {
+  useEffect(() => {
     if (!video.stream) {
       if (processor.current) {
         processor.current.destroy();
@@ -76,10 +76,6 @@ useEffect(() => {
     },
   };
 }
-
-export const wasm = await FilesetResolver.forVisionTasks(
-  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.11/wasm"
-);
 
 export class BlurProcessor {
   private width: number;
@@ -154,6 +150,9 @@ export class BlurProcessor {
     }
 
   private async initMediaPipe() {
+    const wasm = await FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.11/wasm"
+    );
     this.segmenter = await ImageSegmenter.createFromOptions(wasm, {
       baseOptions: {
         modelAssetPath:
