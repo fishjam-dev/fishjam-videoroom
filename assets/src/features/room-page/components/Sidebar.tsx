@@ -1,10 +1,8 @@
 import clsx from "clsx";
-import { FC, useState } from "react";
+import { FC } from "react";
 import Button from "../../shared/components/Button";
 import ChevronDown from "../icons/ChevronDown";
-import Chat from "./Chat";
 import PeopleComponent from "./PeopleComponent";
-import SidebarTab, { Tab } from "./SidebarTab";
 import { useSelector } from "../../../jellyfish.types";
 
 type SidebarProps = {
@@ -12,7 +10,6 @@ type SidebarProps = {
 };
 
 const Sidebar: FC<SidebarProps> = ({ onClose }) => {
-  const [tab, setTab] = useState<Tab>("people");
   const peoples = useSelector((s) => Object.values(s.remote || {}).length + 1);
 
   return (
@@ -28,18 +25,13 @@ const Sidebar: FC<SidebarProps> = ({ onClose }) => {
       <Button className="w-full pt-2 md:hidden" onClick={onClose}>
         <ChevronDown />
       </Button>
-      <div className="flex w-full gap-x-3 p-3">
-        <SidebarTab activeTab={tab} tab="chat" onClick={setTab}>
-          Chat
-        </SidebarTab>
-        <SidebarTab activeTab={tab} tab="people" onClick={setTab}>
-          {`People (${peoples})`}
-        </SidebarTab>
+      <div className={clsx("flex w-full gap-x-3 p-3 rounded-md py-2.5 text-center font-semibold justify-center")}>
+        {`People (${peoples})`}
       </div>
 
       <div className="w-full border-[0.5px] border-brand-dark-blue-300"></div>
 
-      <div className={clsx("w-full overflow-y-auto p-3 pt-6")}>{tab == "chat" ? <Chat /> : <PeopleComponent />}</div>
+      <div className={clsx("w-full overflow-y-auto p-3 pt-6")}><PeopleComponent /></div>
     </div>
   );
 };

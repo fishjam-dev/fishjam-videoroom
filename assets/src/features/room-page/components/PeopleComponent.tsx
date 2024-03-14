@@ -35,7 +35,7 @@ const PeopleComponent: FC = () => {
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-blue-200 text-sm text-brand-dark-blue-400">
             {peer.initials}
           </div>
-          <div className="max-w-6 truncate">{peer.displayName}</div>
+          <div className="max-w-50 truncate">{peer.displayName}</div>
         </div>
       ))}
     </div>

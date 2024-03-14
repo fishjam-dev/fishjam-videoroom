@@ -1,6 +1,7 @@
 export const computeInitials = (name: string): string => {
   return name
     .split(" ")
+    .filter((_, index) => index <= 1)
     .map((word) => word.charAt(0))
     .join("")
     .toLocaleUpperCase();
