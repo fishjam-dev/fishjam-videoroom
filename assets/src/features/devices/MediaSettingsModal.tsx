@@ -3,12 +3,14 @@ import { DeviceSelector } from "./DeviceSelector";
 import { useModal } from "../../contexts/ModalContext";
 import { useLocalPeer } from "./LocalPeerMediaContext";
 import { Modal } from "../shared/components/modal/Modal";
+import { Checkbox } from "../shared/components/Checkbox";
 
 export const MediaSettingsModal: React.FC = () => {
   const { setOpen, isOpen } = useModal();
-  const { video, audio } = useLocalPeer();
+  const { video, audio, blur, setBlur } = useLocalPeer();
   const [videoInput, setVideoInput] = useState<string | null>(null);
   const [audioInput, setAudioInput] = useState<string | null>(null);
+  const [blurInput, setBlurInput] = useState(blur);
 
   useEffect(() => {
     if (video.devices && video.deviceInfo?.deviceId) {
@@ -38,13 +40,23 @@ export const MediaSettingsModal: React.FC = () => {
       onConfirm={() => {
         video.start(videoInput || undefined);
         audio.start(audioInput || undefined);
+        setBlur(blurInput);
         setOpen(false);
       }}
       onCancel={handleClose}
       maxWidth="max-w-md"
       isOpen={isOpen}
     >
-      <DeviceSelector name="Select camera" devices={video.devices} setInput={setVideoInput} inputValue={videoInput} />
+      <div className="flex flex-col gap-2">
+        <DeviceSelector name="Select camera" devices={video.devices} setInput={setVideoInput} inputValue={videoInput} />
+        <Checkbox
+          label="Blur background (experimental)"
+          id="blur-background-checkbox"
+          onChange={() => setBlurInput((prev) => !prev)}
+          status={blurInput}
+          textSize="base"
+        />
+      </div>
       <DeviceSelector
         name="Select microphone"
         devices={audio.devices}
