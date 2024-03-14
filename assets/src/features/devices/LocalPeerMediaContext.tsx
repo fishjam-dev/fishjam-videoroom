@@ -1,12 +1,16 @@
 import React, { useContext } from "react";
-import { AUDIO_TRACK_CONSTRAINTS, SCREENSHARING_TRACK_CONSTRAINTS, VIDEO_TRACK_CONSTRAINTS } from "../../pages/room/consts";
-import { TrackMetadata, useCamera, useMicrophone, useScreenshare, useSetupMedia } from "../../jellyfish.types";
-import { UseCameraResult, UseMicrophoneResult, UseScreenshareResult } from "@jellyfish-dev/react-client-sdk";
+import {
+  AUDIO_TRACK_CONSTRAINTS,
+  SCREENSHARING_TRACK_CONSTRAINTS,
+  VIDEO_TRACK_CONSTRAINTS
+} from "../../pages/room/consts";
+import { TrackMetadata, useCamera, useMicrophone, useScreenShare, useSetupMedia } from "../../jellyfish.types";
+import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult } from "@jellyfish-dev/react-client-sdk";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
   audio: UseMicrophoneResult<TrackMetadata>;
-  screenShare: UseScreenshareResult<TrackMetadata>;
+  screenShare: UseScreenShareResult<TrackMetadata>;
   init: () => void;
 };
 
@@ -20,34 +24,37 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const { init } = useSetupMedia({
     camera: {
       trackConstraints: VIDEO_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: {active: true, type: "camera"},
-      autoStreaming: false,
-      preview: true,
+      defaultTrackMetadata: { active: true, type: "camera" },
+      broadcastOnConnect: false,
+      broadcastOnDeviceStart: false,
       defaultSimulcastConfig: {
         enabled: true,
         activeEncodings: ["l", "m", "h"],
         disabledEncodings: []
-      },
+      }
     },
     microphone: {
       trackConstraints: AUDIO_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: {active: true, type: "audio"},
-      autoStreaming: false,
-      preview: true,
+      defaultTrackMetadata: { active: true, type: "audio" },
+      broadcastOnConnect: false,
+      broadcastOnDeviceStart: false
     },
-    screenshare: {
-      trackConstraints: SCREENSHARING_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: {active: true, type: "screensharing"},
-      autoStreaming: false,
-      preview: true,
+    screenShare: {
+      streamConfig: {
+        videoTrackConstraints: SCREENSHARING_TRACK_CONSTRAINTS,
+        // todo add audio
+      },
+      defaultTrackMetadata: { active: true, type: "screensharing" },
+      broadcastOnConnect: false,
+      broadcastOnDeviceStart: false
     },
     startOnMount: true,
-    storage: true,
+    storage: true
   });
 
   const video = useCamera();
   const audio = useMicrophone();
-  const screenShare = useScreenshare();
+  const screenShare = useScreenShare();
 
   return (
     <LocalPeerMediaContext.Provider
@@ -55,7 +62,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         video,
         audio,
         screenShare,
-        init,
+        init
       }}
     >
       {children}

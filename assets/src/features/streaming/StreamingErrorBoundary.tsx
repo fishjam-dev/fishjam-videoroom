@@ -1,7 +1,7 @@
 import { FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import useToast from "../shared/hooks/useToast";
 import { ErrorMessage, messageComparator } from "../../pages/room/errorMessage";
-import { useJellyfishClient } from "../../jellyfish.types";
+import { useClient } from "../../jellyfish.types";
 import useEffectOnChange from "../shared/hooks/useEffectOnChange";
 import { useLocalPeer } from "../devices/LocalPeerMediaContext";
 
@@ -11,7 +11,7 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
   // todo remove state, refactor to function invocation
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>();
 
-  const client = useJellyfishClient();
+  const client = useClient();
 
   const handleError = useCallback(
     (text: string, id?: string) => {

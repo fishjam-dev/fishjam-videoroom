@@ -6,7 +6,7 @@ import PageLayout from "../../features/room-page/components/PageLayout";
 import { useAcquireWakeLockAutomatically } from "./hooks/useAcquireWakeLockAutomatically";
 import clsx from "clsx";
 import RoomSidebar from "./RoomSidebar";
-import { useConnect, useJellyfishClient } from "../../jellyfish.types.ts";
+import { useConnect, useClient } from "../../jellyfish.types.ts";
 import { useUser } from "../../contexts/UserContext";
 import { getSignalingAddress } from "./consts";
 import { getTokenAndAddress } from "../../room.api";
@@ -44,7 +44,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
     if (!wasMicrophoneDisabled && !audio.stream) audio.start();
   }, [video.stream, audio.stream]);
 
-  const client = useJellyfishClient();
+  const client = useClient();
   const { statistics } = useDeveloperInfo();
 
   let intervalId: NodeJS.Timer | null = null;

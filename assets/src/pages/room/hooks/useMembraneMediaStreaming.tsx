@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { TrackMetadata, useApi } from "../../../jellyfish.types.ts";
+import { TrackMetadata, useClient } from "../../../jellyfish.types.ts";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext.tsx";
 import { selectBandwidthLimit } from "../bandwidth.tsx";
-import { UseCameraResult, UseMicrophoneResult, UseScreenshareResult } from "@jellyfish-dev/react-client-sdk";
+import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult } from "@jellyfish-dev/react-client-sdk";
 
 export type MembraneStreaming = {
   trackId: string | null;
@@ -24,7 +24,7 @@ export const useMembraneMediaStreaming = (
   mode: StreamingMode,
   { type, device }: {
     type: "screensharing",
-    device: UseScreenshareResult<TrackMetadata>
+    device: UseScreenShareResult<TrackMetadata>
   } | { type: "camera", device: UseCameraResult<TrackMetadata> } | {
     type: "audio",
     device: UseMicrophoneResult<TrackMetadata>

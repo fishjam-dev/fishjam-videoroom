@@ -1,7 +1,7 @@
 import { toPairs } from "ramda";
 import { TrackWithId } from "./pages/types";
 import { ApiTrack, RemotePeer } from "./pages/room/hooks/usePeerState";
-import { State, JellyfishClient, create } from "@jellyfish-dev/react-client-sdk";
+import { State, create, Client } from "@jellyfish-dev/react-client-sdk";
 import { z } from "zod";
 
 const trackTypeSchema = z.union([z.literal("screensharing"), z.literal("camera"), z.literal("audio")]);
@@ -27,17 +27,16 @@ export const {
   useSetupMedia,
   useCamera,
   useMicrophone,
-  useScreenshare,
+  useScreenShare,
   useTracks,
   JellyfishContextProvider,
-  useApi
 } = create<PeerMetadata, TrackMetadata>({
   peerMetadataParser: (obj) => peerMetadataSchema.parse(obj),
   trackMetadataParser: (obj) => trackMetadataSchema.parse(obj)
 });
 
-export const useJellyfishClient = (): JellyfishClient<PeerMetadata, TrackMetadata> | null =>
-  useSelector((s) => s.connectivity.client);
+export const useClient = (): Client<PeerMetadata, TrackMetadata> | null =>
+  useSelector((s) => s.client);
 
 export const useCurrentUserVideoTrackId = (): string | null =>
   useSelector(
