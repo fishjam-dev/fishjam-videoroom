@@ -85,9 +85,11 @@ const ConnectComponent: FC<ConnectComponentProps> = (
 
             const bitrate = 8 * (currentBytesReceived - prevBytesReceived) * 1000 / dx; // bits per seconds
 
-            const packetLoss = report?.packetsReceived ? report?.packetsLost / report?.packetsReceived * 100 : NaN; // in %
+            const dxPacketsLost = (report?.packetsLost ?? 0) - (lastReport?.packetsLost ?? 0);
+            const dxPacketsReceived = (report?.packetsReceived ?? 0) - (lastReport?.packetsReceived ?? 0);
+            const packetLoss = dxPacketsReceived ? dxPacketsLost / dxPacketsReceived * 100 : NaN; // in %
 
-            const selectedCandidatePairId = result[report.transportId]?.selectedCandidatePairId;
+            const selectedCandidatePairId = result[report?.transportId || ""]?.selectedCandidatePairId;
             const roundTripTime = result[selectedCandidatePairId]?.currentRoundTripTime;
 
             const dxJitterBufferEmittedCount = (report?.jitterBufferEmittedCount ?? 0) - (lastReport?.jitterBufferEmittedCount ?? 0);
@@ -96,7 +98,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
 
             const codecId = report?.codecId || "";
 
-            if (report.kind === "video") {
+            if (report?.kind === "video") {
               const codec = result[codecId]?.mimeType?.split("/")?.[1];
 
               const videoStats = VideoStatsSchema.safeParse({
@@ -105,10 +107,10 @@ const ConnectComponent: FC<ConnectComponentProps> = (
                 codec,
                 bufferDelay,
                 roundTripTime,
-                frameRate: report.framesPerSecond
+                frameRate: report?.framesPerSecond ?? NaN
               });
 
-              if (videoStats.success) {
+              if (videoStats.success && report?.trackIdentifier) {
                 statistics.setData(report.trackIdentifier, { ...videoStats.data, type: "video" });
               }
 
@@ -126,7 +128,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
                 dtx: false
               });
 
-              if (audioStats.success) {
+              if (audioStats.success && report?.trackIdentifier) {
                 statistics.setData(report.trackIdentifier, { ...audioStats.data, type: "audio" });
               }
             }
@@ -226,13 +228,14 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
             className="m-1 w-full rounded bg-brand-grey-80 px-4 py-2 text-white hover:bg-brand-grey-100"
             type="submit"
           >
-            Show simulcast controls
+            {showSimulcastMenu ? "Hide simulcast controls" : "Show simulcast controls"}
           </button>
           <button
             onClick={showStats}
             className="m-1 w-full rounded bg-brand-grey-80 px-4 py-2 text-white hover:bg-brand-grey-100"
             type="submit"
-          >Show statistics
+          >
+            {statistics.status ? "Hide statistics" : "Show statistics"}
           </button>
         </div>
       </div>

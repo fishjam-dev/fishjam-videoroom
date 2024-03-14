@@ -2,6 +2,7 @@ import { createContext, ReactNode, useContext } from "react";
 import {
   MembraneStreaming,
   StreamingMode,
+  useMembraneCameraStreaming,
   useMembraneMediaStreaming,
 } from "../../pages/room/hooks/useMembraneMediaStreaming";
 import { useStatus } from "../../jellyfish.types";
@@ -26,7 +27,7 @@ export const StreamingProvider = ({ children }: Props) => {
   const isConnected = useStatus() === "joined";
   const { video, audio, screenShare: screenShareMedia } = useLocalPeer();
 
-  const camera = useMembraneMediaStreaming(mode, {type: "camera", device: video}, isConnected);
+  const camera = useMembraneCameraStreaming(mode, video, isConnected);
   const microphone = useMembraneMediaStreaming(mode, {type:"audio", device: audio}, isConnected);
   const screenShare = useMembraneMediaStreaming(mode, {type:"screensharing", device: screenShareMedia}, isConnected);
 
