@@ -29,13 +29,13 @@ export const {
   useMicrophone,
   useScreenShare,
   useTracks,
-  JellyfishContextProvider,
+  JellyfishContextProvider
 } = create<PeerMetadata, TrackMetadata>({
   peerMetadataParser: (obj) => peerMetadataSchema.parse(obj),
   trackMetadataParser: (obj) => trackMetadataSchema.parse(obj)
 });
 
-export const useClient = (): Client<PeerMetadata, TrackMetadata> | null =>
+export const useClient = (): Client<PeerMetadata, TrackMetadata> =>
   useSelector((s) => s.client);
 
 export const useCurrentUserVideoTrackId = (): string | null =>

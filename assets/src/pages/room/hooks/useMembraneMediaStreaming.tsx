@@ -25,7 +25,7 @@ export const useMembraneMediaStreaming = (
   { type, device }: {
     type: "screensharing",
     device: UseScreenShareResult<TrackMetadata>
-  } | { type: "camera", device: UseCameraResult<TrackMetadata> } | {
+  } | {
     type: "audio",
     device: UseMicrophoneResult<TrackMetadata>
   },
@@ -33,9 +33,7 @@ export const useMembraneMediaStreaming = (
 ): MembraneStreaming => {
   const [trackIds, setTrackIds] = useState<TrackIds | null>(null);
 
-  const api = useApi();
-  const { simulcast } = useDeveloperInfo();
-  const simulcastEnabled = simulcast.status && type === "camera";
+  const client = useClient();
 
   const deviceRemoveTrackRef = useRef(device.removeTrack);
   useEffect(() => {
@@ -47,24 +45,13 @@ export const useMembraneMediaStreaming = (
 
   const addTracks = useCallback(
     async () => {
-      if (type === "camera") {
-        await device.addTrack(
-          defaultTrackMetadata,
-          simulcastEnabled ? {
-            enabled: true,
-            activeEncodings: ["l", "m", "h"],
-            disabledEncodings: []
-          } : undefined,
-          selectBandwidthLimit(type, simulcastEnabled));
-      } else {
-        await device.addTrack(
-          defaultTrackMetadata,
-          selectBandwidthLimit(type, simulcastEnabled)
-        );
-      }
+      await device.addTrack(
+        defaultTrackMetadata,
+        selectBandwidthLimit(type, false)
+      );
       setTrackMetadata(defaultTrackMetadata);
     },
-    [defaultTrackMetadata, simulcastEnabled, type]
+    [defaultTrackMetadata, type]
   );
 
   const replaceTrack = useCallback(
@@ -87,7 +74,7 @@ export const useMembraneMediaStreaming = (
 
   useEffect(() => {
     (async () => {
-      if (!api || !isConnected || mode !== "automatic") {
+      if (!client || !isConnected || mode !== "automatic") {
         return;
       }
       const stream = device.stream;
@@ -102,7 +89,7 @@ export const useMembraneMediaStreaming = (
         removeTracks();
       }
     })();
-  }, [api, device.stream, device.track, device.enabled, isConnected, addTracks, mode, removeTracks, trackIds, replaceTrack, type]);
+  }, [client, device.stream, device.track, device.enabled, isConnected, addTracks, mode, removeTracks, trackIds, replaceTrack, type]);
 
   useEffect(() => {
     if (device.track?.id && device.broadcast?.trackId) {
@@ -115,10 +102,115 @@ export const useMembraneMediaStreaming = (
   const updateTrackMetadata = useCallback(
     (metadata: TrackMetadata) => {
       if (!trackIds) return;
-      api?.updateTrackMetadata(trackIds.remoteId, metadata);
+      client?.updateTrackMetadata(trackIds.remoteId, metadata);
       setTrackMetadata(metadata);
     },
-    [api, trackIds]
+    [client, trackIds]
+  );
+
+  const setActive = useCallback(
+    (status: boolean) => {
+      if (trackMetadata) {
+        updateTrackMetadata({ ...trackMetadata, active: status });
+      } else {
+        throw Error("Track metadata is null!");
+      }
+    },
+    [trackMetadata, updateTrackMetadata]
+  );
+
+  return {
+    trackId: trackIds?.remoteId || null,
+    removeTracks,
+    addTracks,
+    setActive,
+    updateTrackMetadata,
+    trackMetadata
+  };
+};
+
+export const useMembraneCameraStreaming = (
+  mode: StreamingMode,
+  device: UseCameraResult<TrackMetadata>,
+  isConnected: boolean
+): MembraneStreaming => {
+  const [trackIds, setTrackIds] = useState<TrackIds | null>(null);
+
+  const client = useClient();
+  const { simulcast } = useDeveloperInfo();
+  const simulcastEnabled = simulcast.status;
+
+  const [trackMetadata, setTrackMetadata] = useState<TrackMetadata | null>(null);
+  const defaultTrackMetadata = useMemo(() => ({ active: device.enabled, type: "camera" as const }), [device.enabled]);
+
+  const addTracks = useCallback(async () => {
+    if (!device.track || !device.stream) return;
+    const remoteId = await client.addTrack(
+      device.track,
+      device.stream,
+      defaultTrackMetadata,
+      simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
+      selectBandwidthLimit("camera", simulcastEnabled)
+    );
+    setTrackMetadata(defaultTrackMetadata);
+    setTrackIds({
+      localId: device.track.id,
+      remoteId
+    });
+  }, [client, device.addTrack, defaultTrackMetadata, simulcastEnabled]);
+
+  const replaceTrack = useCallback(async () => {
+    if (!trackIds || !device.stream) return;
+    if (!device.track) {
+      console.error({ stream: device.stream, type: "camera" });
+      throw Error("Stream has no tracks!");
+    }
+
+    await client.replaceTrack(trackIds.remoteId, device.track);
+    setTrackIds({ ...trackIds, localId: device.track.id });
+  }, [client, device.stream, device.track, trackIds]);
+
+  const removeTracks = useCallback(() => {
+    if (!trackIds) return;
+    client.removeTrack(trackIds.localId);
+    setTrackMetadata(null);
+  }, [client, trackIds]);
+
+  useEffect(() => {
+    if (!client || !isConnected || mode !== "automatic") {
+      return;
+    }
+    const stream = device.stream;
+
+    const localTrackId: string | undefined = device.track?.id;
+
+    if (stream && !trackIds) {
+      addTracks();
+    } else if (stream && trackIds && trackIds.localId !== localTrackId) {
+      replaceTrack();
+    } else if (!stream && trackIds) {
+      removeTracks();
+    }
+  }, [
+    client,
+    device.stream,
+    device.track,
+    device.enabled,
+    isConnected,
+    addTracks,
+    mode,
+    removeTracks,
+    trackIds,
+    replaceTrack
+  ]);
+
+  const updateTrackMetadata = useCallback(
+    (metadata: TrackMetadata) => {
+      if (!trackIds) return;
+      client?.updateTrackMetadata(trackIds.remoteId, metadata);
+      setTrackMetadata(metadata);
+    },
+    [client, trackIds]
   );
 
   const setActive = useCallback(

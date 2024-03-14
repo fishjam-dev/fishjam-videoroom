@@ -3,15 +3,19 @@ import {
   AUDIO_TRACK_CONSTRAINTS,
   SCREENSHARING_TRACK_CONSTRAINTS,
   VIDEO_TRACK_CONSTRAINTS
+,
 } from "../../pages/room/consts";
 import { TrackMetadata, useCamera, useMicrophone, useScreenShare, useSetupMedia } from "../../jellyfish.types";
 import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult } from "@jellyfish-dev/react-client-sdk";
+import { useBlur } from "./BlurProcessor";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
   audio: UseMicrophoneResult<TrackMetadata>;
   screenShare: UseScreenShareResult<TrackMetadata>;
   init: () => void;
+  blur: boolean;
+  setBlur: (status: boolean) => void;
 };
 
 const LocalPeerMediaContext = React.createContext<LocalPeerContext | undefined>(undefined);
@@ -56,13 +60,17 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const audio = useMicrophone();
   const screenShare = useScreenShare();
 
+  const { video: blurVideo, blur, setBlur } = useBlur(video);
+
   return (
     <LocalPeerMediaContext.Provider
       value={{
-        video,
+        video: blur ? blurVideo : video,
         audio,
         screenShare,
-        init
+        init,
+        blur,
+        setBlur
       }}
     >
       {children}
