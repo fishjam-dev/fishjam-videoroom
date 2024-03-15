@@ -1,18 +1,18 @@
 import { createContext, ReactNode, useContext } from "react";
 import {
   MembraneStreaming,
-  StreamingMode,
-  useMembraneCameraStreaming,
-  useMembraneMediaStreaming,
+  // StreamingMode,
+  useMembraneCameraStreaming
+  // useMembraneMediaStreaming,
 } from "../../pages/room/hooks/useMembraneMediaStreaming";
 import { useStatus } from "../../jellyfish.types";
-import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext";
+// import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext";
 import { useLocalPeer } from "../devices/LocalPeerMediaContext";
 
 export type StreamingContext = {
   camera: MembraneStreaming;
-  microphone: MembraneStreaming;
-  screenShare: MembraneStreaming;
+  // microphone: MembraneStreaming;
+  // screenShare: MembraneStreaming;
 };
 
 const StreamingContext = createContext<StreamingContext | undefined>(undefined);
@@ -22,16 +22,16 @@ type Props = {
 };
 
 export const StreamingProvider = ({ children }: Props) => {
-  const { manualMode } = useDeveloperInfo();
-  const mode: StreamingMode = manualMode.status ? "manual" : "automatic";
+  // const { manualMode } = useDeveloperInfo();
+  // const mode: StreamingMode = manualMode.status ? "manual" : "automatic";
   const isConnected = useStatus() === "joined";
-  const { video, audio, screenShare: screenShareMedia } = useLocalPeer();
+  const { video } = useLocalPeer();
 
-  const camera = useMembraneCameraStreaming(mode, video, isConnected);
-  const microphone = useMembraneMediaStreaming(mode, {type:"audio", device: audio}, isConnected);
-  const screenShare = useMembraneMediaStreaming(mode, {type:"screensharing", device: screenShareMedia}, isConnected);
+  const camera = useMembraneCameraStreaming("manual", video, isConnected);
+  // const microphone = useMembraneMediaStreaming(mode, {type:"audio", device: audio}, isConnected);
+  // const screenShare = useMembraneMediaStreaming(mode, {type:"screensharing", device: screenShareMedia}, isConnected);
 
-  return <StreamingContext.Provider value={{ camera, microphone, screenShare }}>{children}</StreamingContext.Provider>;
+  return <StreamingContext.Provider value={{ camera }}>{children}</StreamingContext.Provider>;
 };
 
 export const useStreaming = (): StreamingContext => {

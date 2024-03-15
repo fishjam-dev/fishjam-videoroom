@@ -3,7 +3,7 @@ import {
   AUDIO_TRACK_CONSTRAINTS,
   SCREENSHARING_TRACK_CONSTRAINTS,
   VIDEO_TRACK_CONSTRAINTS
-,
+
 } from "../../pages/room/consts";
 import { TrackMetadata, useCamera, useMicrophone, useScreenShare, useSetupMedia } from "../../jellyfish.types";
 import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult } from "@jellyfish-dev/react-client-sdk";
@@ -40,17 +40,17 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     microphone: {
       trackConstraints: AUDIO_TRACK_CONSTRAINTS,
       defaultTrackMetadata: { active: true, type: "audio" },
-      broadcastOnConnect: false,
-      broadcastOnDeviceStart: false
+      broadcastOnConnect: true,
+      broadcastOnDeviceStart: true
     },
     screenShare: {
       streamConfig: {
-        videoTrackConstraints: SCREENSHARING_TRACK_CONSTRAINTS,
+        videoTrackConstraints: SCREENSHARING_TRACK_CONSTRAINTS
         // todo add audio
       },
       defaultTrackMetadata: { active: true, type: "screensharing" },
-      broadcastOnConnect: false,
-      broadcastOnDeviceStart: false
+      broadcastOnConnect: true,
+      broadcastOnDeviceStart: true
     },
     startOnMount: true,
     storage: true

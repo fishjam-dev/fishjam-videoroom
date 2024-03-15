@@ -1,8 +1,11 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext";
 import { useUser } from "../../../contexts/UserContext";
-import { DEFAULT_MANUAL_MODE_CHECKBOX_VALUE, DEFAULT_SMART_LAYER_SWITCHING_CHECKBOX_VALUE } from "../../../pages/room/consts";
+import {
+  DEFAULT_MANUAL_MODE_CHECKBOX_VALUE,
+  DEFAULT_SMART_LAYER_SWITCHING_CHECKBOX_VALUE, getSignalingAddress
+} from "../../../pages/room/consts";
 import { useToggle } from "../../../pages/room/hooks/useToggle";
 import Button from "../../shared/components/Button";
 import { Checkbox, CheckboxProps } from "../../shared/components/Checkbox";
@@ -12,6 +15,8 @@ import HomePageLayout from "./HomePageLayout";
 
 import HomePageVideoTile from "./HomePageVideoTile";
 import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
+import { useConnect } from "../../../jellyfish.types.ts";
+import { getTokenAndAddress } from "../../../room.api.tsx";
 
 const VideoroomHomePage: FC = () => {
   const lastDisplayName: string | null = localStorage.getItem("displayName");
@@ -41,40 +46,51 @@ const VideoroomHomePage: FC = () => {
       label: "Simulcast",
       id: "simulcast",
       onChange: toggleSimulcastCheckbox,
-      status: simulcastInput,
+      status: simulcastInput
     },
     {
       label: "Smart layer switching",
       id: "smart-layer-mode",
       onChange: toggleSmartLayerSwitchingInput,
-      status: smartLayerSwitchingInput,
+      status: smartLayerSwitchingInput
     },
     {
       label: "Manual mode",
       id: "manual-mode",
       onChange: toggleManualModeCheckbox,
-      status: manualModeInput,
-    },
+      status: manualModeInput
+    }
   ];
 
   const navigate = useNavigate();
   const { audio, video } = useLocalPeer();
-  const wasVideoStarted = useRef(false);
-  const wasAudioStarted = useRef(false);
+  // const wasVideoStarted = useRef(false);
+  // const wasAudioStarted = useRef(false);
 
-  useEffect(() => {
-    if (!wasVideoStarted.current && !video.stream) {
-      video.start();
-      wasVideoStarted.current = true;
-    }
-    if (!wasAudioStarted.current && !audio.stream) {
-      audio.start();
-      wasAudioStarted.current = true;
-    }
-  }, [audio.stream, video.stream]);
+  // useEffect(() => {
+  //   if (!wasVideoStarted.current && !video.stream) {
+  //     video.start();
+  //     wasVideoStarted.current = true;
+  //   }
+  //   if (!wasAudioStarted.current && !audio.stream) {
+  //     audio.start();
+  //     wasAudioStarted.current = true;
+  //   }
+  // }, [audio.stream, video.stream]);
+
+  const connect = useConnect();
 
   const onJoin = useCallback((e: React.SyntheticEvent) => {
     e.preventDefault();
+
+    getTokenAndAddress(roomId).then((tokenAndAddress) => {
+      return connect({
+        peerMetadata: { name: displayNameInput },
+        token: tokenAndAddress.token,
+        signaling: getSignalingAddress(tokenAndAddress.serverAddress)
+      });
+    });
+
 
     localStorage.setItem("displayName", displayNameInput);
     setUsername(displayNameInput);
@@ -83,7 +99,7 @@ const VideoroomHomePage: FC = () => {
     manualMode.setManualMode(manualModeInput);
 
     const href = (e.target as HTMLAnchorElement).pathname;
-    navigate(href, {state: {wasCameraDisabled: !video.enabled, wasMicrophoneDisabled: !audio.enabled}});
+    navigate(href, { state: { wasCameraDisabled: !video.enabled, wasMicrophoneDisabled: !audio.enabled } });
   }, [
     displayNameInput,
     manualMode,
@@ -102,7 +118,8 @@ const VideoroomHomePage: FC = () => {
     return (
       <>
         {joiningExistingRoom ? (
-          <div className="mt-2 flex w-full items-center justify-center gap-x-2 text-center text-lg font-medium sm:mt-0 sm:flex-col sm:text-base sm:font-normal">
+          <div
+            className="mt-2 flex w-full items-center justify-center gap-x-2 text-center text-lg font-medium sm:mt-0 sm:flex-col sm:text-base sm:font-normal">
             <span>You are joining:</span>
             <span className="sm:text-2xl sm:font-medium">{roomId}</span>
           </div>
@@ -148,7 +165,7 @@ const VideoroomHomePage: FC = () => {
         >
           Create a room
         </Button>
-      ),
+      )
     },
     "preview-settings": {
       content: (
@@ -181,13 +198,14 @@ const VideoroomHomePage: FC = () => {
             </Button>
           )}
         </>
-      ),
-    },
+      )
+    }
   };
 
   return (
     <HomePageLayout>
-      <section className="flex h-full w-full flex-col items-center justify-center gap-y-8 sm:w-auto sm:gap-y-14 2xl:gap-y-28">
+      <section
+        className="flex h-full w-full flex-col items-center justify-center gap-y-8 sm:w-auto sm:gap-y-14 2xl:gap-y-28">
         <div className="flex flex-col items-center gap-y-2 text-center sm:gap-y-6">
           <h2 className="text-xl font-medium tracking-wide sm:text-5xl">Videoconferencing for everyone</h2>
           <p className="hidden font-aktivGrotesk text-xl sm:inline-block">
@@ -198,7 +216,8 @@ const VideoroomHomePage: FC = () => {
           </p>
         </div>
 
-        <div className="flex w-full flex-col items-center justify-center gap-x-12 sm:max-h-[400px] sm:flex-row lg:gap-x-24">
+        <div
+          className="flex w-full flex-col items-center justify-center gap-x-12 sm:max-h-[400px] sm:flex-row lg:gap-x-24">
           {/* mobile view */}
           <div className="flex w-full flex-col items-center gap-y-6 sm:hidden">
             {mobileLoginSteps[mobileCurrentLoginStep].content}

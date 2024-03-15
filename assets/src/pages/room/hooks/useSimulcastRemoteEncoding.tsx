@@ -23,7 +23,7 @@ export const useSimulcastRemoteEncoding = (
       setTargetEncodingState(encoding);
 
       if (!trackId || !peerId || !client) return;
-      client.setTargetTrackEncoding(trackId, encoding);
+      // client.setTargetTrackEncoding(trackId, encoding);
     },
     [peerId, trackId, client]
   );

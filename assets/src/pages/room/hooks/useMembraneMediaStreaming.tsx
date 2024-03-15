@@ -77,6 +77,8 @@ export const useMembraneMediaStreaming = (
       if (!client || !isConnected || mode !== "automatic") {
         return;
       }
+
+
       const stream = device.stream;
 
       const localTrackId: string | undefined = device.track?.id;
@@ -136,7 +138,7 @@ export const useMembraneCameraStreaming = (
 ): MembraneStreaming => {
   const [trackIds, setTrackIds] = useState<TrackIds | null>(null);
 
-  const client = useClient();
+  // const client = useClient();
   const { simulcast } = useDeveloperInfo();
   const simulcastEnabled = simulcast.status;
 
@@ -145,19 +147,20 @@ export const useMembraneCameraStreaming = (
 
   const addTracks = useCallback(async () => {
     if (!device.track || !device.stream) return;
-    const remoteId = await client.addTrack(
-      device.track,
-      device.stream,
-      defaultTrackMetadata,
-      simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
-      selectBandwidthLimit("camera", simulcastEnabled)
-    );
+    // const remoteId = await client.addTrack(
+    //   device.track,
+    //   device.stream,
+    //   defaultTrackMetadata,
+    //   simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
+    //   selectBandwidthLimit("camera", simulcastEnabled)
+    // );
     setTrackMetadata(defaultTrackMetadata);
-    setTrackIds({
-      localId: device.track.id,
-      remoteId
-    });
-  }, [client, device.addTrack, defaultTrackMetadata, simulcastEnabled]);
+    // setTrackIds({
+    //   localId: device.track.id,
+    //   remoteId
+    // });
+  // }, [client, device.addTrack, defaultTrackMetadata, simulcastEnabled]);
+  }, [device.addTrack, defaultTrackMetadata, simulcastEnabled]);
 
   const replaceTrack = useCallback(async () => {
     if (!trackIds || !device.stream) return;
@@ -166,33 +169,35 @@ export const useMembraneCameraStreaming = (
       throw Error("Stream has no tracks!");
     }
 
-    await client.replaceTrack(trackIds.remoteId, device.track);
+    // await client.replaceTrack(trackIds.remoteId, device.track);
     setTrackIds({ ...trackIds, localId: device.track.id });
-  }, [client, device.stream, device.track, trackIds]);
+  // }, [client, device.stream, device.track, trackIds]);
+  }, [device.stream, device.track, trackIds]);
 
   const removeTracks = useCallback(() => {
     if (!trackIds) return;
-    client.removeTrack(trackIds.localId);
+    // client.removeTrack(trackIds.localId);
     setTrackMetadata(null);
-  }, [client, trackIds]);
+  // }, [client, trackIds]);
+  }, [trackIds]);
 
   useEffect(() => {
-    if (!client || !isConnected || mode !== "automatic") {
-      return;
-    }
-    const stream = device.stream;
-
-    const localTrackId: string | undefined = device.track?.id;
-
-    if (stream && !trackIds) {
-      addTracks();
-    } else if (stream && trackIds && trackIds.localId !== localTrackId) {
-      replaceTrack();
-    } else if (!stream && trackIds) {
-      removeTracks();
-    }
+    // if (!client || !isConnected || mode !== "automatic") {
+    //   return;
+    // }
+    // const stream = device.stream;
+    //
+    // const localTrackId: string | undefined = device.track?.id;
+    //
+    // if (stream && !trackIds) {
+    //   addTracks();
+    // } else if (stream && trackIds && trackIds.localId !== localTrackId) {
+    //   replaceTrack();
+    // } else if (!stream && trackIds) {
+    //   removeTracks();
+    // }
   }, [
-    client,
+    // client,
     device.stream,
     device.track,
     device.enabled,
@@ -207,10 +212,11 @@ export const useMembraneCameraStreaming = (
   const updateTrackMetadata = useCallback(
     (metadata: TrackMetadata) => {
       if (!trackIds) return;
-      client?.updateTrackMetadata(trackIds.remoteId, metadata);
+      // client?.updateTrackMetadata(trackIds.remoteId, metadata);
       setTrackMetadata(metadata);
     },
-    [client, trackIds]
+    // [client, trackIds]
+    [trackIds]
   );
 
   const setActive = useCallback(
