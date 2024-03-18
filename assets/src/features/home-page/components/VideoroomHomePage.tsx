@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, SyntheticEvent, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext";
 import { useUser } from "../../../contexts/UserContext";
@@ -15,7 +15,7 @@ import HomePageLayout from "./HomePageLayout";
 
 import HomePageVideoTile from "./HomePageVideoTile";
 import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
-import { useConnect } from "../../../jellyfish.types.ts";
+import { useConnect, useMicrophone } from "../../../jellyfish.types.ts";
 import { getTokenAndAddress } from "../../../room.api.tsx";
 
 const VideoroomHomePage: FC = () => {
@@ -63,7 +63,8 @@ const VideoroomHomePage: FC = () => {
   ];
 
   const navigate = useNavigate();
-  const { audio, video } = useLocalPeer();
+  const { video } = useLocalPeer();
+  const microphone = useMicrophone();
   // const wasVideoStarted = useRef(false);
   // const wasAudioStarted = useRef(false);
 
@@ -72,15 +73,15 @@ const VideoroomHomePage: FC = () => {
   //     video.start();
   //     wasVideoStarted.current = true;
   //   }
-  //   if (!wasAudioStarted.current && !audio.stream) {
-  //     audio.start();
+  //   if (!wasAudioStarted.current && !microphone.stream) {
+  //     microphone.start();
   //     wasAudioStarted.current = true;
   //   }
-  // }, [audio.stream, video.stream]);
+  // }, [microphone.stream, video.stream]);
 
   const connect = useConnect();
 
-  const onJoin = useCallback((e: React.SyntheticEvent) => {
+  const onJoin = useCallback((e: SyntheticEvent) => {
     e.preventDefault();
 
     getTokenAndAddress(roomId).then((tokenAndAddress) => {
@@ -99,7 +100,7 @@ const VideoroomHomePage: FC = () => {
     manualMode.setManualMode(manualModeInput);
 
     const href = (e.target as HTMLAnchorElement).pathname;
-    navigate(href, { state: { wasCameraDisabled: !video.enabled, wasMicrophoneDisabled: !audio.enabled } });
+    navigate(href, { state: { wasCameraDisabled: !video.enabled, wasMicrophoneDisabled: !microphone.enabled } });
   }, [
     displayNameInput,
     manualMode,
@@ -111,7 +112,7 @@ const VideoroomHomePage: FC = () => {
     smartLayerSwitchingInput,
     navigate,
     video,
-    audio
+    microphone
   ]);
 
   const inputs = useMemo(() => {

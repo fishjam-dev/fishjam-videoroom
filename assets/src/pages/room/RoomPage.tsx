@@ -28,7 +28,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
     // username,
     // roomId,
     wasCameraDisabled,
-    wasMicrophoneDisabled
+    // wasMicrophoneDisabled
   }) => {
   // const connect = useConnect();
   // const streaming = useStreaming();
@@ -39,11 +39,11 @@ const ConnectComponent: FC<ConnectComponentProps> = (
     localPeerRef.current = localPeer;
   }, [localPeer]);
 
-  const { video, audio } = localPeer;
+  const { video } = localPeer;
   useEffect(() => {
     if (!wasCameraDisabled && !video.stream) video.start();
-    if (!wasMicrophoneDisabled && !audio.stream) audio.start();
-  }, [video.stream, audio.stream]);
+    // if (!wasMicrophoneDisabled && !audio.stream) audio.start();
+  }, [video.stream]);
 
   const client = useClient();
   const { statistics } = useDeveloperInfo();

@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { TrackMetadata, useClient } from "../../../jellyfish.types.ts";
+import { PeerMetadata, TrackMetadata, useClient } from "../../../jellyfish.types.ts";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext.tsx";
 import { selectBandwidthLimit } from "../bandwidth.tsx";
-import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult } from "@jellyfish-dev/react-client-sdk";
+import {
+  ClientEvents,
+  UseCameraResult,
+  UseMicrophoneResult,
+  UseScreenShareResult
+} from "@jellyfish-dev/react-client-sdk";
 
 export type MembraneStreaming = {
   trackId: string | null;
@@ -136,17 +141,42 @@ export const useMembraneCameraStreaming = (
   device: UseCameraResult<TrackMetadata>,
   isConnected: boolean
 ): MembraneStreaming => {
+  console.log({ device });
   const [trackIds, setTrackIds] = useState<TrackIds | null>(null);
 
   // const client = useClient();
+  // const defaultTrackMetadata = useRef({ active: true, type: "camera" as const });
+
   const { simulcast } = useDeveloperInfo();
   const simulcastEnabled = simulcast.status;
 
+  useEffect(() => {
+    // const joinedHandler: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = async () => {
+    //   const { stream, track, enabled } = client.getSnapshot().devices.camera;
+    //
+    //   if (stream && track) {
+    //     await client.addTrack(
+    //       track,
+    //       stream,
+    //       { active: enabled, type: "camera" },
+    //       simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
+    //       selectBandwidthLimit("camera", simulcastEnabled)
+    //     );
+    //   }
+    // };
+    //
+    // client.on("joined", joinedHandler);
+    //
+    // return () => {
+    //   client.removeListener("joined", joinedHandler);
+    // };
+  }, []);
+
+
   const [trackMetadata, setTrackMetadata] = useState<TrackMetadata | null>(null);
-  const defaultTrackMetadata = useMemo(() => ({ active: device.enabled, type: "camera" as const }), [device.enabled]);
 
   const addTracks = useCallback(async () => {
-    if (!device.track || !device.stream) return;
+  //   if (!device.track || !device.stream) return;
     // const remoteId = await client.addTrack(
     //   device.track,
     //   device.stream,
@@ -154,13 +184,14 @@ export const useMembraneCameraStreaming = (
     //   simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
     //   selectBandwidthLimit("camera", simulcastEnabled)
     // );
-    setTrackMetadata(defaultTrackMetadata);
+    // setTrackMetadata(defaultTrackMetadata);
     // setTrackIds({
     //   localId: device.track.id,
     //   remoteId
     // });
-  // }, [client, device.addTrack, defaultTrackMetadata, simulcastEnabled]);
-  }, [device.addTrack, defaultTrackMetadata, simulcastEnabled]);
+    // }, [client, device.addTrack, defaultTrackMetadata, simulcastEnabled]);
+  // }, [device.addTrack, defaultTrackMetadata, simulcastEnabled]);
+  }, [device.addTrack, simulcastEnabled]);
 
   const replaceTrack = useCallback(async () => {
     if (!trackIds || !device.stream) return;
@@ -171,14 +202,14 @@ export const useMembraneCameraStreaming = (
 
     // await client.replaceTrack(trackIds.remoteId, device.track);
     setTrackIds({ ...trackIds, localId: device.track.id });
-  // }, [client, device.stream, device.track, trackIds]);
+    // }, [client, device.stream, device.track, trackIds]);
   }, [device.stream, device.track, trackIds]);
 
   const removeTracks = useCallback(() => {
     if (!trackIds) return;
     // client.removeTrack(trackIds.localId);
     setTrackMetadata(null);
-  // }, [client, trackIds]);
+    // }, [client, trackIds]);
   }, [trackIds]);
 
   useEffect(() => {
@@ -220,14 +251,14 @@ export const useMembraneCameraStreaming = (
   );
 
   const setActive = useCallback(
-    (status: boolean) => {
-      if (trackMetadata) {
-        updateTrackMetadata({ ...trackMetadata, active: status });
-      } else {
-        throw Error("Track metadata is null!");
-      }
+    (_status: boolean) => {
+    //   if (trackMetadata) {
+    //     updateTrackMetadata({ ...trackMetadata, active: status });
+    //   } else {
+    //     throw Error("Track metadata is null!");
+    //   }
     },
-    [trackMetadata, updateTrackMetadata]
+    []
   );
 
   return {

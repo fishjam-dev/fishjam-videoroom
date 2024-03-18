@@ -4,10 +4,12 @@ import { useModal } from "../../contexts/ModalContext";
 import { useLocalPeer } from "./LocalPeerMediaContext";
 import { Modal } from "../shared/components/modal/Modal";
 import { Checkbox } from "../shared/components/Checkbox";
+import { useMicrophone } from "../../jellyfish.types.ts";
 
 export const MediaSettingsModal: React.FC = () => {
   const { setOpen, isOpen } = useModal();
-  const { video, audio, blur, setBlur } = useLocalPeer();
+  const { video, blur, setBlur } = useLocalPeer();
+  const microphone = useMicrophone()
   const [videoInput, setVideoInput] = useState<string | null>(null);
   const [audioInput, setAudioInput] = useState<string | null>(null);
   const [blurInput, setBlurInput] = useState(blur);
@@ -19,14 +21,14 @@ export const MediaSettingsModal: React.FC = () => {
   }, [video.devices, video.deviceInfo?.deviceId]);
 
   useEffect(() => {
-    if (audio.devices && audio.deviceInfo?.deviceId) {
-      setAudioInput(audio.deviceInfo.deviceId);
+    if (microphone.devices && microphone.deviceInfo?.deviceId) {
+      setAudioInput(microphone.deviceInfo.deviceId);
     }
-  }, [audio.devices, audio.deviceInfo?.deviceId]);
+  }, [microphone.devices, microphone.deviceInfo?.deviceId]);
 
   const handleClose = () => {
     setOpen(false);
-    setAudioInput(audio.deviceInfo?.deviceId ?? null);
+    setAudioInput(microphone.deviceInfo?.deviceId ?? null);
     setVideoInput(video.deviceInfo?.deviceId ?? null);
   };
 
@@ -39,8 +41,8 @@ export const MediaSettingsModal: React.FC = () => {
       cancelClassName="!text-additional-red-100"
       onConfirm={() => {
         video.start(videoInput || undefined);
-        audio.start(audioInput || undefined);
-        setBlur(blurInput);
+        microphone.start(audioInput || undefined);
+        setBlur(blurInput); //this function invokes every time someone apply new settings
         setOpen(false);
       }}
       onCancel={handleClose}
@@ -59,7 +61,7 @@ export const MediaSettingsModal: React.FC = () => {
       </div>
       <DeviceSelector
         name="Select microphone"
-        devices={audio.devices}
+        devices={microphone.devices}
         setInput={setAudioInput}
         inputValue={audioInput}
       />

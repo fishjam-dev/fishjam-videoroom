@@ -12,7 +12,7 @@ import { disableSafariCache } from "./features/devices/disableSafariCache";
 import ReactModal from "react-modal";
 import "./index.css";
 
-import { StreamingProvider } from "./features/streaming/StreamingContext";
+// import { StreamingProvider } from "./features/streaming/StreamingContext";
 import { StreamingErrorBoundary } from "./features/streaming/StreamingErrorBoundary";
 import { JellyfishContextProvider } from "./jellyfish.types";
 
@@ -32,10 +32,10 @@ const App: FC = () => {
               <ModalProvider>
                 <LocalMediaMessagesBoundary>
                   <StreamingErrorBoundary>
-                    <StreamingProvider>
-                      <RouterProvider router={router} />
-                      <MediaSettingsModal />
-                    </StreamingProvider>
+                    {/*<StreamingProvider>*/}
+                    <RouterProvider router={router} />
+                    <MediaSettingsModal />
+                    {/*</StreamingProvider>*/}
                   </StreamingErrorBoundary>
                 </LocalMediaMessagesBoundary>
               </ModalProvider>

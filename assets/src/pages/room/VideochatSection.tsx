@@ -141,6 +141,11 @@ export const VideochatSection: FC<Props> = ({ showSimulcast, unpinnedTilesHorizo
     [pinnedTilesIds, unpinnedTilesIds, allTilesConfig]
   );
 
+  console.log({
+    pinnedTiles,
+    unpinnedTiles
+  });
+
   const wrapperClass = useMemo(() => {
     const areAllTilesPinned = !pinningFlags.isAnyUnpinned;
 

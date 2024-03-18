@@ -1,9 +1,8 @@
 import { FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import useToast from "../shared/hooks/useToast";
 import { ErrorMessage, messageComparator } from "../../pages/room/errorMessage";
-import { useClient } from "../../jellyfish.types";
+import { useClient, useScreenShare } from "../../jellyfish.types";
 import useEffectOnChange from "../shared/hooks/useEffectOnChange";
-import { useLocalPeer } from "../devices/LocalPeerMediaContext";
 
 export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
   const { addToast } = useToast();
@@ -57,7 +56,7 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
     };
   }, [client, handleError]);
 
-  const { screenShare } = useLocalPeer();
+  const screenShare = useScreenShare()
 
   useEffectOnChange(screenShare.stream, () => {
     if (screenShare.stream) {

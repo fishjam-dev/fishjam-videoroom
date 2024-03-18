@@ -10,14 +10,16 @@ import Settings from "../../room-page/icons/Settings";
 import { useModal } from "../../../contexts/ModalContext";
 import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
 import GenericMediaPlayerTile from "../../../pages/room/components/StreamPlayer/GenericMediaPlayerTile";
+import { useMicrophone } from "../../../jellyfish.types.ts";
 
 type HomePageVideoTileProps = {
   displayName: string;
 };
 
 const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
-  const { audio, video } = useLocalPeer();
-  
+  const {  video } = useLocalPeer();
+  const microphone = useMicrophone()
+
   const initials = computeInitials(displayName);
   const { setOpen } = useModal();
 
@@ -54,13 +56,13 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   }}
                 />
               )}
-              {audio.enabled ? (
+              {microphone.enabled ? (
                 <MediaControlButton
                   icon={Microphone}
                   hover="Turn off the microphone"
                   buttonClassName={neutralButtonStyle}
                   onClick={() => {
-                    audio.stop();
+                    microphone.stop();
                   }}
                 />
               ) : (
@@ -69,10 +71,10 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the microphone"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    if (audio.stream) {
-                      audio.setEnable(true);
+                    if (microphone.stream) {
+                      microphone.setEnable(true);
                     } else {
-                      audio.start();
+                      microphone.start();
                     }
                   }}
                 />
