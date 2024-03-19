@@ -13,7 +13,7 @@ import { getTokenAndAddress } from "../../room.api";
 import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
 import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 import { InboundRtpId, useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
-import { AudioStatsSchema, VideoStatsSchema } from "./components/StreamPlayer/rtcMosScore.ts";
+import { AudioStatsSchema, VideoStatsSchema } from "./components/StreamPlayer/rtcMOS1.ts";
 
 type ConnectComponentProps = {
   username: string;
