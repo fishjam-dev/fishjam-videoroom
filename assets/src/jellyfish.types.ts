@@ -50,9 +50,10 @@ export const toLocalTrackSelector = (state: State<PeerMetadata, TrackMetadata>, 
   toPairs(state?.local?.tracks || {})
     .filter(([_, value]) => value?.metadata?.type === type)
     .map(([key, value]): TrackWithId => {
-      const { stream, metadata, encoding } = value;
+      const { stream, metadata, encoding, track } = value;
       return {
         stream: stream || undefined,
+        track: track || undefined,
         remoteTrackId: key,
         metadata,
         isSpeaking: true,

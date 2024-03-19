@@ -27,7 +27,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
   {
     // username,
     // roomId,
-    wasCameraDisabled,
+    wasCameraDisabled
     // wasMicrophoneDisabled
   }) => {
   // const connect = useConnect();
@@ -203,6 +203,8 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
     statistics.setStatus(!statistics.status);
   };
 
+  const client = useClient();
+
   return (
     <PageLayout>
       {username && <ConnectComponent username={username} roomId={roomId} wasCameraDisabled={wasCameraDisabled}
@@ -237,6 +239,10 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
             type="submit"
           >
             {statistics.status ? "Hide statistics" : "Show statistics"}
+          </button>
+          <button onClick={() => {
+            console.log(client.getSnapshot());
+          }}>Show state
           </button>
         </div>
       </div>

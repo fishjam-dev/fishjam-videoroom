@@ -4,21 +4,24 @@ import { useModal } from "../../contexts/ModalContext";
 import { useLocalPeer } from "./LocalPeerMediaContext";
 import { Modal } from "../shared/components/modal/Modal";
 import { Checkbox } from "../shared/components/Checkbox";
-import { useMicrophone } from "../../jellyfish.types.ts";
+import { useCamera, useMicrophone } from "../../jellyfish.types.ts";
 
 export const MediaSettingsModal: React.FC = () => {
   const { setOpen, isOpen } = useModal();
-  const { video, blur, setBlur } = useLocalPeer();
-  const microphone = useMicrophone()
+  const { setBlur } = useLocalPeer();
+
+  const camera = useCamera();
+  const microphone = useMicrophone();
+
   const [videoInput, setVideoInput] = useState<string | null>(null);
   const [audioInput, setAudioInput] = useState<string | null>(null);
-  const [blurInput, setBlurInput] = useState(blur);
+  const [blurInput, setBlurInput] = useState(false);
 
   useEffect(() => {
-    if (video.devices && video.deviceInfo?.deviceId) {
-      setVideoInput(video.deviceInfo?.deviceId);
+    if (camera.devices && camera.deviceInfo?.deviceId) {
+      setVideoInput(camera.deviceInfo?.deviceId);
     }
-  }, [video.devices, video.deviceInfo?.deviceId]);
+  }, [camera.devices, camera.deviceInfo?.deviceId]);
 
   useEffect(() => {
     if (microphone.devices && microphone.deviceInfo?.deviceId) {
@@ -29,7 +32,7 @@ export const MediaSettingsModal: React.FC = () => {
   const handleClose = () => {
     setOpen(false);
     setAudioInput(microphone.deviceInfo?.deviceId ?? null);
-    setVideoInput(video.deviceInfo?.deviceId ?? null);
+    setVideoInput(camera.deviceInfo?.deviceId ?? null);
   };
 
   return (
@@ -40,17 +43,34 @@ export const MediaSettingsModal: React.FC = () => {
       closable
       cancelClassName="!text-additional-red-100"
       onConfirm={() => {
-        video.start(videoInput || undefined);
+        console.log({ name: "clicked", videoInput, audioInput, blurInput });
+
+        // setBlur(blurInput, true);
+
+        // if (video.deviceInfo?.deviceId !== videoInput) {
+        // video.start(videoInput || undefined);
+        console.log({ name: "clicked - setBlur" });
+        setBlur(blurInput, true);
+        // } else {
+        //   setBlur(blurInput, true);
+        // }
+
+        console.log("Restarting video");
+        camera.start(videoInput || undefined);
+
+        // if (microphone.deviceInfo?.deviceId !== audioInput) {
         microphone.start(audioInput || undefined);
-        setBlur(blurInput); //this function invokes every time someone apply new settings
+        // }
         setOpen(false);
+        // setBlurInput(blurInput)
       }}
       onCancel={handleClose}
       maxWidth="max-w-md"
       isOpen={isOpen}
     >
       <div className="flex flex-col gap-2">
-        <DeviceSelector name="Select camera" devices={video.devices} setInput={setVideoInput} inputValue={videoInput} />
+        <DeviceSelector name="Select camera" devices={camera.devices} setInput={setVideoInput}
+                        inputValue={videoInput} />
         <Checkbox
           label="Blur background (experimental)"
           id="blur-background-checkbox"

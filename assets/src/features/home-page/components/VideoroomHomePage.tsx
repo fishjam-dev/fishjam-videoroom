@@ -15,7 +15,7 @@ import HomePageLayout from "./HomePageLayout";
 
 import HomePageVideoTile from "./HomePageVideoTile";
 import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
-import { useConnect, useMicrophone } from "../../../jellyfish.types.ts";
+import { useClient, useConnect, useMicrophone } from "../../../jellyfish.types.ts";
 import { getTokenAndAddress } from "../../../room.api.tsx";
 
 const VideoroomHomePage: FC = () => {
@@ -115,6 +115,8 @@ const VideoroomHomePage: FC = () => {
     microphone
   ]);
 
+  const client = useClient();
+
   const inputs = useMemo(() => {
     return (
       <>
@@ -123,6 +125,10 @@ const VideoroomHomePage: FC = () => {
             className="mt-2 flex w-full items-center justify-center gap-x-2 text-center text-lg font-medium sm:mt-0 sm:flex-col sm:text-base sm:font-normal">
             <span>You are joining:</span>
             <span className="sm:text-2xl sm:font-medium">{roomId}</span>
+            <button onClick={() => {
+              console.log(client.getSnapshot());
+            }}>Show state
+            </button>
           </div>
         ) : (
           <Input

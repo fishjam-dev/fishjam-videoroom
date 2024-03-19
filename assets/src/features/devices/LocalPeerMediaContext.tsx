@@ -17,7 +17,7 @@ export type LocalPeerContext = {
   // camera: MembraneStreaming;
   init: () => void;
   blur: boolean;
-  setBlur: (status: boolean) => void;
+  setBlur: (status: boolean, restart: boolean) => void;
 };
 
 const LocalPeerMediaContext = React.createContext<LocalPeerContext | undefined>(undefined);
@@ -104,6 +104,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const client = useClient();
 
   const { simulcast } = useDeveloperInfo();
+  const simulcastEnabled = simulcast.status;
 
   const blurRef = useRef<boolean>(false);
 
@@ -111,19 +112,25 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const streamRef = useRef<MediaStream | null>(null);
   const [track, setTrack] = useState<MediaStreamTrack | null>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
+  const remoteTrackIdRef = useRef<string | null>(null);
 
+  const broadcastedStreamRef = useRef<MediaStream | null>(null)
 
-  const changeMediaStream = useCallback((stream: MediaStream | null, track: MediaStreamTrack | null, blur: boolean) => {
+  const changeMediaStream = useCallback(async (stream: MediaStream | null, track: MediaStreamTrack | null, blur: boolean) => {
+    console.log({ name: "changeMediaStream1", stream, track });
     if (processor.current) {
       processor.current.destroy();
       processor.current = null;
     }
+    console.log({ name: "changeMediaStream2", stream, track });
 
     if (blur && stream) {
       console.log({ name: "blur true, start blur", blur, stream });
       processor.current = new BlurProcessor(stream);
+
       setStream(processor.current?.stream);
       setTrack(processor.current?.track);
+
       streamRef.current = processor.current?.stream || null;
       trackRef.current = processor.current?.track || null;
     } else {
@@ -135,11 +142,45 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       streamRef.current = stream || null;
       trackRef.current = track || null;
     }
+
+    if (client.getSnapshot().status === "joined") {
+      console.log("Handling remote tracks");
+      if (!remoteTrackIdRef.current && stream && track) {
+        console.log("Adding track");
+
+        const mediaStream = new MediaStream()
+        mediaStream.addTrack(track)
+
+        broadcastedStreamRef.current = mediaStream
+
+        remoteTrackIdRef.current = await client.addTrack(
+          track,
+          mediaStream,
+          // todo think about track.enabled
+          { active: track.enabled, type: "camera" },
+          simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
+          selectBandwidthLimit("camera", simulcastEnabled)
+        );
+      } else if (remoteTrackIdRef.current && trackRef.current) {
+        // replace track
+        console.log({name: "Replacing track", stream: streamRef.current, track: trackRef.current});
+
+        // todo add setter as an alternative to setting whole object
+        broadcastedStreamRef.current?.removeTrack(broadcastedStreamRef.current?.getVideoTracks()[0])
+        broadcastedStreamRef.current?.addTrack(trackRef.current)
+
+
+        // todo when you replaceTrack this not affects stream so local peer don't know that something changesls
+        await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, { active: true, type: "camera" });
+      } else if (remoteTrackIdRef.current && !stream) {
+        console.log("Removing track");
+        await client.removeTrack(remoteTrackIdRef.current)
+        // remove track
+      }
+    }
   }, [setStream, setTrack]);
 
   useEffect(() => {
-    const simulcastEnabled = simulcast.status;
-
     const managerInitialized: ClientEvents<PeerMetadata, TrackMetadata>["managerInitialized"] = (event) => {
       console.log({ name: "managerInitialized", event });
 
@@ -153,7 +194,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
       if (!snapshot.media?.video?.media) return;
 
-      const { stream, track, enabled } = snapshot.media.video.media;
+      const { stream, track } = snapshot.media.video.media;
 
       if (stream && track) {
         // if (processor.current) {
@@ -171,17 +212,17 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         // const selectedTrack = blur ? processor.current?.track : track;
         console.log({ name: "joinedHandler", stream, track });
 
-        changeMediaStream(stream, track, blur);
+        await changeMediaStream(stream, track, blur);
 
-        if (!streamRef.current || !trackRef.current) return;
-
-        await client.addTrack(
-          trackRef.current,
-          streamRef.current,
-          { active: enabled, type: "camera" },
-          simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
-          selectBandwidthLimit("camera", simulcastEnabled)
-        );
+        // if (!streamRef.current || !trackRef.current) return;
+        //
+        // await client.addTrack(
+        //   trackRef.current,
+        //   streamRef.current,
+        //   { active: enabled, type: "camera" },
+        //   simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
+        //   selectBandwidthLimit("camera", simulcastEnabled)
+        // );
       }
     };
 
@@ -197,7 +238,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       console.log({ name: "devicesReady", event, client, snapshot });
 
       if (event.video.restarted && event.video?.media?.stream) {
-        changeMediaStream(event.video?.media?.stream || null, event.video?.media?.track || null, blurRef.current);
+        await changeMediaStream(event.video?.media?.stream || null, event.video?.media?.track || null, blurRef.current);
       }
     };
 
@@ -214,13 +255,16 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     };
   }, [simulcast.status]);
 
-  const applyNewSettings = useCallback((newBlurValue: boolean) => {
+  const applyNewSettings = useCallback(async (newBlurValue: boolean, restart: boolean) => {
     console.log({ name: "applyNewSettings", newBlurValue, stream, track });
 
-    setBlur(newBlurValue);
+    // setBlur(newBlurValue);
+
+    if (restart) {
+      await changeMediaStream(video.stream, video.track, newBlurValue);
+    }
     blurRef.current = newBlurValue;
 
-    changeMediaStream(stream, track, newBlurValue);
     // if (stream && track && newBlurValue) {
     //   if (processor.current) {
     //     processor.current.destroy();
@@ -249,7 +293,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     //     setTrack(null);
     //   }
     // }
-  }, [setBlur, stream, track]);
+  }, [setBlur, stream, track, video]);
 
   const noop: () => Promise<any> = useCallback((..._args) => Promise.resolve(), []);
 
