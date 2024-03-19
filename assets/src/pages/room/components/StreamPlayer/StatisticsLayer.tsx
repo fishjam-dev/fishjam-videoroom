@@ -112,7 +112,7 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
   const audioRawStats = statistics.data[audioTrackId || ""];
   const audioStats: AudioStatistics | undefined = audioRawStats?.type === "audio" ? audioRawStats : undefined;
 
-  const audioScore = !audioStats ? 0 : calculateAudioScore(
+  const audioScore1 = !audioStats ? 0 : calculateAudioScore(
     {
       bitrate: audioStats.bitrate,
       bufferDelay: audioStats.bufferDelay,
@@ -122,7 +122,7 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
       dtx: audioStats.dtx
     });
 
-  const openTokAudioScore = !audioStats ? 0 : calculateOpenTokAudioScore(
+  const audioScore2 = !audioStats ? 0 : calculateOpenTokAudioScore(
     {
       roundTripTime: audioStats.roundTripTime,
       packetLoss: audioStats.packetLoss
@@ -141,12 +141,12 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
       <tr>
         <th>score 1 [unit]</th>
         <td>{decimal2FractionFormatter.format(videoScore).toString()} ({decimal2FractionFormatter.format(maxScore1HighLayer > 0 ? videoScore * 100 / maxScore1HighLayer : NaN).toString()}%)</td>
-        <td>{decimal2FractionFormatter.format(audioScore).toString()}</td>
+        <td>{decimal2FractionFormatter.format(audioScore1).toString()} ({decimal2FractionFormatter.format(maxAudioScore1 > 0 ? audioScore1 * 100 / maxAudioScore1 : NaN).toString()}%)</td>
       </tr>
       <tr>
         <th>score 2 [unit]</th>
         <td>{decimal2FractionFormatter.format(openTokVideoScore).toString()} ({decimal2FractionFormatter.format(maxScore2HighLayer > 0 ? openTokVideoScore * 100 / maxScore2HighLayer : NaN).toString()}%)</td>
-        <td>{decimal2FractionFormatter.format(openTokAudioScore).toString()} ({decimal2FractionFormatter.format(maxAudioScore2 > 0 ? openTokAudioScore * 100 / maxAudioScore2 : NaN).toString()}%)</td>
+        <td>{decimal2FractionFormatter.format(audioScore2).toString()} ({decimal2FractionFormatter.format(maxAudioScore2 > 0 ? audioScore2 * 100 / maxAudioScore2 : NaN).toString()}%)</td>
       </tr>
       <tr>
         <th>bitrate [bps]</th>
