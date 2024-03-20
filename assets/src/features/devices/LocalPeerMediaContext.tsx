@@ -114,7 +114,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const trackRef = useRef<MediaStreamTrack | null>(null);
   const remoteTrackIdRef = useRef<string | null>(null);
 
-  const broadcastedStreamRef = useRef<MediaStream | null>(null)
+  const broadcastedStreamRef = useRef<MediaStream | null>(null);
 
   const changeMediaStream = useCallback(async (stream: MediaStream | null, track: MediaStreamTrack | null, blur: boolean) => {
     console.log({ name: "changeMediaStream1", stream, track });
@@ -148,10 +148,10 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       if (!remoteTrackIdRef.current && stream && track) {
         console.log("Adding track");
 
-        const mediaStream = new MediaStream()
-        mediaStream.addTrack(track)
+        const mediaStream = new MediaStream();
+        mediaStream.addTrack(track);
 
-        broadcastedStreamRef.current = mediaStream
+        broadcastedStreamRef.current = mediaStream;
 
         remoteTrackIdRef.current = await client.addTrack(
           track,
@@ -163,18 +163,18 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         );
       } else if (remoteTrackIdRef.current && trackRef.current) {
         // replace track
-        console.log({name: "Replacing track", stream: streamRef.current, track: trackRef.current});
+        console.log({ name: "Replacing track", stream: streamRef.current, track: trackRef.current });
 
         // todo add setter as an alternative to setting whole object
-        broadcastedStreamRef.current?.removeTrack(broadcastedStreamRef.current?.getVideoTracks()[0])
-        broadcastedStreamRef.current?.addTrack(trackRef.current)
+        broadcastedStreamRef.current?.removeTrack(broadcastedStreamRef.current?.getVideoTracks()[0]);
+        broadcastedStreamRef.current?.addTrack(trackRef.current);
 
 
         // todo when you replaceTrack this not affects stream so local peer don't know that something changesls
         await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, { active: true, type: "camera" });
       } else if (remoteTrackIdRef.current && !stream) {
         console.log("Removing track");
-        await client.removeTrack(remoteTrackIdRef.current)
+        await client.removeTrack(remoteTrackIdRef.current);
         // remove track
       }
     }
@@ -186,43 +186,20 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
       setStream(() => event.video?.media?.stream || null);
       setTrack(() => event.video?.media?.track || null);
+
+      trackRef.current = event.video?.media?.track || null
+      streamRef.current = event.video?.media?.stream || null
     };
 
 
     const joinedHandler: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = async () => {
-      const snapshot = client.getSnapshot();
-
-      if (!snapshot.media?.video?.media) return;
-
-      const { stream, track } = snapshot.media.video.media;
+      const stream = streamRef.current || null;
+      const track = trackRef.current || null;
 
       if (stream && track) {
-        // if (processor.current) {
-        //   processor.current.destroy();
-        //   processor.current = null;
-        // }
-        //
-        // if (blur) {
-        //   processor.current = new BlurProcessor(stream);
-        //   setStream(processor.current?.stream);
-        //   setTrack(processor.current?.track);
-        // }
-        //
-        // const selectedStream = blur ? processor.current?.stream : stream;
-        // const selectedTrack = blur ? processor.current?.track : track;
         console.log({ name: "joinedHandler", stream, track });
 
         await changeMediaStream(stream, track, blur);
-
-        // if (!streamRef.current || !trackRef.current) return;
-        //
-        // await client.addTrack(
-        //   trackRef.current,
-        //   streamRef.current,
-        //   { active: enabled, type: "camera" },
-        //   simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
-        //   selectBandwidthLimit("camera", simulcastEnabled)
-        // );
       }
     };
 
