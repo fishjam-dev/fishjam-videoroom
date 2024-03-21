@@ -1,4 +1,6 @@
-// This is a rewritten implementation of https://github.com/ggarber/rtcscore
+// Original implementation: https://github.com/ggarber/rtcscore
+// I just adjusted the code to our needs.
+// This implementation reflects the score for the last second rather than for the entire session.
 
 import { z } from "zod";
 
@@ -8,14 +10,14 @@ export const VideoStatsSchema = z.object({
   bufferDelay: z.number().default(0),
   codec: z.string().optional(),
   frameRate: z.number().default(0),
-  packetLoss: z.number().default(0)
+  packetLoss: z.number().default(0) // %
 });
 
 export const AudioStatsSchema = z.object({
   bitrate: z.number().default(0),
   roundTripTime: z.number().default(0),
   bufferDelay: z.number().default(0),
-  packetLoss: z.number().default(0),
+  packetLoss: z.number().default(0), // %
   fec: z.boolean().default(false),
   dtx: z.boolean().default(false)
 });

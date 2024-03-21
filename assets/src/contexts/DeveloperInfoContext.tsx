@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useState } from "react";
-import { AudioStats, VideoStats } from "../pages/room/components/StreamPlayer/rtcMosScore.ts";
+import { AudioStats, VideoStats } from "../pages/room/components/StreamPlayer/rtcMOS1.ts";
 
 export type VideoStatistics = VideoStats & { type: "video" }
 export type AudioStatistics = AudioStats & { type: "audio" }

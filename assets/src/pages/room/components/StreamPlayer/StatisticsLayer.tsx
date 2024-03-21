@@ -1,9 +1,10 @@
 import { AudioStatistics, useDeveloperInfo, VideoStatistics } from "../../../../contexts/DeveloperInfoContext.tsx";
-import { calculateAudioScore, calculateVideoScore } from "./rtcMosScore.ts";
+import { calculateAudioScore, calculateVideoScore } from "./rtcMOS1.ts";
 import { SIMULCAST_BANDWIDTH_LIMITS } from "../../bandwidth.tsx";
+import { calculateOpenTokAudioScore, calculateOpenTokVideoScore } from "./rtcMOS2.ts";
 
 
-const maxScoreHighLayer = calculateVideoScore({
+const maxScore1HighLayer = calculateVideoScore({
   codec: "",
   bitrate: SIMULCAST_BANDWIDTH_LIMITS.get("h")! * 1024,
   bufferDelay: 0,
@@ -14,7 +15,7 @@ const maxScoreHighLayer = calculateVideoScore({
   expectedHeight: 720
 });
 
-const maxScoreMediumLayer = calculateVideoScore({
+const maxScore1MediumLayer = calculateVideoScore({
   codec: "",
   bitrate: SIMULCAST_BANDWIDTH_LIMITS.get("m")! * 1024,
   bufferDelay: 0,
@@ -25,7 +26,7 @@ const maxScoreMediumLayer = calculateVideoScore({
   expectedHeight: 720
 });
 
-const maxScoreLowLayer = calculateVideoScore({
+const maxScore1LowLayer = calculateVideoScore({
   codec: "",
   bitrate: SIMULCAST_BANDWIDTH_LIMITS.get("l")! * 1024,
   bufferDelay: 0,
@@ -36,7 +37,25 @@ const maxScoreLowLayer = calculateVideoScore({
   expectedHeight: 720
 });
 
-const maxAudioScore = calculateAudioScore(
+const maxScore2HighLayer = calculateOpenTokVideoScore({
+  width: 1280,
+  height: 720,
+  bitrate: SIMULCAST_BANDWIDTH_LIMITS.get("h")! * 1024
+});
+
+const maxScore2MediumLayer = calculateOpenTokVideoScore({
+  width: 1280,
+  height: 720,
+  bitrate: SIMULCAST_BANDWIDTH_LIMITS.get("m")! * 1024
+});
+
+const maxScore2LowLayer = calculateOpenTokVideoScore({
+  width: 1280,
+  height: 720,
+  bitrate: SIMULCAST_BANDWIDTH_LIMITS.get("l")! * 1024
+});
+
+const maxAudioScore1 = calculateAudioScore(
   {
     bitrate: 30_000,
     bufferDelay: 0,
@@ -46,10 +65,24 @@ const maxAudioScore = calculateAudioScore(
     dtx: false
   });
 
+const maxAudioScore2 = calculateOpenTokAudioScore(
+  {
+    roundTripTime: 0,
+    packetLoss: 0
+  });
+
 
 export type Props = { videoTrackId: string | null, audioTrackId: string | null }
 
-const numberFormatter = new Intl.NumberFormat("pl-PL", { minimumFractionDigits: 3 });
+const decimal3FractionFormatter = new Intl.NumberFormat("pl-PL", {
+  minimumFractionDigits: 3,
+  maximumFractionDigits: 3
+});
+const decimal2FractionFormatter = new Intl.NumberFormat("pl-PL", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+const integerFormatter = new Intl.NumberFormat("pl-PL", { maximumFractionDigits: 0 });
 
 export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
 
@@ -70,10 +103,16 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
       expectedHeight: 720
     });
 
+  const openTokVideoScore = !videoStats ? 0 : calculateOpenTokVideoScore({
+    width: 1280,
+    height: 720,
+    bitrate: videoStats.bitrate
+  });
+
   const audioRawStats = statistics.data[audioTrackId || ""];
   const audioStats: AudioStatistics | undefined = audioRawStats?.type === "audio" ? audioRawStats : undefined;
 
-  const audioScore = !audioStats ? 0 : calculateAudioScore(
+  const audioScore1 = !audioStats ? 0 : calculateAudioScore(
     {
       bitrate: audioStats.bitrate,
       bufferDelay: audioStats.bufferDelay,
@@ -81,6 +120,12 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
       packetLoss: audioStats.packetLoss,
       fec: audioStats.fec,
       dtx: audioStats.dtx
+    });
+
+  const audioScore2 = !audioStats ? 0 : calculateOpenTokAudioScore(
+    {
+      roundTripTime: audioStats.roundTripTime,
+      packetLoss: audioStats.packetLoss
     });
 
   return <div className="absolute right-0 bottom-0 z-50 !text-xs text-black md:text-base bg-white/50 p-2">
@@ -94,32 +139,37 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
       </thead>
       <tbody>
       <tr>
-        <th>score</th>
-        <td>{videoScore.toString()}</td>
-        <td>{audioScore.toString()}</td>
+        <th>score 1 [unit]</th>
+        <td>{decimal2FractionFormatter.format(videoScore).toString()} ({decimal2FractionFormatter.format(maxScore1HighLayer > 0 ? videoScore * 100 / maxScore1HighLayer : NaN).toString()}%)</td>
+        <td>{decimal2FractionFormatter.format(audioScore1).toString()} ({decimal2FractionFormatter.format(maxAudioScore1 > 0 ? audioScore1 * 100 / maxAudioScore1 : NaN).toString()}%)</td>
       </tr>
       <tr>
-        <th>bitrate</th>
-        <td>{numberFormatter.format(videoStats?.bitrate ?? NaN).toString()}</td>
-        <td>{numberFormatter.format(audioStats?.bitrate ?? NaN).toString()}</td>
+        <th>score 2 [unit]</th>
+        <td>{decimal2FractionFormatter.format(openTokVideoScore).toString()} ({decimal2FractionFormatter.format(maxScore2HighLayer > 0 ? openTokVideoScore * 100 / maxScore2HighLayer : NaN).toString()}%)</td>
+        <td>{decimal2FractionFormatter.format(audioScore2).toString()} ({decimal2FractionFormatter.format(maxAudioScore2 > 0 ? audioScore2 * 100 / maxAudioScore2 : NaN).toString()}%)</td>
       </tr>
       <tr>
-        <th>bufferDelay</th>
-        <td>{numberFormatter.format(videoStats?.bufferDelay ?? NaN).toString()}</td>
-        <td>{numberFormatter.format(audioStats?.bufferDelay ?? NaN).toString()}</td>
+        <th>bitrate [bps]</th>
+        <td>{integerFormatter.format(videoStats?.bitrate ?? NaN).toString()}</td>
+        <td>{integerFormatter.format(audioStats?.bitrate ?? NaN).toString()}</td>
       </tr>
       <tr>
-        <th>roundTripTime</th>
-        <td>{numberFormatter.format(videoStats?.roundTripTime ?? NaN).toString()}</td>
-        <td>{numberFormatter.format(audioStats?.roundTripTime ?? NaN).toString()}</td>
+        <th>bufferDelay [s]</th>
+        <td>{decimal3FractionFormatter.format(videoStats?.bufferDelay ?? NaN).toString()}</td>
+        <td>{decimal3FractionFormatter.format(audioStats?.bufferDelay ?? NaN).toString()}</td>
       </tr>
       <tr>
-        <th>packetLoss</th>
-        <td>{videoStats?.packetLoss ?? NaN.toString()}</td>
-        <td>{audioStats?.packetLoss ?? NaN.toString()}</td>
+        <th>roundTripTime [s]</th>
+        <td>{decimal3FractionFormatter.format(videoStats?.roundTripTime ?? NaN).toString()}</td>
+        <td>{decimal3FractionFormatter.format(audioStats?.roundTripTime ?? NaN).toString()}</td>
       </tr>
       <tr>
-        <th>frameRate</th>
+        <th>packetLoss [%]</th>
+        <td>{decimal3FractionFormatter.format(videoStats?.packetLoss ?? NaN).toString()}</td>
+        <td>{decimal3FractionFormatter.format(audioStats?.packetLoss ?? NaN).toString()}</td>
+      </tr>
+      <tr>
+        <th>frameRate [fps]</th>
         <td>{videoStats?.frameRate ?? NaN.toString()}</td>
         <td></td>
       </tr>
@@ -134,9 +184,14 @@ export const StatisticsLayer = ({ videoTrackId, audioTrackId }: Props) => {
         <td>{audioStats?.fec?.toString()}</td>
       </tr>
       <tr>
-        <th>max score</th>
-        <td>{maxScoreHighLayer}, {maxScoreMediumLayer}, {maxScoreLowLayer}</td>
-        <td>{maxAudioScore}</td>
+        <th>est. max score 1</th>
+        <td>{maxScore1HighLayer}, {maxScore1MediumLayer}, {maxScore1LowLayer}</td>
+        <td>{maxAudioScore1}</td>
+      </tr>
+      <tr>
+        <th>est. max score 2</th>
+        <td>{decimal2FractionFormatter.format(maxScore2HighLayer).toString()}, {decimal2FractionFormatter.format(maxScore2MediumLayer).toString()}, {decimal2FractionFormatter.format(maxScore2LowLayer).toString()}</td>
+        <td>{decimal2FractionFormatter.format(maxAudioScore2).toString()}</td>
       </tr>
       </tbody>
     </table>
