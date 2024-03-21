@@ -9,6 +9,7 @@ import { ClientEvents, UseCameraResult } from "@jellyfish-dev/react-client-sdk";
 import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
+import EmptyVideoWorker from "./emptyVideoWorker.ts?worker";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
@@ -30,7 +31,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const { init } = useSetupMedia({
     camera: {
       trackConstraints: VIDEO_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: { active: true, type: "camera" },
+      defaultTrackMetadata: undefined,
       broadcastOnConnect: false,
       broadcastOnDeviceStart: false,
       defaultSimulcastConfig: {
@@ -60,46 +61,9 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   });
 
   const video = useCamera();
-  // const audio = useMicrophone();
-  // const screenShare = useScreenShare();
-
-  // const { video: blurVideo } = useBlur(video);
 
   const [blur, setBlur] = useState(false);
-  // const [prevStream, setPrevStream] = useState(video.stream);
   const processor = useRef<BlurProcessor | null>(null);
-  // const [, rerender] = useReducer((p) => p + 1, 0);
-
-
-  // useEffect(() => {
-  //   if (!video.stream) {
-  //     if (processor.current) {
-  //       processor.current.destroy();
-  //       processor.current = null;
-  //       setPrevStream(null);
-  //     }
-  //     return;
-  //   }
-  //   if (!blur) return;
-  //
-  //   if (prevStream === video.stream) return;
-  //   setPrevStream(video.stream);
-  //   processor.current = new BlurProcessor(video.stream);
-  //
-  //   return () => {
-  //     processor.current?.destroy();
-  //     processor.current = null;
-  //     setPrevStream(null);
-  //   };
-  // }, [video.stream, blur]);
-
-  // const stream = processor.current?.stream ?? null;
-  // const track = processor.current?.track ?? null;
-  //
-
-  // todo remove
-  // const isConnected = useStatus() === "joined";
-  // moze to musi być ref?
 
   const client = useClient();
 
@@ -112,12 +76,15 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const streamRef = useRef<MediaStream | null>(null);
   const [track, setTrack] = useState<MediaStreamTrack | null>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
+  const workerRef = useRef<Worker | null>(null);
+  const blackCanvasStreamRef = useRef<MediaStream | null>(null);
+  const offscreenCanvasRef = useRef<OffscreenCanvas | null>(null);
   const remoteTrackIdRef = useRef<string | null>(null);
 
   const broadcastedStreamRef = useRef<MediaStream | null>(null);
 
-  const changeMediaStream = useCallback(async (stream: MediaStream | null, track: MediaStreamTrack | null, blur: boolean) => {
-    console.log({ name: "changeMediaStream1", stream, track });
+  const changeMediaStream = useCallback(async (stream: MediaStream | null, track: MediaStreamTrack | null, blur: boolean, metadataActive: boolean) => {
+    console.log({ name: "changeMediaStream1", stream, track, metadataActive });
     if (processor.current) {
       processor.current.destroy();
       processor.current = null;
@@ -157,25 +124,28 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
           track,
           mediaStream,
           // todo think about track.enabled
-          { active: track.enabled, type: "camera" },
+          { active: metadataActive, type: "camera" },
           simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
           selectBandwidthLimit("camera", simulcastEnabled)
         );
       } else if (remoteTrackIdRef.current && trackRef.current) {
-        // replace track
         console.log({ name: "Replacing track", stream: streamRef.current, track: trackRef.current });
 
         // todo add setter as an alternative to setting whole object
         broadcastedStreamRef.current?.removeTrack(broadcastedStreamRef.current?.getVideoTracks()[0]);
         broadcastedStreamRef.current?.addTrack(trackRef.current);
 
+        // todo when you replaceTrack this not affects stream so local peer don't know that something changes
+        const newMetadata: TrackMetadata = { active: metadataActive, type: "camera" };
 
-        // todo when you replaceTrack this not affects stream so local peer don't know that something changesls
-        await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, { active: true, type: "camera" });
+        console.log({ newMetadata });
+
+        await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, newMetadata);
+        // todo ...
+        // await client.updateTrackMetadata(remoteTrackIdRef.current, newMetadata);
       } else if (remoteTrackIdRef.current && !stream) {
         console.log("Removing track");
         await client.removeTrack(remoteTrackIdRef.current);
-        // remove track
       }
     }
   }, [setStream, setTrack]);
@@ -187,8 +157,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       setStream(() => event.video?.media?.stream || null);
       setTrack(() => event.video?.media?.track || null);
 
-      trackRef.current = event.video?.media?.track || null
-      streamRef.current = event.video?.media?.stream || null
+      trackRef.current = event.video?.media?.track || null;
+      streamRef.current = event.video?.media?.stream || null;
     };
 
 
@@ -199,7 +169,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       if (stream && track) {
         console.log({ name: "joinedHandler", stream, track });
 
-        await changeMediaStream(stream, track, blur);
+        await changeMediaStream(stream, track, blur, track.enabled);
       }
     };
 
@@ -207,6 +177,14 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       const snapshot = client.getSnapshot();
 
       console.log({ name: "deviceReady", event, client, snapshot });
+
+      const stream = snapshot?.media?.video?.media?.stream;
+      const track = snapshot?.media?.video?.media?.track;
+
+      if (snapshot.status === "joined" && event.type === "video" && remoteTrackIdRef.current && stream && track) {
+        workerRef.current?.postMessage({ action: "stop" }, []); // todo what is the second parameter
+        await changeMediaStream(stream, track, blurRef.current, track.enabled);
+      }
     };
 
     const devicesReady: ClientEvents<PeerMetadata, TrackMetadata>["devicesReady"] = async (event, client) => {
@@ -215,61 +193,83 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       console.log({ name: "devicesReady", event, client, snapshot });
 
       if (event.video.restarted && event.video?.media?.stream) {
-        await changeMediaStream(event.video?.media?.stream || null, event.video?.media?.track || null, blurRef.current);
+        await changeMediaStream(event.video?.media?.stream || null, event.video?.media?.track || null, blurRef.current, !!track?.enabled);
       }
     };
 
+    const deviceStopped: ClientEvents<PeerMetadata, TrackMetadata>["deviceStopped"] = async (event, client) => {
+      const snapshot = client.getSnapshot();
+
+      console.log({ name: "deviceStopped", event, client, snapshot });
+
+      if (snapshot.status === "joined" && event.type === "video" && trackRef.current && remoteTrackIdRef.current) {
+        if (!workerRef.current) {
+          workerRef.current = new EmptyVideoWorker();
+          const canvasElement = document.createElement("canvas");
+
+          offscreenCanvasRef.current = canvasElement.transferControlToOffscreen();
+
+          const worker = workerRef.current;
+          if(!worker) throw Error("Worker is null");
+
+          const offscreenCanvas = offscreenCanvasRef.current
+          if(!offscreenCanvas) throw Error("OffscreenCanvas is null");
+
+          worker.postMessage({
+            action: "init",
+            canvas: offscreenCanvas
+          }, [offscreenCanvas]);
+
+          blackCanvasStreamRef.current = canvasElement.captureStream(24);
+        }
+
+        const worker = workerRef.current;
+        const offscreenCanvas = offscreenCanvasRef.current
+        const stream = blackCanvasStreamRef.current;
+
+        if(!worker) throw Error("Worker is null");
+        if(!offscreenCanvas) throw Error("OffscreenCanvas is null");
+        if (!stream) throw Error("Worker stream is null");
+
+        worker.postMessage({
+          action: "start",
+        }, []);
+
+        await changeMediaStream(stream, stream.getVideoTracks()[0], false, false);
+      }
+    };
+
+    const localTrackMetadataChanged: ClientEvents<PeerMetadata, TrackMetadata>["localTrackMetadataChanged"] = async (event, client) => {
+      const snapshot = client.getSnapshot();
+
+      console.log({ name: "localTrackMetadataChanged", event, client, snapshot });
+    };
+
+
     client.on("joined", joinedHandler);
+    client.on("localTrackMetadataChanged", localTrackMetadataChanged);
     client.on("managerInitialized", managerInitialized);
     client.on("deviceReady", deviceReady);
     client.on("devicesReady", devicesReady);
+    client.on("deviceStopped", deviceStopped);
 
     return () => {
       client.removeListener("joined", joinedHandler);
+      client.removeListener("localTrackMetadataChanged", localTrackMetadataChanged);
       client.removeListener("managerInitialized", managerInitialized);
       client.removeListener("deviceReady", deviceReady);
       client.removeListener("devicesReady", devicesReady);
+      client.removeListener("deviceStopped", deviceStopped);
     };
   }, [simulcast.status]);
 
   const applyNewSettings = useCallback(async (newBlurValue: boolean, restart: boolean) => {
     console.log({ name: "applyNewSettings", newBlurValue, stream, track });
 
-    // setBlur(newBlurValue);
-
     if (restart) {
-      await changeMediaStream(video.stream, video.track, newBlurValue);
+      await changeMediaStream(video.stream, video.track, newBlurValue, !!video.track?.enabled);
     }
     blurRef.current = newBlurValue;
-
-    // if (stream && track && newBlurValue) {
-    //   if (processor.current) {
-    //     processor.current.destroy();
-    //     processor.current = null;
-    //   }
-    //
-    //   processor.current = new BlurProcessor(stream);
-    //   setStream(processor.current?.stream);
-    //   setTrack(processor.current?.track);
-    // } else if (!newBlurValue) {
-    //   if (processor.current) {
-    //     processor.current.destroy();
-    //     processor.current = null;
-    //   }
-    //   const snapshot = client.getSnapshot();
-    //   console.log({ newBlurValue, snapshot });
-    //
-    //   const localVideoStream = snapshot.media?.video?.media?.stream;
-    //   const localVideoTrack = snapshot.media?.video?.media?.track;
-    //
-    //   if (localVideoStream && localVideoTrack) {
-    //     setStream(localVideoStream);
-    //     setTrack(localVideoTrack);
-    //   } else {
-    //     setStream(null);
-    //     setTrack(null);
-    //   }
-    // }
   }, [setBlur, stream, track, video]);
 
   const noop: () => Promise<any> = useCallback((..._args) => Promise.resolve(), []);

@@ -43,18 +43,19 @@ const getAutomaticControls = (
   camera: UseCameraResult<TrackMetadata>,
   client: Client<PeerMetadata, TrackMetadata>
 ): ControlButton[] => [
-  camera.enabled
+  camera.stream
     ? {
       id: "cam-off",
       icon: Camera,
       hover: "Turn off the camera",
       buttonClassName: neutralButtonStyle,
       onClick: () => {
-        if (camera.broadcast?.trackId && camera.broadcast.metadata) {
-          const prevMetadata = camera.broadcast.metadata;
-          camera.setEnable(false);
-          client.updateTrackMetadata(camera.broadcast?.trackId, { ...prevMetadata, active: false });
-        }
+        // if (camera.broadcast?.trackId && camera.broadcast.metadata) {
+        // const prevMetadata = camera.broadcast.metadata;
+        // camera.setEnable(false);
+        // client.updateTrackMetadata(camera.broadcast?.trackId, { ...prevMetadata, active: false });
+        // }
+        camera.stop();
       }
     }
     : {
@@ -63,15 +64,15 @@ const getAutomaticControls = (
       icon: CameraOff,
       buttonClassName: activeButtonStyle,
       onClick: () => {
-        if (camera.stream) {
-          if (camera.broadcast?.trackId && camera.broadcast.metadata) {
-            const prevMetadata = camera.broadcast.metadata;
-            camera.setEnable(true);
-            client.updateTrackMetadata(camera.broadcast?.trackId, { ...prevMetadata, active: true });
-          }
-        } else {
-          camera.start();
-        }
+        // if (camera.stream) {
+        //   if (camera.broadcast?.trackId && camera.broadcast.metadata) {
+        //     // const prevMetadata = camera.broadcast.metadata;
+        //     // camera.setEnable(true);
+        //     // client.updateTrackMetadata(camera.broadcast?.trackId, { ...prevMetadata, active: true });
+        //   }
+        // } else {
+        camera.start();
+        // }
       }
     },
   microphone.enabled
