@@ -43,26 +43,10 @@ export const MediaSettingsModal: React.FC = () => {
       closable
       cancelClassName="!text-additional-red-100"
       onConfirm={() => {
-        console.log({ name: "clicked", videoInput, audioInput, blurInput });
-
-        // setBlur(blurInput, true);
-
-        // if (video.deviceInfo?.deviceId !== videoInput) {
-        // video.start(videoInput || undefined);
-        console.log({ name: "clicked - setBlur" });
         setBlur(blurInput, true);
-        // } else {
-        //   setBlur(blurInput, true);
-        // }
-
-        console.log("Restarting video");
         camera.start(videoInput || undefined);
-
-        // if (microphone.deviceInfo?.deviceId !== audioInput) {
         microphone.start(audioInput || undefined);
-        // }
         setOpen(false);
-        // setBlurInput(blurInput)
       }}
       onCancel={handleClose}
       maxWidth="max-w-md"

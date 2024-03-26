@@ -141,7 +141,6 @@ export const useMembraneCameraStreaming = (
   device: UseCameraResult<TrackMetadata>,
   isConnected: boolean
 ): MembraneStreaming => {
-  console.log({ device });
   const [trackIds, setTrackIds] = useState<TrackIds | null>(null);
 
   // const client = useClient();

@@ -50,11 +50,6 @@ const getAutomaticControls = (
       hover: "Turn off the camera",
       buttonClassName: neutralButtonStyle,
       onClick: () => {
-        // if (camera.broadcast?.trackId && camera.broadcast.metadata) {
-        // const prevMetadata = camera.broadcast.metadata;
-        // camera.setEnable(false);
-        // client.updateTrackMetadata(camera.broadcast?.trackId, { ...prevMetadata, active: false });
-        // }
         camera.stop();
       }
     }
@@ -64,29 +59,17 @@ const getAutomaticControls = (
       icon: CameraOff,
       buttonClassName: activeButtonStyle,
       onClick: () => {
-        // if (camera.stream) {
-        //   if (camera.broadcast?.trackId && camera.broadcast.metadata) {
-        //     // const prevMetadata = camera.broadcast.metadata;
-        //     // camera.setEnable(true);
-        //     // client.updateTrackMetadata(camera.broadcast?.trackId, { ...prevMetadata, active: true });
-        //   }
-        // } else {
         camera.start();
-        // }
       }
     },
-  microphone.enabled
+  microphone.stream
     ? {
       id: "mic-mute",
       icon: Microphone,
       hover: "Turn off the microphone",
       buttonClassName: neutralButtonStyle,
       onClick: () => {
-        if (microphone.broadcast?.trackId && microphone.broadcast.metadata) {
-          const prevMetadata = microphone.broadcast.metadata;
-          microphone.setEnable(false);
-          client.updateTrackMetadata(microphone.broadcast?.trackId, { ...prevMetadata, active: false });
-        }
+        microphone.stop();
       }
     }
     : {
@@ -95,15 +78,8 @@ const getAutomaticControls = (
       hover: "Turn on the microphone",
       buttonClassName: activeButtonStyle,
       onClick: () => {
-        if (microphone.stream) {
-          if (microphone.broadcast?.trackId && microphone.broadcast.metadata) {
-            const prevMetadata = microphone.broadcast.metadata;
-            microphone.setEnable(true);
-            client.updateTrackMetadata(microphone.broadcast?.trackId, { ...prevMetadata, active: true });
-          }
-        } else {
-          microphone.start();
-        }
+        // todo implement replace track
+        microphone.start();
       }
     },
   screenShare.enabled
@@ -147,6 +123,7 @@ const getAutomaticControls = (
           wasMicrophoneDisabled: !microphone.enabled
         }
       });
+      // client.disconnect()
     }
   }
 ];

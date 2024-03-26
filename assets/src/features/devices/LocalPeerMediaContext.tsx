@@ -10,6 +10,7 @@ import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
 import EmptyVideoWorker from "./emptyVideoWorker.ts?worker";
+import camera from "../room-page/icons/Camera.tsx";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
@@ -80,6 +81,11 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const blackCanvasStreamRef = useRef<MediaStream | null>(null);
   const offscreenCanvasRef = useRef<OffscreenCanvas | null>(null);
   const remoteTrackIdRef = useRef<string | null>(null);
+
+  // if user start or stop camera during it's decision is reflected in this variables
+  const cameraIntentionRef = useRef<boolean>(true);
+  const microphoneIntentionRef = useRef<boolean>(true);
+  const lastCameraIdRef = useRef<null | string>(null);
 
   const broadcastedStreamRef = useRef<MediaStream | null>(null);
 
@@ -166,10 +172,16 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       const stream = streamRef.current || null;
       const track = trackRef.current || null;
 
+      const snapshot = client.getSnapshot();
+
       if (stream && track) {
         console.log({ name: "joinedHandler", stream, track });
 
-        await changeMediaStream(stream, track, blur, track.enabled);
+        await changeMediaStream(stream, track, blur, !!snapshot.media?.video?.media?.stream);
+      } else if (cameraIntentionRef.current && lastCameraIdRef.current) {
+        // todo:
+        //  we need another method that starts the last stopped one
+        await snapshot.deviceManager.start({ videoDeviceId: lastCameraIdRef.current });
       }
     };
 
@@ -177,6 +189,14 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       const snapshot = client.getSnapshot();
 
       console.log({ name: "deviceReady", event, client, snapshot });
+
+      if (event.type === "video" && snapshot.media?.video?.media?.deviceInfo?.deviceId) {
+        cameraIntentionRef.current = true;
+        lastCameraIdRef.current = snapshot.media?.video?.media?.deviceInfo?.deviceId;
+      }
+      if (event.type === "audio") {
+        microphoneIntentionRef.current = true;
+      }
 
       const stream = snapshot?.media?.video?.media?.stream;
       const track = snapshot?.media?.video?.media?.track;
@@ -192,6 +212,13 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
       console.log({ name: "devicesReady", event, client, snapshot });
 
+      // if (event.video.restarted === "video") {
+      //   cameraIntentionRef.current = false
+      // }
+      // if (event.type === "audio") {
+      //   microphoneIntentionRef.current = false
+      // }
+
       if (event.video.restarted && event.video?.media?.stream) {
         await changeMediaStream(event.video?.media?.stream || null, event.video?.media?.track || null, blurRef.current, !!track?.enabled);
       }
@@ -201,6 +228,12 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       const snapshot = client.getSnapshot();
 
       console.log({ name: "deviceStopped", event, client, snapshot });
+      if (event.type === "video") {
+        cameraIntentionRef.current = false;
+      }
+      if (event.type === "audio") {
+        microphoneIntentionRef.current = false;
+      }
 
       if (snapshot.status === "joined" && event.type === "video" && trackRef.current && remoteTrackIdRef.current) {
         if (!workerRef.current) {
@@ -210,10 +243,10 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
           offscreenCanvasRef.current = canvasElement.transferControlToOffscreen();
 
           const worker = workerRef.current;
-          if(!worker) throw Error("Worker is null");
+          if (!worker) throw Error("Worker is null");
 
-          const offscreenCanvas = offscreenCanvasRef.current
-          if(!offscreenCanvas) throw Error("OffscreenCanvas is null");
+          const offscreenCanvas = offscreenCanvasRef.current;
+          if (!offscreenCanvas) throw Error("OffscreenCanvas is null");
 
           worker.postMessage({
             action: "init",
@@ -224,15 +257,15 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         }
 
         const worker = workerRef.current;
-        const offscreenCanvas = offscreenCanvasRef.current
+        const offscreenCanvas = offscreenCanvasRef.current;
         const stream = blackCanvasStreamRef.current;
 
-        if(!worker) throw Error("Worker is null");
-        if(!offscreenCanvas) throw Error("OffscreenCanvas is null");
+        if (!worker) throw Error("Worker is null");
+        if (!offscreenCanvas) throw Error("OffscreenCanvas is null");
         if (!stream) throw Error("Worker stream is null");
 
         worker.postMessage({
-          action: "start",
+          action: "start"
         }, []);
 
         await changeMediaStream(stream, stream.getVideoTracks()[0], false, false);
@@ -245,6 +278,29 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       console.log({ name: "localTrackMetadataChanged", event, client, snapshot });
     };
 
+    const disconnectRequested: ClientEvents<PeerMetadata, TrackMetadata>["disconnectRequested"] = async (event, client) => {
+      const snapshot = client.getSnapshot();
+
+      console.log({ name: "disconnectRequested", event, client, snapshot });
+    };
+
+    const authSuccess: ClientEvents<PeerMetadata, TrackMetadata>["authSuccess"] = async (client) => {
+      console.log({ name: "socketOpen", client });
+    };
+
+    const socketOpen: ClientEvents<PeerMetadata, TrackMetadata>["socketOpen"] = async (client) => {
+      console.log({ name: "socketOpen", client });
+    };
+
+    const disconnected: ClientEvents<PeerMetadata, TrackMetadata>["disconnected"] = async (client) => {
+      const snapshot = client.getSnapshot();
+
+      console.log({ name: "disconnected", client, snapshot });
+      remoteTrackIdRef.current = null;
+
+      // await snapshot.deviceManager.stop("audio");
+      // await snapshot.deviceManager.stop("video");
+    };
 
     client.on("joined", joinedHandler);
     client.on("localTrackMetadataChanged", localTrackMetadataChanged);
@@ -252,6 +308,10 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     client.on("deviceReady", deviceReady);
     client.on("devicesReady", devicesReady);
     client.on("deviceStopped", deviceStopped);
+    client.on("disconnectRequested", disconnectRequested);
+    client.on("socketOpen", socketOpen);
+    client.on("authSuccess", authSuccess);
+    client.on("disconnected", disconnected);
 
     return () => {
       client.removeListener("joined", joinedHandler);
@@ -260,6 +320,10 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       client.removeListener("deviceReady", deviceReady);
       client.removeListener("devicesReady", devicesReady);
       client.removeListener("deviceStopped", deviceStopped);
+      client.removeListener("disconnectRequested", disconnectRequested);
+      client.removeListener("socketOpen", socketOpen);
+      client.removeListener("authSuccess", authSuccess);
+      client.removeListener("disconnected", disconnected);
     };
   }, [simulcast.status]);
 
@@ -292,9 +356,9 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     stop: video.stop
   }), [stream, track]);
 
-  useEffect(() => {
-    console.log({ video, newVideo });
-  }, [video, newVideo]);
+  // useEffect(() => {
+  //   console.log({ video, newVideo });
+  // }, [video, newVideo]);
 
   return (
     <LocalPeerMediaContext.Provider

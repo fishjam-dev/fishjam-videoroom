@@ -7,7 +7,7 @@ import { useAcquireWakeLockAutomatically } from "./hooks/useAcquireWakeLockAutom
 import clsx from "clsx";
 import RoomSidebar from "./RoomSidebar";
 // import { useConnect, useClient } from "../../jellyfish.types.ts";
-import { useClient } from "../../jellyfish.types.ts";
+import { useClient, useConnect } from "../../jellyfish.types.ts";
 import { useUser } from "../../contexts/UserContext";
 // import { getSignalingAddress } from "./consts";
 // import { getTokenAndAddress } from "../../room.api";
@@ -15,6 +15,8 @@ import { useUser } from "../../contexts/UserContext";
 import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 import { InboundRtpId, useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
 import { AudioStatsSchema, VideoStatsSchema } from "./components/StreamPlayer/rtcMosScore.ts";
+import { getTokenAndAddress } from "../../room.api.tsx";
+import { getSignalingAddress } from "./consts.ts";
 
 type ConnectComponentProps = {
   username: string;
@@ -25,12 +27,12 @@ type ConnectComponentProps = {
 
 const ConnectComponent: FC<ConnectComponentProps> = (
   {
-    // username,
-    // roomId,
+    username,
+    roomId,
     wasCameraDisabled
     // wasMicrophoneDisabled
   }) => {
-  // const connect = useConnect();
+  const connect = useConnect();
   // const streaming = useStreaming();
 
   const localPeer = useLocalPeer();
@@ -148,29 +150,37 @@ const ConnectComponent: FC<ConnectComponentProps> = (
     };
   }, [client]);
 
-  // useEffect(() => {
-  //   const disconnectCallback = getTokenAndAddress(roomId).then((tokenAndAddress) => {
-  //     return connect({
-  //       peerMetadata: { name: username },
-  //       token: tokenAndAddress.token,
-  //       signaling: getSignalingAddress(tokenAndAddress.serverAddress)
-  //     });
-  //   });
-  //
-  //   return () => {
-  //     streaming.camera.removeTracks();
-  //     streaming.microphone.removeTracks();
-  //     streaming.screenShare.removeTracks();
-  //     const { video, audio, screenShare } = localPeerRef.current;
-  //     video.stop();
-  //     audio.stop();
-  //     screenShare.stop();
-  //     disconnectCallback.then((disconnect) => {
-  //       disconnect();
-  //     });
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  useEffect(() => {
+    console.log("Before connect");
+    const disconnectCallback = getTokenAndAddress(roomId)
+      .then((tokenAndAddress) => {
+
+        // todo make connect in membrane js idempotent
+        // because i get two connect event from this hook
+        return connect({
+          peerMetadata: { name: username },
+          token: tokenAndAddress.token,
+          signaling: getSignalingAddress(tokenAndAddress.serverAddress)
+        });
+      });
+
+    return () => {
+      console.log("Cleanup");
+      // streaming.camera.removeTracks();
+      // streaming.microphone.removeTracks();
+      // streaming.screenShare.removeTracks();
+      // const { video, audio, screenShare } = localPeerRef.current;
+      // video.stop();
+      // audio.stop();
+      // screenShare.stop();
+
+      // old code
+      disconnectCallback.then((disconnect) => {
+        disconnect();
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <></>;
 };

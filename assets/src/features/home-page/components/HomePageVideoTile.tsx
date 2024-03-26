@@ -8,18 +8,17 @@ import Microphone from "../../room-page/icons/Microphone";
 import MicrophoneOff from "../../room-page/icons/MicrophoneOff";
 import Settings from "../../room-page/icons/Settings";
 import { useModal } from "../../../contexts/ModalContext";
-import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
 import GenericMediaPlayerTile from "../../../pages/room/components/StreamPlayer/GenericMediaPlayerTile";
-import { useMicrophone } from "../../../jellyfish.types.ts";
+import { useCamera, useMicrophone } from "../../../jellyfish.types.ts";
 
 type HomePageVideoTileProps = {
   displayName: string;
 };
 
 const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
-  const {  video } = useLocalPeer();
-  const microphone = useMicrophone()
-
+  const microphone = useMicrophone();
+  // todo add loading to device manager
+  const video = useCamera();
   const initials = computeInitials(displayName);
   const { setOpen } = useModal();
 
@@ -33,7 +32,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
           <>
             {!video.enabled ? <InitialsImage initials={initials} /> : null}
             <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-x-4">
-              {video.enabled ? (
+              {video.stream ? (
                 <MediaControlButton
                   icon={Camera}
                   hover="Turn off the camera"
@@ -48,11 +47,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the camera"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    if (video.stream) {
-                      video.setEnable(true);
-                    } else {
-                      video.start();
-                    }
+                    video.start();
                   }}
                 />
               )}
@@ -71,11 +66,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the microphone"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    if (microphone.stream) {
-                      microphone.setEnable(true);
-                    } else {
-                      microphone.start();
-                    }
+                    microphone.start();
                   }}
                 />
               )}

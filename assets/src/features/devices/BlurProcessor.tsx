@@ -230,7 +230,6 @@ export class BlurProcessor {
   }
 
   destroy() {
-    console.log("destroying")
     document.removeEventListener("visibilitychange", this.visibilityListener);
     this.worker.terminate();
     this.track.stop();

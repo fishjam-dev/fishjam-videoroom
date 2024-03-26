@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo } from "react";
+import { FC, useMemo } from "react";
 
 import { ApiTrack, RemotePeer } from "./hooks/usePeerState";
 import { LOCAL_PEER_NAME, LOCAL_SCREEN_SHARING_ID, LOCAL_VIDEO_ID } from "./consts";
@@ -100,12 +100,8 @@ const prepareScreenSharingStreams = (
 
 export const VideochatSection: FC<Props> = ({ showSimulcast, unpinnedTilesHorizontal }: Props) => {
   const video = useSelector((state) => toLocalTrackSelector(state, "camera"));
-
-  useEffect(() => {
-    console.log({ name: "localUserTracks", video });
-  }, [video]);
-
   const audio = useSelector((state) => toLocalTrackSelector(state, "audio"));
+
   const screenSharing = useSelector((state) => toLocalTrackSelector(state, "screensharing"));
   const { peerId, initials } = useSelector((state) => ({
     peerId: state?.local?.id || "Unknown",
@@ -145,11 +141,6 @@ export const VideochatSection: FC<Props> = ({ showSimulcast, unpinnedTilesHorizo
     }),
     [pinnedTilesIds, unpinnedTilesIds, allTilesConfig]
   );
-
-  console.log({
-    pinnedTiles,
-    unpinnedTiles
-  });
 
   const wrapperClass = useMemo(() => {
     const areAllTilesPinned = !pinningFlags.isAnyUnpinned;
