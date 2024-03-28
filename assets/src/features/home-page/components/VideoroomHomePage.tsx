@@ -4,7 +4,7 @@ import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext";
 import { useUser } from "../../../contexts/UserContext";
 import {
   DEFAULT_MANUAL_MODE_CHECKBOX_VALUE,
-  DEFAULT_SMART_LAYER_SWITCHING_CHECKBOX_VALUE
+  DEFAULT_SMART_LAYER_SWITCHING_CHECKBOX_VALUE, getSignalingAddress
 } from "../../../pages/room/consts";
 import { useToggle } from "../../../pages/room/hooks/useToggle";
 import Button from "../../shared/components/Button";
@@ -15,7 +15,9 @@ import HomePageLayout from "./HomePageLayout";
 
 import HomePageVideoTile from "./HomePageVideoTile";
 import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
-import { useClient, useMicrophone } from "../../../jellyfish.types.ts";
+import { useClient, useConnect, useMicrophone } from "../../../jellyfish.types.ts";
+import { getTokenAndAddress } from "../../../room.api.tsx";
+
 
 const VideoroomHomePage: FC = () => {
   const lastDisplayName: string | null = localStorage.getItem("displayName");
@@ -78,18 +80,18 @@ const VideoroomHomePage: FC = () => {
   //   }
   // }, [microphone.stream, video.stream]);
 
-  // const connect = useConnect();
+  const connect = useConnect();
 
   const onJoin = useCallback((e: SyntheticEvent) => {
     e.preventDefault();
 
-    // getTokenAndAddress(roomId).then((tokenAndAddress) => {
-    //   return connect({
-    //     peerMetadata: { name: displayNameInput },
-    //     token: tokenAndAddress.token,
-    //     signaling: getSignalingAddress(tokenAndAddress.serverAddress)
-    //   });
-    // });
+    getTokenAndAddress(roomId).then((tokenAndAddress) => {
+      return connect({
+        peerMetadata: { name: displayNameInput },
+        token: tokenAndAddress.token,
+        signaling: getSignalingAddress(tokenAndAddress.serverAddress)
+      });
+    });
 
 
     localStorage.setItem("displayName", displayNameInput);

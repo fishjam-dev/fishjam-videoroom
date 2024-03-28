@@ -27,12 +27,12 @@ type ConnectComponentProps = {
 
 const ConnectComponent: FC<ConnectComponentProps> = (
   {
-    username,
-    roomId,
+    // username,
+    // roomId,
     wasCameraDisabled
     // wasMicrophoneDisabled
   }) => {
-  const connect = useConnect();
+  // const connect = useConnect();
   // const streaming = useStreaming();
 
   const localPeer = useLocalPeer();
@@ -53,7 +53,11 @@ const ConnectComponent: FC<ConnectComponentProps> = (
   let intervalId: NodeJS.Timer | null = null;
 
   useEffect(() => {
+    console.log("Setup join callback");
+
     const callback = () => {
+      console.log("joined callback!");
+
       let prevTime: number = 0;
       let lastInbound: Record<InboundRtpId, any> | null = null;
 
@@ -144,43 +148,55 @@ const ConnectComponent: FC<ConnectComponentProps> = (
 
     client?.on("joined", callback);
 
+    // const disconnectedCallback = () => {
+    //   console.log("disconnected callback");
+    // };
+    // client?.on("disconnected", disconnectedCallback);
+
+    window["ws-close"] = () => {
+      console.log("Call websocket.client.close()");
+      client["client"]["websocket"].close();
+    };
+
     return () => {
+      console.log("Remove join callback");
+
       client?.removeListener("joined", callback);
       intervalId && clearInterval(intervalId);
     };
   }, [client]);
 
-  useEffect(() => {
-    console.log("Before connect");
-    const disconnectCallback = getTokenAndAddress(roomId)
-      .then((tokenAndAddress) => {
-
-        // todo make connect in membrane js idempotent
-        // because i get two connect event from this hook
-        return connect({
-          peerMetadata: { name: username },
-          token: tokenAndAddress.token,
-          signaling: getSignalingAddress(tokenAndAddress.serverAddress)
-        });
-      });
-
-    return () => {
-      console.log("Cleanup");
-      // streaming.camera.removeTracks();
-      // streaming.microphone.removeTracks();
-      // streaming.screenShare.removeTracks();
-      // const { video, audio, screenShare } = localPeerRef.current;
-      // video.stop();
-      // audio.stop();
-      // screenShare.stop();
-
-      // old code
-      disconnectCallback.then((disconnect) => {
-        disconnect();
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   console.log("Before connect");
+  //   const disconnectCallback = getTokenAndAddress(roomId)
+  //     .then((tokenAndAddress) => {
+  //
+  //       // todo make connect in membrane js idempotent
+  //       // because i get two connect event from this hook
+  //       return connect({
+  //         peerMetadata: { name: username },
+  //         token: tokenAndAddress.token,
+  //         signaling: getSignalingAddress(tokenAndAddress.serverAddress)
+  //       });
+  //     });
+  //
+  //   return () => {
+  //     console.log("Cleanup");
+  //     // streaming.camera.removeTracks();
+  //     // streaming.microphone.removeTracks();
+  //     // streaming.screenShare.removeTracks();
+  //     // const { video, audio, screenShare } = localPeerRef.current;
+  //     // video.stop();
+  //     // audio.stop();
+  //     // screenShare.stop();
+  //
+  //     // old code
+  //     disconnectCallback.then((disconnect) => {
+  //       disconnect();
+  //     });
+  //   };
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   return <></>;
 };
@@ -253,6 +269,12 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
           <button onClick={() => {
             console.log(client.getSnapshot());
           }}>Show state
+          </button>
+
+          <button onClick={() => {
+            console.log("Closing websocket");
+            window["ws-close"]();
+          }}>Close socket
           </button>
         </div>
       </div>

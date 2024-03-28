@@ -123,7 +123,7 @@ const getAutomaticControls = (
           wasMicrophoneDisabled: !microphone.enabled
         }
       });
-      // client.disconnect()
+      client.disconnect()
     }
   }
 ];
@@ -374,6 +374,7 @@ const getManualControls = (
         hover: "Leave the room",
         buttonClassName: redButtonStyle,
         onClick: () => {
+          client.disconnect()
           navigate(`/room/${roomId}`, { state: { isLeavingRoom: true } });
         }
       }
