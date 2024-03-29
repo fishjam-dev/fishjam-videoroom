@@ -7,7 +7,7 @@ defmodule Videoroom.Meeting do
   require Logger
 
   alias Jellyfish.Room
-  alias Jellyfish.Notification.{PeerConnected, PeerCrashed, PeerDisconnected, RoomCrashed}
+  alias Jellyfish.Notification.{PeerConnected, PeerCrashed, RoomCrashed}
 
   alias Videoroom.RoomRegistry
 
@@ -144,7 +144,7 @@ defmodule Videoroom.Meeting do
   end
 
   defp handle_notification(%type{peer_id: peer_id}, state)
-       when type in [PeerDisconnected, PeerCrashed] do
+       when type in [PeerCrashed] do
     delete_peer(peer_id, state)
   end
 
