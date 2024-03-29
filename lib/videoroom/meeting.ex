@@ -138,7 +138,7 @@ defmodule Videoroom.Meeting do
   defp handle_notification(%PeerConnected{peer_id: peer_id}, state) do
     {timer, peer_timers} = Map.get_and_update(state.peer_timers, peer_id, fn p -> {p, nil} end)
 
-    Process.cancel_timer(timer)
+    unless is_nil(timer), do: Process.cancel_timer(timer)
 
     {:noreply, %{state | peer_timers: peer_timers}}
   end
