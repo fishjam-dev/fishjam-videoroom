@@ -24,6 +24,7 @@ export const {
   useSelector,
   useStatus,
   useConnect,
+  useDisconnect,
   useSetupMedia,
   useCamera,
   useMicrophone,
@@ -38,7 +39,7 @@ export const {
     maxAttempts: 1,
     delay: 5
   }
-});
+}, { storage: true });
 
 export const useClient = (): Client<PeerMetadata, TrackMetadata> =>
   useSelector((s) => s.client);

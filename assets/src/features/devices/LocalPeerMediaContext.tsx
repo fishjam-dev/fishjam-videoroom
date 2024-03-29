@@ -10,7 +10,6 @@ import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
 import EmptyVideoWorker from "./emptyVideoWorker.ts?worker";
-import camera from "../room-page/icons/Camera.tsx";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
