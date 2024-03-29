@@ -11,6 +11,8 @@ import MediaControlButton from "../../../pages/room/components/MediaControlButto
 import { useModal } from "../../../contexts/ModalContext";
 import useSmartphoneViewport from "../../shared/hooks/useSmartphoneViewport";
 
+const showSettingsButton = false;
+
 const Navbar: FC = () => {
   const match = useParams();
   const currentUrl = window.location.href;
@@ -52,7 +54,7 @@ const Navbar: FC = () => {
             </Button>
           </>
         )}
-        <MediaControlButton
+        {showSettingsButton && <MediaControlButton
           icon={Settings}
           hover="Settings"
           buttonClassName="!border !border-brand-dark-blue-200 "
@@ -62,7 +64,7 @@ const Navbar: FC = () => {
           variant="light"
           position="bottom"
           hoverClassName="-ml-10"
-        />
+        />}
       </div>
     </div>
   );
