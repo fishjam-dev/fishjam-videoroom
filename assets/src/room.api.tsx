@@ -14,3 +14,6 @@ export const getTokenAndAddress = (roomId: string) =>
     const token = resp?.data?.data?.token || "";
     return { token: token, serverAddress: address };
   });
+
+export const startRecording = (roomId: string) =>
+  API.videoroomWebRoomControllerStartRecording(roomId);

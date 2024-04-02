@@ -59,6 +59,23 @@ if config_env() == :prod do
 
   secure_connection? = System.get_env("BE_JF_SECURE_CONNECTION", "false") == "true"
 
+  s3_access_key_id = System.get_env("BE_S3_ACCESS_KEY_ID")
+  s3_secret_access_key = System.get_env("BE_S3_SECRET_ACCESS_KEY")
+  s3_region = System.get_env("BE_S3_REGION")
+  s3_bucket = System.get_env("BE_S3_BUCKET")
+
+  s3_credentials =
+    if s3_access_key_id && s3_secret_access_key && s3_region && s3_bucket do
+      %{
+        access_key_id: s3_access_key_id,
+        secret_access_key: s3_secret_access_key,
+        region: s3_region,
+        bucket: s3_bucket
+      }
+    else
+      nil
+    end
+
   config :jellyfish_server_sdk,
     secure?: secure_connection?,
     server_api_token:
@@ -69,7 +86,8 @@ if config_env() == :prod do
 
   config :videoroom,
     peer_join_timeout: String.to_integer(System.get_env("BE_PEER_JOIN_TIMEOUT") || "60000"),
-    jellyfish_addresses: jellyfish_addresses
+    jellyfish_addresses: jellyfish_addresses,
+    s3_credentials: s3_credentials
 
   # ## SSL Support
   #

@@ -21,6 +21,12 @@ defmodule Videoroom.RoomService do
     GenServer.call(__MODULE__, {:add_peer, meeting_name})
   end
 
+  # start recording
+  @spec start_recording(Meeting.name()) :: :ok | {:error, binary()}
+  def start_recording(meeting_name) do
+    GenServer.call(__MODULE__, {:start_recording, meeting_name})
+  end
+
   @impl true
   def init(_init_arg) do
     {:ok, supervisor} = DynamicSupervisor.start_link([])
@@ -71,6 +77,11 @@ defmodule Videoroom.RoomService do
     end
 
     {:reply, Meeting.add_peer(room_name), state}
+  end
+
+  @impl true
+  def handle_call({:start_recording, room_name}, _from, state) do
+    {:reply, Meeting.start_recording(room_name), state}
   end
 
   @impl true

@@ -63,7 +63,7 @@ export const toLocalTrackSelector = (state: State<PeerMetadata, TrackMetadata>, 
     })[0] || null;
 
 export const toRemotePeerSelector = (state: State<PeerMetadata, TrackMetadata>): RemotePeer[] => {
-  return toPairs(state?.remote || {}).map(([peerId, peer]) => {
+  return toPairs(state?.remote || {}).filter(([, peer]) => (peer as unknown as { type: string}).type === "webrtc").map(([peerId, peer]) => {
     const tracks: ApiTrack[] = toPairs(peer.tracks || {}).map(([trackId, track]) => {
       return {
         trackId,
