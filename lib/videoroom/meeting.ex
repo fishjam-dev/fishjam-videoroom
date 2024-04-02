@@ -6,9 +6,9 @@ defmodule Videoroom.Meeting do
 
   require Logger
 
+  alias Jellyfish.Component
   alias Jellyfish.Room
   alias Jellyfish.Notification.{PeerConnected, PeerCrashed, PeerDisconnected, RoomCrashed}
-  alias Jellyfish.Component
 
   alias Videoroom.RoomRegistry
 
