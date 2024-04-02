@@ -3,6 +3,7 @@ defmodule Videoroom.RoomService do
   use GenServer
 
   require Logger
+  alias Jellyfish.Component
   alias Jellyfish.WSNotifier
 
   alias Videoroom.Meeting
@@ -22,7 +23,7 @@ defmodule Videoroom.RoomService do
   end
 
   # start recording
-  @spec start_recording(Meeting.name()) :: :ok | {:error, binary()}
+  @spec start_recording(Meeting.name()) :: {:ok, Component.Recording.t()} | {:error, binary()}
   def start_recording(meeting_name) do
     GenServer.call(__MODULE__, {:start_recording, meeting_name})
   end
