@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PeerMetadata, TrackMetadata, useClient } from "../../../jellyfish.types.ts";
+import { TrackMetadata, useClient } from "../../../jellyfish.types.ts";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext.tsx";
 import { selectBandwidthLimit } from "../bandwidth.tsx";
 import {
-  ClientEvents,
   UseCameraResult,
   UseMicrophoneResult,
   UseScreenShareResult
@@ -175,7 +174,7 @@ export const useMembraneCameraStreaming = (
   const [trackMetadata, setTrackMetadata] = useState<TrackMetadata | null>(null);
 
   const addTracks = useCallback(async () => {
-  //   if (!device.track || !device.stream) return;
+    //   if (!device.track || !device.stream) return;
     // const remoteId = await client.addTrack(
     //   device.track,
     //   device.stream,
@@ -189,7 +188,7 @@ export const useMembraneCameraStreaming = (
     //   remoteId
     // });
     // }, [client, device.addTrack, defaultTrackMetadata, simulcastEnabled]);
-  // }, [device.addTrack, defaultTrackMetadata, simulcastEnabled]);
+    // }, [device.addTrack, defaultTrackMetadata, simulcastEnabled]);
   }, [device.addTrack, simulcastEnabled]);
 
   const replaceTrack = useCallback(async () => {
@@ -251,11 +250,11 @@ export const useMembraneCameraStreaming = (
 
   const setActive = useCallback(
     (_status: boolean) => {
-    //   if (trackMetadata) {
-    //     updateTrackMetadata({ ...trackMetadata, active: status });
-    //   } else {
-    //     throw Error("Track metadata is null!");
-    //   }
+      //   if (trackMetadata) {
+      //     updateTrackMetadata({ ...trackMetadata, active: status });
+      //   } else {
+      //     throw Error("Track metadata is null!");
+      //   }
     },
     []
   );

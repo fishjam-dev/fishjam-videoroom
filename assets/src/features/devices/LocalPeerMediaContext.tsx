@@ -92,24 +92,46 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const broadcastedStreamRef = useRef<MediaStream | null>(null);
 
   const changeMediaStream = useCallback(async (stream: MediaStream | null, track: MediaStreamTrack | null, blur: boolean, metadataActive: boolean) => {
-    console.log({ name: "changeMediaStream1", stream, track, metadataActive });
+    console.log({ name: "changeMediaStream1", stream, track, metadataActive, blur });
 
     metadataActiveRef.current = metadataActive;
-    if (processor.current) {
+
+    // disable process if blur is false
+    if (processor.current && !blur) {
+
+      console.log({ workerJoinedHandlerInChangeMediaStream: workerRef.current });
+
+      console.log("Destroying processor")
       processor.current.destroy();
       processor.current = null;
     }
+
     console.log({ name: "changeMediaStream2", stream, track });
 
     if (blur && stream) {
-      console.log({ name: "blur true, start blur", blur, stream });
-      processor.current = new BlurProcessor(stream);
+      console.log({ name: "Handle blur", blur, stream });
+      if (processor.current && streamRef.current?.id === stream.id) {
+        // ignore
+        console.log("Ignoring blur");
 
-      setStream(processor.current?.stream);
-      setTrack(processor.current?.track);
+      } else {
+        // disable old and create new
+        console.log("Disabling old processor and creating new one");
 
-      streamRef.current = processor.current?.stream || null;
-      trackRef.current = processor.current?.track || null;
+        processor?.current?.destroy();
+        processor.current = null;
+
+
+        console.log({ name: "blur true, start blur", blur, stream });
+        processor.current = new BlurProcessor(stream);
+
+        setStream(processor.current?.stream);
+        setTrack(processor.current?.track);
+
+        streamRef.current = processor.current?.stream || null;
+        trackRef.current = processor.current?.track || null;
+      }
+
     } else {
       console.log({ name: "blur false", blur, stream });
 
@@ -170,7 +192,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       trackRef.current = event.video?.media?.track || null;
       streamRef.current = event.video?.media?.stream || null;
 
-      console.log({name: "Video stream id", streamId: stream?.id})
+      console.log({ name: "Video stream id", streamId: stream?.id });
     };
 
 
@@ -181,9 +203,10 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       const snapshot = client.getSnapshot();
 
       if (stream && track) {
+        console.log({ workerJoinedHandler: workerRef.current });
         console.log({ name: "joinedHandler", stream, track });
 
-        await changeMediaStream(stream, track, blur, !!snapshot.media?.video?.media?.stream);
+        await changeMediaStream(stream, track, blurRef.current, !!snapshot.media?.video?.media?.stream);
       } else if (cameraIntentionRef.current && lastCameraIdRef.current) {
         // todo:
         //  we need another method that starts the last stopped one
@@ -207,7 +230,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       const stream = snapshot?.media?.video?.media?.stream;
       const track = snapshot?.media?.video?.media?.track;
 
-      console.log({name: "Video stream id", streamId: stream?.id})
+      console.log({ name: "Video stream id", streamId: stream?.id });
 
       if (snapshot.status === "joined" && event.type === "video" && remoteTrackIdRef.current && stream && track) {
         workerRef.current?.postMessage({ action: "stop" }, []); // todo what is the second parameter
@@ -230,7 +253,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       if (event.video.restarted && event.video?.media?.stream) {
         console.log("Change blur!");
 
-        console.log({name: "Video stream id", streamId: event.video?.media?.stream?.id})
+        console.log({ name: "Video stream id", streamId: event.video?.media?.stream?.id });
         await changeMediaStream(event.video?.media?.stream || null, event.video?.media?.track || null, blurRef.current, !!track?.enabled);
       }
     };
@@ -379,14 +402,14 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       microphone.start(microphoneId);
     }
 
-    console.log({name: "Video stream id", streamId: stream?.id})
+    console.log({ name: "Video stream id", streamId: stream?.id });
 
     if (blurRef.current !== blur) {
       console.log("activate blur!");
       blurRef.current = blur;
 
       if (streamRef.current && trackRef.current) {
-        if(blur) {
+        if (blur) {
           await changeMediaStream(streamRef.current, trackRef.current, blurRef.current, metadataActiveRef.current);
         } else {
           await changeMediaStream(video.stream, video.track, blurRef.current, metadataActiveRef.current);
