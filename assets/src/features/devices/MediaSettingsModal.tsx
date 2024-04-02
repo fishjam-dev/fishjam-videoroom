@@ -8,7 +8,7 @@ import { useCamera, useMicrophone } from "../../jellyfish.types.ts";
 
 export const MediaSettingsModal: React.FC = () => {
   const { setOpen, isOpen } = useModal();
-  const { setBlur } = useLocalPeer();
+  const { setDevice } = useLocalPeer();
 
   const camera = useCamera();
   const microphone = useMicrophone();
@@ -43,9 +43,8 @@ export const MediaSettingsModal: React.FC = () => {
       closable
       cancelClassName="!text-additional-red-100"
       onConfirm={() => {
-        setBlur(blurInput, true);
-        camera.start(videoInput || undefined);
-        microphone.start(audioInput || undefined);
+        setDevice(videoInput, audioInput, blurInput);
+        console.log({ blurInput, videoInput, audioInput });
         setOpen(false);
       }}
       onCancel={handleClose}

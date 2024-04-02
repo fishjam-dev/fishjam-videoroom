@@ -4,7 +4,7 @@ import {
   SCREENSHARING_TRACK_CONSTRAINTS,
   VIDEO_TRACK_CONSTRAINTS
 } from "../../pages/room/consts";
-import { PeerMetadata, TrackMetadata, useCamera, useClient, useSetupMedia } from "../../jellyfish.types";
+import { PeerMetadata, TrackMetadata, useCamera, useClient, useMicrophone, useSetupMedia } from "../../jellyfish.types";
 import { ClientEvents, UseCameraResult } from "@jellyfish-dev/react-client-sdk";
 import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
@@ -19,6 +19,7 @@ export type LocalPeerContext = {
   init: () => void;
   blur: boolean;
   setBlur: (status: boolean, restart: boolean) => void;
+  setDevice: (cameraId: string | null, microphoneId: string | null, blur: boolean) => void;
 };
 
 const LocalPeerMediaContext = React.createContext<LocalPeerContext | undefined>(undefined);
@@ -74,6 +75,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   const [stream, setStream] = useState<MediaStream | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const metadataActiveRef = useRef<boolean>(true);
+
   const [track, setTrack] = useState<MediaStreamTrack | null>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
   const workerRef = useRef<Worker | null>(null);
@@ -90,6 +93,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   const changeMediaStream = useCallback(async (stream: MediaStream | null, track: MediaStreamTrack | null, blur: boolean, metadataActive: boolean) => {
     console.log({ name: "changeMediaStream1", stream, track, metadataActive });
+
+    metadataActiveRef.current = metadataActive;
     if (processor.current) {
       processor.current.destroy();
       processor.current = null;
@@ -164,6 +169,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
       trackRef.current = event.video?.media?.track || null;
       streamRef.current = event.video?.media?.stream || null;
+
+      console.log({name: "Video stream id", streamId: stream?.id})
     };
 
 
@@ -200,6 +207,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       const stream = snapshot?.media?.video?.media?.stream;
       const track = snapshot?.media?.video?.media?.track;
 
+      console.log({name: "Video stream id", streamId: stream?.id})
+
       if (snapshot.status === "joined" && event.type === "video" && remoteTrackIdRef.current && stream && track) {
         workerRef.current?.postMessage({ action: "stop" }, []); // todo what is the second parameter
         await changeMediaStream(stream, track, blurRef.current, track.enabled);
@@ -219,6 +228,9 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       // }
 
       if (event.video.restarted && event.video?.media?.stream) {
+        console.log("Change blur!");
+
+        console.log({name: "Video stream id", streamId: event.video?.media?.stream?.id})
         await changeMediaStream(event.video?.media?.stream || null, event.video?.media?.track || null, blurRef.current, !!track?.enabled);
       }
     };
@@ -359,6 +371,39 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   //   console.log({ video, newVideo });
   // }, [video, newVideo]);
 
+
+  const microphone = useMicrophone();
+
+  const setDevice = useCallback(async (cameraId: string | null, microphoneId: string | null, blur: boolean) => {
+    if (microphoneId) {
+      microphone.start(microphoneId);
+    }
+
+    console.log({name: "Video stream id", streamId: stream?.id})
+
+    if (blurRef.current !== blur) {
+      console.log("activate blur!");
+      blurRef.current = blur;
+
+      if (streamRef.current && trackRef.current) {
+        if(blur) {
+          await changeMediaStream(streamRef.current, trackRef.current, blurRef.current, metadataActiveRef.current);
+        } else {
+          await changeMediaStream(video.stream, video.track, blurRef.current, metadataActiveRef.current);
+        }
+      }
+    }
+
+    if (cameraId) {
+      video.start(cameraId);
+    }
+
+
+    // console.log({ cameraId, microphoneId, blur });
+
+    // changeMediaStream();
+  }, [video]);
+
   return (
     <LocalPeerMediaContext.Provider
       value={{
@@ -368,7 +413,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         // camera,
         init,
         blur,
-        setBlur: applyNewSettings
+        setBlur: applyNewSettings,
+        setDevice
       }}
     >
       {children}

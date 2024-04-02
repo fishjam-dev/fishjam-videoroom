@@ -9,7 +9,8 @@ import MicrophoneOff from "../../room-page/icons/MicrophoneOff";
 import Settings from "../../room-page/icons/Settings";
 import { useModal } from "../../../contexts/ModalContext";
 import GenericMediaPlayerTile from "../../../pages/room/components/StreamPlayer/GenericMediaPlayerTile";
-import { useCamera, useMicrophone } from "../../../jellyfish.types.ts";
+import { useMicrophone } from "../../../jellyfish.types.ts";
+import { useLocalPeer } from "../../devices/LocalPeerMediaContext.tsx";
 
 type HomePageVideoTileProps = {
   displayName: string;
@@ -18,7 +19,8 @@ type HomePageVideoTileProps = {
 const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
   const microphone = useMicrophone();
   // todo add loading to device manager
-  const video = useCamera();
+  // const video = useCamera();
+  const { video } = useLocalPeer()
   const initials = computeInitials(displayName);
   const { setOpen } = useModal();
 
