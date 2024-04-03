@@ -24,6 +24,7 @@ import {
   useScreenShare
 } from "../../../jellyfish.types.ts";
 import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult, Client } from "@jellyfish-dev/react-client-sdk";
+import { LocalPeerContext, useLocalPeer } from "../../../features/devices/LocalPeerMediaContext.tsx";
 
 type ControlButton = MediaControlButtonProps & { id: string };
 
@@ -41,6 +42,7 @@ const getAutomaticControls = (
   microphone: UseMicrophoneResult<TrackMetadata>,
   screenShare: UseScreenShareResult<TrackMetadata>,
   camera: UseCameraResult<TrackMetadata>,
+  localPeerContext: LocalPeerContext,
 ): ControlButton[] => [
   camera.stream
     ? {
@@ -49,7 +51,7 @@ const getAutomaticControls = (
       hover: "Turn off the camera",
       buttonClassName: neutralButtonStyle,
       onClick: () => {
-        camera.stop();
+        localPeerContext.toggleCamera(false)
       }
     }
     : {
@@ -58,7 +60,7 @@ const getAutomaticControls = (
       icon: CameraOff,
       buttonClassName: activeButtonStyle,
       onClick: () => {
-        camera.start();
+        localPeerContext.toggleCamera(true)
       }
     },
   microphone.stream
@@ -68,7 +70,7 @@ const getAutomaticControls = (
       hover: "Turn off the microphone",
       buttonClassName: neutralButtonStyle,
       onClick: () => {
-        microphone.stop();
+        localPeerContext.toggleCamera(false)
       }
     }
     : {
@@ -77,8 +79,8 @@ const getAutomaticControls = (
       hover: "Turn on the microphone",
       buttonClassName: activeButtonStyle,
       onClick: () => {
+        localPeerContext.toggleCamera(true)
         // todo implement replace track
-        microphone.start();
       }
     },
   screenShare.enabled
@@ -399,6 +401,8 @@ const MediaControlButtons: FC<MediaControlButtonsProps> =
     const screenShare: UseScreenShareResult<TrackMetadata> = useScreenShare();
     const client = useClient();
 
+    const localPeerContext = useLocalPeer();
+
     // todo fix sidebar
     const controls: ControlButton[][] =
       mode === "manual"
@@ -413,6 +417,7 @@ const MediaControlButtons: FC<MediaControlButtonsProps> =
             microphone,
             screenShare,
             camera,
+            localPeerContext,
           )
         ];
     return (

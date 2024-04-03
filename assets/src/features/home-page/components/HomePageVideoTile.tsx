@@ -20,7 +20,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
   const microphone = useMicrophone();
   // todo add loading to device manager
   // const video = useCamera();
-  const { video } = useLocalPeer()
+  const { video, toggleCamera, toggleMicrophone } = useLocalPeer()
   const initials = computeInitials(displayName);
   const { setOpen } = useModal();
 
@@ -40,7 +40,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn off the camera"
                   buttonClassName={neutralButtonStyle}
                   onClick={() => {
-                    video.stop();
+                    toggleCamera(false)
                   }}
                 />
               ) : (
@@ -49,7 +49,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the camera"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    video.start();
+                    toggleCamera(true)
                   }}
                 />
               )}
@@ -59,7 +59,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn off the microphone"
                   buttonClassName={neutralButtonStyle}
                   onClick={() => {
-                    microphone.stop();
+                    toggleMicrophone(false)
                   }}
                 />
               ) : (
@@ -68,7 +68,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the microphone"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    microphone.start();
+                    toggleMicrophone(true)
                   }}
                 />
               )}

@@ -11,11 +11,12 @@ interface Props {
 
 const LeavingRoomScreen: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled }) => {
   const navigate = useNavigate();
-  
+
   const rejoinHref = `/room/${roomId}`;
 
   const onRejoin = (e: SyntheticEvent) => {
     e.preventDefault();
+    // todo remove { state: { wasCameraDisabled, wasMicrophoneDisabled}}
     navigate(rejoinHref, { state: { wasCameraDisabled, wasMicrophoneDisabled}});
   }
 

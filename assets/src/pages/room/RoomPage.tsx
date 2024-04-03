@@ -29,7 +29,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
   {
     username,
     roomId,
-    wasCameraDisabled
+    // wasCameraDisabled
     // wasMicrophoneDisabled
   }) => {
   const connect = useConnect();
@@ -41,11 +41,11 @@ const ConnectComponent: FC<ConnectComponentProps> = (
     localPeerRef.current = localPeer;
   }, [localPeer]);
 
-  const { video } = localPeer;
-  useEffect(() => {
-    if (!wasCameraDisabled && !video.stream) video.start();
-    // if (!wasMicrophoneDisabled && !audio.stream) audio.start();
-  }, [video.stream]);
+  // const { video } = localPeer;
+  // useEffect(() => {
+  //   if (!wasCameraDisabled && !video.stream) video.start();
+  //   // if (!wasMicrophoneDisabled && !audio.stream) audio.start();
+  // }, [video.stream]);
 
   const client = useClient();
   const { statistics } = useDeveloperInfo();
@@ -53,11 +53,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
   let intervalId: NodeJS.Timer | null = null;
 
   useEffect(() => {
-    console.log("Setup statistics callback");
-
     const callback = () => {
-      console.log("Joined - adding statistics");
-
       let prevTime: number = 0;
       let lastInbound: Record<InboundRtpId, any> | null = null;
 

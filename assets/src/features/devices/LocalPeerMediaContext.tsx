@@ -20,6 +20,8 @@ export type LocalPeerContext = {
   blur: boolean;
   setBlur: (status: boolean, restart: boolean) => void;
   setDevice: (cameraId: string | null, microphoneId: string | null, blur: boolean) => void;
+  toggleCamera: (value: boolean) => void,
+  toggleMicrophone: (value: boolean) => void,
 };
 
 const LocalPeerMediaContext = React.createContext<LocalPeerContext | undefined>(undefined);
@@ -74,6 +76,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const blurRef = useRef<boolean>(false);
 
   const [stream, setStream] = useState<MediaStream | null>(null);
+  // obecnie nadawany stram - może to być ciemność, może to być blur, może to być kamerka
   const streamRef = useRef<MediaStream | null>(null);
   const metadataActiveRef = useRef<boolean>(true);
 
@@ -86,22 +89,23 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   // if user start or stop camera during it's decision is reflected in this variables
   const cameraIntentionRef = useRef<boolean>(true);
-  const microphoneIntentionRef = useRef<boolean>(true);
+  // const microphoneIntentionRef = useRef<boolean>(true);
   const lastCameraIdRef = useRef<null | string>(null);
 
-  useEffect(() => {
-    const a = setInterval(() => {
-      console.log({ lastCameraIdRef: lastCameraIdRef.current });
-    }, 3000);
-
-    return () => {
-      clearInterval(a);
-    };
-  }, []);
+  // useEffect(() => {
+  //   const a = setInterval(() => {
+  //     console.log({ lastCameraIdRef: lastCameraIdRef.current, cameraIntention: cameraIntentionRef.current });
+  //   }, 3000);
+  //
+  //   return () => {
+  //     clearInterval(a);
+  //   };
+  // }, []);
 
   const broadcastedStreamRef = useRef<MediaStream | null>(null);
 
   const changeMediaStream = useCallback(async (stream: MediaStream | null, track: MediaStreamTrack | null, blur: boolean, metadataActive: boolean) => {
+    console.log({ stream, track, blur, metadataActive });
     metadataActiveRef.current = metadataActive;
 
     if (processor.current && !blur) {
@@ -129,6 +133,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       }
 
     } else {
+      console.log("Set stream and track");
       setStream(stream || null);
       setTrack(track || null);
 
@@ -137,14 +142,15 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     }
 
     if (client.getSnapshot().status === "joined") {
-      if (!remoteTrackIdRef.current && stream && track) {
+      if (!remoteTrackIdRef.current && streamRef.current && trackRef.current) {
+        console.log("Adding track");
         const mediaStream = new MediaStream();
-        mediaStream.addTrack(track);
+        mediaStream.addTrack(trackRef.current);
 
         broadcastedStreamRef.current = mediaStream;
 
         remoteTrackIdRef.current = await client.addTrack(
-          track,
+          trackRef.current,
           mediaStream,
           // todo think about track.enabled
           { active: metadataActive, type: "camera" },
@@ -152,6 +158,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
           selectBandwidthLimit("camera", simulcastEnabled)
         );
       } else if (remoteTrackIdRef.current && trackRef.current) {
+        console.log("Replacing track");
 
         // todo add setter as an alternative to setting whole object
         broadcastedStreamRef.current?.removeTrack(broadcastedStreamRef.current?.getVideoTracks()[0]);
@@ -164,7 +171,12 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         // todo ...
         // await client.updateTrackMetadata(remoteTrackIdRef.current, newMetadata);
       } else if (remoteTrackIdRef.current && !stream) {
+        console.log("Removing track");
+
         await client.removeTrack(remoteTrackIdRef.current);
+        remoteTrackIdRef.current = null;
+      } else {
+        console.log("Skipping track");
       }
     }
   }, [setStream, setTrack]);
@@ -176,84 +188,146 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
       trackRef.current = event.video?.media?.track || null;
       streamRef.current = event.video?.media?.stream || null;
-    };
-
-    const joinedHandler: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = async () => {
-      throw Error("Handle todo in deviceStopped")
-
-      const stream = streamRef.current || null;
-      const track = trackRef.current || null;
 
       const snapshot = client.getSnapshot();
 
-      console.log("joinedHandler - important one");
-      console.log({ cameraIntentionRef: cameraIntentionRef.current, lastCameraIdRef: lastCameraIdRef.current });
+      console.log({ name: "managerInitialized", event });
+      const cameraId = snapshot?.media?.video?.media?.deviceInfo?.deviceId || null;
 
-      if (stream && track) {
-        // naiwnie zakłądam zę jest tylko kamera a nie czarne ekran lub rozmycie
-        const cameraId = snapshot?.media?.video?.media?.deviceInfo?.deviceId || null;
-        console.log({ name: "setting camera id - joinedHandler", cameraId, stream, track });
-
+      if (cameraId) {
         lastCameraIdRef.current = cameraId;
-
-        await changeMediaStream(stream, track, blurRef.current, !!snapshot.media?.video?.media?.stream);
-      } else if (cameraIntentionRef.current && lastCameraIdRef.current) {
-        // todo:
-        //  we need another method that starts the last stopped one
-        console.log("Jest intencja uruchomionej kamery");
-        await snapshot.deviceManager.start({ videoDeviceId: lastCameraIdRef.current });
       }
+    };
+
+
+    /*
+     * Przypadki:
+     * 1) uruchamiam kamerę i następnie wchodze do pokoju
+     *    - intencja: true, ma być włączona
+     *    - leci event
+     *        - disconnect (czyli wyłączam)
+     *        - i następnie joined (czyli uruchamiam bo intencja true)
+     *    - sprawdzam intencje i wiem, że muszę uruchomić ponownie
+     * 2) Wychodzę z pokoju i wracam
+     *    - leci event disconnect -> czyli wyłączam
+     *    - intencja jest true
+     *    - wracam do pokoju czyli leci
+     *        - connect (uruchamiam bo intencja jest true)
+     *        - disconnect (wyłączam)
+     *        - connect uruchamiam (bo inencja jest true)
+     *
+     * Czy z tego powodu wynika, że za każdym razem jak uruchamiam urządzenie, to sprawdzam czy jestem joined
+     * i jak tak to dodaję
+     */
+    const joinedHandler: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = async () => {
+
+      // const stream = streamRef.current || null;
+      // const track = trackRef.current || null;
+
+      const snapshot = client.getSnapshot();
+
+      const stream = snapshot.devices.camera.stream;
+      const track = snapshot.devices.camera.track;
+
+      console.log({ name: "joinedHandler - method start", cameraIntentionRef: cameraIntentionRef.current, lastCameraIdRef: lastCameraIdRef.current });
+
+      if (cameraIntentionRef.current && !remoteTrackIdRef.current && stream && track) {
+        console.log("First visit");
+
+        await changeMediaStream(stream, track, blurRef.current, metadataActiveRef.current);
+      } else if (cameraIntentionRef.current && lastCameraIdRef.current) {
+        console.log("Rejoin");
+        console.log("joinedHandler - start device if user wants it");
+        await snapshot.deviceManager.start({ videoDeviceId: lastCameraIdRef.current });
+      } else {
+        console.log("joinedHandler - skipped")
+      }
+
+      // if (stream && track) {
+      //   // naiwnie zakłądam zę jest tylko kamera a nie czarne ekran lub rozmycie
+      //   const cameraId = snapshot?.media?.video?.media?.deviceInfo?.deviceId || null;
+      //   console.log({ name: "setting camera id - joinedHandler", cameraId, stream, track });
+      //
+      //   lastCameraIdRef.current = cameraId;
+      //
+      //   await changeMediaStream(stream, track, blurRef.current, !!snapshot.media?.video?.media?.stream);
+      // } else if (cameraIntentionRef.current && lastCameraIdRef.current) {
+      //   // todo:
+      //   //  we need another method that starts the last stopped one
+      //   console.log("Jest intencja uruchomionej kamery");
+      //   await snapshot.deviceManager.start({ videoDeviceId: lastCameraIdRef.current });
+      // }
     };
 
     const deviceReady: ClientEvents<PeerMetadata, TrackMetadata>["deviceReady"] = async (event, client) => {
       const snapshot = client.getSnapshot();
 
+      console.log({ name: "Device ready", event });
+
+
       const cameraId = snapshot.media?.video?.media?.deviceInfo?.deviceId;
-      if (event.trackType === "video" && cameraId) {
-        cameraIntentionRef.current = true;
+      if (event.trackType === "video" && event.mediaDeviceType === "userMedia" && cameraId) {
+        // todo remove? what about autost
+        // cameraIntentionRef.current = true;
 
         console.log({ name: "setting camera id - device ready", cameraId });
         lastCameraIdRef.current = cameraId;
-      }
-      if (event.trackType === "audio") {
-        microphoneIntentionRef.current = true;
-      }
+        // if (event.trackType === "audio") {
+        //   // microphoneIntentionRef.current = true;
+        // }
 
-      const stream = snapshot?.media?.video?.media?.stream;
-      const track = snapshot?.media?.video?.media?.track;
+        const stream = snapshot?.media?.video?.media?.stream;
+        const track = snapshot?.media?.video?.media?.track;
 
-      if (snapshot.status === "joined" && event.trackType === "video" && remoteTrackIdRef.current && stream && track) {
-        workerRef.current?.postMessage({ action: "stop" }, []); // todo what is the second parameter
-        await changeMediaStream(stream, track, blurRef.current, track.enabled);
+        if (snapshot.status === "joined" && event.trackType === "video" && stream && track) {
+          // why is there remoteTrackIdRef.current?
+          workerRef.current?.postMessage({ action: "stop" }, []); // todo what is the second parameter
+          await changeMediaStream(stream, track, blurRef.current, track.enabled);
+        }
       }
     };
 
     const devicesReady: ClientEvents<PeerMetadata, TrackMetadata>["devicesReady"] = async (event, client) => {
       const snapshot = client.getSnapshot();
 
-      if (event.video.restarted && event.video?.media?.stream) {
-        const cameraId = snapshot?.media?.video?.media?.deviceInfo?.deviceId || null;
+      console.log({ name: "devicesReady", event });
+      const cameraId = snapshot?.media?.video?.media?.deviceInfo?.deviceId || null;
 
-        console.log({ name: "setting camera id - devices ready", cameraId });
+      if (cameraId) {
+        lastCameraIdRef.current = cameraId;
+      }
+
+      if (event.video.restarted && event.video?.media?.stream) {
+        console.log({ name: "devicesReady -> changeMediaStream", cameraId });
         lastCameraIdRef.current = cameraId;
 
-        await changeMediaStream(event.video?.media?.stream || null, event.video?.media?.track || null, blurRef.current, !!track?.enabled);
+        await changeMediaStream(event.video?.media?.stream || null, event.video?.media?.track || null, blurRef.current, true);
       }
     };
 
     const deviceStopped: ClientEvents<PeerMetadata, TrackMetadata>["deviceStopped"] = async (event, client) => {
-      throw Error("Handle todo")
+      console.log({ name: "device stopped", event });
+
       const snapshot = client.getSnapshot();
 
       if (event.trackType === "video" && event.mediaDeviceType === "userMedia") {
         // todo to nie jest prawda, intencja na stop jest wtedy gdy użytkownik to wciśnie
-        cameraIntentionRef.current = false;
+        // cameraIntentionRef.current = false;
       }
       if (event.trackType === "audio" && event.mediaDeviceType === "userMedia") {
-        microphoneIntentionRef.current = false;
+        // microphoneIntentionRef.current = false;
       }
 
+      if (snapshot.status !== "joined" && event.trackType === "video" && event.mediaDeviceType === "userMedia") {
+        // w poczeklani trzeba wynullować tracki
+        setStream(null);
+        setTrack(null);
+
+        streamRef.current = null;
+        trackRef.current = null;
+      }
       if (snapshot.status === "joined" && event.trackType === "video" && event.mediaDeviceType === "userMedia" && trackRef.current && remoteTrackIdRef.current) {
+        // jeżeli jesteśmy połączeni to trzeba podmienić na blackscreen
         if (!workerRef.current) {
           workerRef.current = new EmptyVideoWorker();
           const canvasElement = document.createElement("canvas");
@@ -303,7 +377,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     };
 
     const authSuccess: ClientEvents<PeerMetadata, TrackMetadata>["authSuccess"] = async (client) => {
-      console.log({ name: "socketOpen", client });
+      console.log({ name: "authSuccess", client });
     };
 
     const socketOpen: ClientEvents<PeerMetadata, TrackMetadata>["socketOpen"] = async (client) => {
@@ -316,9 +390,9 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       console.log({ name: "disconnected", client, snapshot });
       remoteTrackIdRef.current = null;
 
-      snapshot.devices.microphone.stop();
-      snapshot.devices.camera.stop();
-      snapshot.devices.screenShare.stop();
+      if (snapshot.devices.microphone.stream) snapshot.devices.microphone.stop();
+      if (snapshot.devices.camera.stream) snapshot.devices.camera.stop();
+      if (snapshot.devices.screenShare.stream) snapshot.devices.screenShare.stop();
     };
 
     client.on("joined", joinedHandler);
@@ -364,7 +438,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     broadcast: video.broadcast,
     deviceInfo: video.deviceInfo,
     devices: video.devices,
-    enabled: true,
+    enabled: !!track?.enabled,
     error: video.error,
     setEnable: () => {
     },
@@ -397,6 +471,27 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     }
   }, [video]);
 
+  const toggleCamera = useCallback((value: boolean) => {
+    console.log({ name: "Toggle camera", value });
+    cameraIntentionRef.current = value;
+
+    if (value) {
+      video.start();
+    } else {
+      video.stop();
+    }
+
+  }, []);
+
+  const toggleMicrophone = useCallback((value: boolean) => {
+    console.log({ name: "Toggle microphone", value });
+    if (value) {
+      microphone.start();
+    } else {
+      microphone.stop();
+    }
+  }, []);
+
   return (
     <LocalPeerMediaContext.Provider
       value={{
@@ -404,7 +499,9 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         init,
         blur,
         setBlur: applyNewSettings,
-        setDevice
+        setDevice,
+        toggleCamera,
+        toggleMicrophone
       }}
     >
       {children}
