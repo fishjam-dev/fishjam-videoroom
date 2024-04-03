@@ -41,7 +41,6 @@ const getAutomaticControls = (
   microphone: UseMicrophoneResult<TrackMetadata>,
   screenShare: UseScreenShareResult<TrackMetadata>,
   camera: UseCameraResult<TrackMetadata>,
-  client: Client<PeerMetadata, TrackMetadata>
 ): ControlButton[] => [
   camera.stream
     ? {
@@ -123,7 +122,6 @@ const getAutomaticControls = (
           wasMicrophoneDisabled: !microphone.enabled
         }
       });
-      client.disconnect()
     }
   }
 ];
@@ -374,7 +372,6 @@ const getManualControls = (
         hover: "Leave the room",
         buttonClassName: redButtonStyle,
         onClick: () => {
-          client.disconnect()
           navigate(`/room/${roomId}`, { state: { isLeavingRoom: true } });
         }
       }
@@ -416,7 +413,6 @@ const MediaControlButtons: FC<MediaControlButtonsProps> =
             microphone,
             screenShare,
             camera,
-            client
           )
         ];
     return (

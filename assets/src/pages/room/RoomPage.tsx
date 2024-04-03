@@ -53,10 +53,10 @@ const ConnectComponent: FC<ConnectComponentProps> = (
   let intervalId: NodeJS.Timer | null = null;
 
   useEffect(() => {
-    console.log("Setup join callback");
+    console.log("Setup statistics callback");
 
     const callback = () => {
-      console.log("joined callback!");
+      console.log("Joined - adding statistics");
 
       let prevTime: number = 0;
       let lastInbound: Record<InboundRtpId, any> | null = null;
