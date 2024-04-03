@@ -70,7 +70,7 @@ const getAutomaticControls = (
       hover: "Turn off the microphone",
       buttonClassName: neutralButtonStyle,
       onClick: () => {
-        localPeerContext.toggleCamera(false)
+        localPeerContext.toggleMicrophone(false)
       }
     }
     : {
@@ -79,8 +79,8 @@ const getAutomaticControls = (
       hover: "Turn on the microphone",
       buttonClassName: activeButtonStyle,
       onClick: () => {
-        localPeerContext.toggleCamera(true)
-        // todo implement replace track
+        localPeerContext.toggleMicrophone(true)
+        // todo implement replace track with silence
       }
     },
   screenShare.enabled

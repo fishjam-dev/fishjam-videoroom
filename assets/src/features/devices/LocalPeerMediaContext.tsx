@@ -89,7 +89,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   // if user start or stop camera during it's decision is reflected in this variables
   const cameraIntentionRef = useRef<boolean>(true);
-  // const microphoneIntentionRef = useRef<boolean>(true);
+  const microphoneIntentionRef = useRef<boolean>(true);
   const lastCameraIdRef = useRef<null | string>(null);
 
   // useEffect(() => {
@@ -229,7 +229,11 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       const stream = snapshot.devices.camera.stream;
       const track = snapshot.devices.camera.track;
 
-      console.log({ name: "joinedHandler - method start", cameraIntentionRef: cameraIntentionRef.current, lastCameraIdRef: lastCameraIdRef.current });
+      console.log({
+        name: "joinedHandler - method start",
+        cameraIntentionRef: cameraIntentionRef.current,
+        lastCameraIdRef: lastCameraIdRef.current
+      });
 
       if (cameraIntentionRef.current && !remoteTrackIdRef.current && stream && track) {
         console.log("First visit");
@@ -240,7 +244,14 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         console.log("joinedHandler - start device if user wants it");
         await snapshot.deviceManager.start({ videoDeviceId: lastCameraIdRef.current });
       } else {
-        console.log("joinedHandler - skipped")
+        console.log("joinedHandler - skipped");
+      }
+
+      const microphoneTrack = snapshot.devices.microphone.track;
+
+      if (microphoneIntentionRef.current && !microphoneTrack) {
+        console.log("Restarting microphone");
+        await snapshot.deviceManager.start({ audioDeviceId: true });
       }
 
       // if (stream && track) {
@@ -485,6 +496,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   const toggleMicrophone = useCallback((value: boolean) => {
     console.log({ name: "Toggle microphone", value });
+    microphoneIntentionRef.current = value
     if (value) {
       microphone.start();
     } else {
