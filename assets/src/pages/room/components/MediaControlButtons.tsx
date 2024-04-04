@@ -2,7 +2,6 @@ import { FC } from "react";
 
 import MediaControlButton, { MediaControlButtonProps } from "./MediaControlButton";
 import { NavigateFunction, useNavigate, useParams } from "react-router-dom";
-import { StreamingMode } from "../hooks/useMembraneMediaStreaming";
 import { useToggle } from "../hooks/useToggle";
 import Microphone from "../../../features/room-page/icons/Microphone";
 import MicrophoneOff from "../../../features/room-page/icons/MicrophoneOff";
@@ -27,6 +26,7 @@ import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult, Client } fr
 import { LocalPeerContext, useLocalPeer } from "../../../features/devices/LocalPeerMediaContext.tsx";
 
 type ControlButton = MediaControlButtonProps & { id: string };
+export type StreamingMode = "manual" | "automatic";
 
 type Sidebar = {
   isSidebarOpen: boolean;

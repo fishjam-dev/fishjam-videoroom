@@ -244,7 +244,7 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
             {statistics.status ? "Hide statistics" : "Show statistics"}
           </button>
           <button onClick={() => {
-            console.log(client.getSnapshot());
+            console.log({ client });
           }}>Show state
           </button>
 

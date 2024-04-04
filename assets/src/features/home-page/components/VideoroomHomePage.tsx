@@ -126,7 +126,7 @@ const VideoroomHomePage: FC = () => {
             <span>You are joining:</span>
             <span className="sm:text-2xl sm:font-medium">{roomId}</span>
             <button onClick={() => {
-              console.log(client.getSnapshot());
+              console.log(client);
             }}>Show state
             </button>
           </div>

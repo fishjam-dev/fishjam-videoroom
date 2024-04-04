@@ -122,7 +122,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       trackRef.current = track || null;
     }
 
-    if (client.getSnapshot().status === "joined") {
+    if (client.status === "joined") {
       if (!remoteTrackIdRef.current && streamRef.current && trackRef.current) {
         const mediaStream = new MediaStream();
         mediaStream.addTrack(trackRef.current);
@@ -163,7 +163,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       trackRef.current = event.video?.media?.track || null;
       streamRef.current = event.video?.media?.stream || null;
 
-      const snapshot = client.getSnapshot();
+      const snapshot = client;
 
       const cameraId = snapshot?.media?.video?.media?.deviceInfo?.deviceId || null;
 
@@ -193,39 +193,31 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
      * i jak tak to dodaję
      */
     const joinedHandler: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = async () => {
-
-      // const stream = streamRef.current || null;
-      // const track = trackRef.current || null;
-
-      const snapshot = client.getSnapshot();
-
-      const stream = snapshot.devices.camera.stream;
-      const track = snapshot.devices.camera.track;
+      const stream = client.devices.camera.stream;
+      const track = client.devices.camera.track;
 
       if (cameraIntentionRef.current && !remoteTrackIdRef.current && stream && track) {
         await changeMediaStream(stream, track, blurRef.current, metadataActiveRef.current);
       } else if (cameraIntentionRef.current && lastCameraIdRef.current) {
-        await snapshot.deviceManager.start({ videoDeviceId: lastCameraIdRef.current });
+        await client.deviceManager.start({ videoDeviceId: lastCameraIdRef.current });
       }
 
-      const microphoneTrack = snapshot.devices.microphone.track;
+      const microphoneTrack = client.devices.microphone.track;
 
       if (microphoneIntentionRef.current && !microphoneTrack) {
-        await snapshot.deviceManager.start({ audioDeviceId: true });
+        await client.deviceManager.start({ audioDeviceId: true });
       }
     };
 
     const deviceReady: ClientEvents<PeerMetadata, TrackMetadata>["deviceReady"] = async (event, client) => {
-      const snapshot = client.getSnapshot();
-
-      const cameraId = snapshot.media?.video?.media?.deviceInfo?.deviceId;
+      const cameraId = client.media?.video?.media?.deviceInfo?.deviceId;
       if (event.trackType === "video" && event.mediaDeviceType === "userMedia" && cameraId) {
         lastCameraIdRef.current = cameraId;
 
-        const stream = snapshot?.media?.video?.media?.stream;
-        const track = snapshot?.media?.video?.media?.track;
+        const stream = client?.media?.video?.media?.stream;
+        const track = client?.media?.video?.media?.track;
 
-        if (snapshot.status === "joined" && event.trackType === "video" && stream && track) {
+        if (client.status === "joined" && event.trackType === "video" && stream && track) {
           workerRef.current?.postMessage({ action: "stop" }, []); // todo what is the second parameter
           await changeMediaStream(stream, track, blurRef.current, track.enabled);
         }
@@ -233,9 +225,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     };
 
     const devicesReady: ClientEvents<PeerMetadata, TrackMetadata>["devicesReady"] = async (event, client) => {
-      const snapshot = client.getSnapshot();
-
-      const cameraId = snapshot?.media?.video?.media?.deviceInfo?.deviceId || null;
+      const cameraId = client?.media?.video?.media?.deviceInfo?.deviceId || null;
 
       if (cameraId) {
         lastCameraIdRef.current = cameraId;
@@ -249,16 +239,14 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     };
 
     const deviceStopped: ClientEvents<PeerMetadata, TrackMetadata>["deviceStopped"] = async (event, client) => {
-      const snapshot = client.getSnapshot();
-
-      if (snapshot.status !== "joined" && event.trackType === "video" && event.mediaDeviceType === "userMedia") {
+      if (client.status !== "joined" && event.trackType === "video" && event.mediaDeviceType === "userMedia") {
         setStream(null);
         setTrack(null);
 
         streamRef.current = null;
         trackRef.current = null;
       }
-      if (snapshot.status === "joined" && event.trackType === "video" && event.mediaDeviceType === "userMedia" && trackRef.current && remoteTrackIdRef.current) {
+      if (client.status === "joined" && event.trackType === "video" && event.mediaDeviceType === "userMedia" && trackRef.current && remoteTrackIdRef.current) {
         if (!workerRef.current) {
           workerRef.current = new EmptyVideoWorker();
           const canvasElement = document.createElement("canvas");
@@ -298,13 +286,11 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     };
 
     const disconnected: ClientEvents<PeerMetadata, TrackMetadata>["disconnected"] = async (client) => {
-      const snapshot = client.getSnapshot();
-
       remoteTrackIdRef.current = null;
 
-      if (snapshot.devices.microphone.stream) snapshot.devices.microphone.stop();
-      if (snapshot.devices.camera.stream) snapshot.devices.camera.stop();
-      if (snapshot.devices.screenShare.stream) snapshot.devices.screenShare.stop();
+      if (client.devices.microphone.stream) client.devices.microphone.stop();
+      if (client.devices.camera.stream) client.devices.camera.stop();
+      if (client.devices.screenShare.stream) client.devices.screenShare.stop();
     };
 
 
@@ -399,11 +385,11 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   }, []);
 
   const restartDevices = useCallback(() => {
-    const micStatus = client.getSnapshot().media?.audio?.mediaStatus;
+    const micStatus = client.media?.audio?.mediaStatus;
     if (managerInitializedRef.current && microphoneIntentionRef.current && micStatus === "OK") {
       toggleMicrophone(true);
     }
-    const camStatus = client.getSnapshot().media?.video?.mediaStatus;
+    const camStatus = client.media?.video?.mediaStatus;
     if (managerInitializedRef.current && cameraIntentionRef.current && camStatus === "OK") {
       toggleCamera(true);
     }
