@@ -63,23 +63,24 @@ export const toLocalTrackSelector = (state: State<PeerMetadata, TrackMetadata>, 
     })[0] || null;
 
 export const toRemotePeerSelector = (state: State<PeerMetadata, TrackMetadata>): RemotePeer[] => {
-  return toPairs(state?.remote || {}).filter(([, peer]) => (peer as unknown as { type: string}).type === "webrtc").map(([peerId, peer]) => {
-    const tracks: ApiTrack[] = toPairs(peer.tracks || {}).map(([trackId, track]) => {
+  return toPairs(state?.remote || {})
+    .map(([peerId, peer]) => {
+      const tracks: ApiTrack[] = toPairs(peer.tracks || {}).map(([trackId, track]) => {
+        return {
+          trackId,
+          metadata: track.metadata || undefined,
+          isSpeaking: track.vadStatus === "speech",
+          encoding: track.encoding || undefined,
+          mediaStream: track.stream || undefined,
+          mediaStreamTrack: track.track || undefined
+        };
+      });
+
       return {
-        trackId,
-        metadata: track.metadata || undefined,
-        isSpeaking: track.vadStatus === "speech",
-        encoding: track.encoding || undefined,
-        mediaStream: track.stream || undefined,
-        mediaStreamTrack: track.track || undefined
+        id: peerId,
+        displayName: peer?.metadata?.name || "",
+        source: "remote",
+        tracks
       };
     });
-
-    return {
-      id: peerId,
-      displayName: peer?.metadata?.name || "",
-      source: "remote",
-      tracks
-    };
-  });
 };
