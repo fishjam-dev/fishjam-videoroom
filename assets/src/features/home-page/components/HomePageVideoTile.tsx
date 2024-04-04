@@ -18,23 +18,12 @@ type HomePageVideoTileProps = {
 
 const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
   const microphone = useMicrophone();
-  // todo add loading to device manager
-  // const video = useCamera();
-  const { video, toggleCamera, toggleMicrophone, restartMicrophone } = useLocalPeer();
+  const { video, toggleCamera, toggleMicrophone, restartDevices } = useLocalPeer();
   const initials = computeInitials(displayName);
   const { setOpen } = useModal();
 
   useEffect(() => {
-    console.log({ video });
-    // restartMicrophone();
-  }, [video]);
-
-  useEffect(() => {
-    // if (microphone.mediaStatus === "Requesting") {
-    //   console.warn("Replacing!");
-    // }
-    // console.log({ mediaStatus: microphone.mediaStatus });
-    restartMicrophone();
+    restartDevices();
   }, []);
 
   return (

@@ -144,19 +144,11 @@ const ConnectComponent: FC<ConnectComponentProps> = (
 
     client?.on("joined", callback);
 
-    // const disconnectedCallback = () => {
-    //   console.log("disconnected callback");
-    // };
-    // client?.on("disconnected", disconnectedCallback);
-
     window["ws-close"] = () => {
-      console.log("Call websocket.client.close()");
       client["client"]["websocket"].close();
     };
 
     return () => {
-      console.log("Remove join callback");
-
       client?.removeListener("joined", callback);
       intervalId && clearInterval(intervalId);
     };
@@ -165,7 +157,6 @@ const ConnectComponent: FC<ConnectComponentProps> = (
   const disconnect = useDisconnect();
 
   useEffect(() => {
-    console.log("Before connect");
     getTokenAndAddress(roomId)
       .then((tokenAndAddress) => {
 
@@ -179,19 +170,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
       });
 
     return () => {
-      console.log("Cleanup");
-      // streaming.camera.removeTracks();
-      // streaming.microphone.removeTracks();
-      // streaming.screenShare.removeTracks();
-      // const { video, audio, screenShare } = localPeerRef.current;
-      // video.stop();
-      // audio.stop();
-      // screenShare.stop();
-
-      // old code
-      // disconnectCallback.then((disconnect) => {
       disconnect();
-      // });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -270,7 +249,6 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
           </button>
 
           <button onClick={() => {
-            console.log("Closing websocket");
             window["ws-close"]();
           }}>Close socket
           </button>

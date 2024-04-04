@@ -44,7 +44,6 @@ export const MediaSettingsModal: React.FC = () => {
       cancelClassName="!text-additional-red-100"
       onConfirm={() => {
         setDevice(videoInput, audioInput, blurInput);
-        console.log({ blurInput, videoInput, audioInput });
         setOpen(false);
       }}
       onCancel={handleClose}
