@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import MediaControlButton from "../../../pages/room/components/MediaControlButton";
 import InitialsImage, { computeInitials } from "../../room-page/components/InitialsImage";
 import { activeButtonStyle, neutralButtonStyle } from "../../room-page/consts";
@@ -20,9 +20,22 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
   const microphone = useMicrophone();
   // todo add loading to device manager
   // const video = useCamera();
-  const { video, toggleCamera, toggleMicrophone } = useLocalPeer()
+  const { video, toggleCamera, toggleMicrophone, restartMicrophone } = useLocalPeer();
   const initials = computeInitials(displayName);
   const { setOpen } = useModal();
+
+  useEffect(() => {
+    console.log({ video });
+    // restartMicrophone();
+  }, [video]);
+
+  useEffect(() => {
+    // if (microphone.mediaStatus === "Requesting") {
+    //   console.warn("Replacing!");
+    // }
+    // console.log({ mediaStatus: microphone.mediaStatus });
+    restartMicrophone();
+  }, []);
 
   return (
     <div className="h-full w-full">
@@ -34,13 +47,13 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
           <>
             {!video.enabled ? <InitialsImage initials={initials} /> : null}
             <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-x-4">
-              {video.stream ? (
+              {video.enabled ? (
                 <MediaControlButton
                   icon={Camera}
                   hover="Turn off the camera"
                   buttonClassName={neutralButtonStyle}
                   onClick={() => {
-                    toggleCamera(false)
+                    toggleCamera(false);
                   }}
                 />
               ) : (
@@ -49,7 +62,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the camera"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    toggleCamera(true)
+                    toggleCamera(true);
                   }}
                 />
               )}
@@ -59,7 +72,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn off the microphone"
                   buttonClassName={neutralButtonStyle}
                   onClick={() => {
-                    toggleMicrophone(false)
+                    toggleMicrophone(false);
                   }}
                 />
               ) : (
@@ -68,7 +81,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the microphone"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    toggleMicrophone(true)
+                    toggleMicrophone(true);
                   }}
                 />
               )}

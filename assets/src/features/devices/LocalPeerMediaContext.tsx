@@ -22,6 +22,7 @@ export type LocalPeerContext = {
   setDevice: (cameraId: string | null, microphoneId: string | null, blur: boolean) => void;
   toggleCamera: (value: boolean) => void,
   toggleMicrophone: (value: boolean) => void,
+  restartMicrophone: () => void;
 };
 
 const LocalPeerMediaContext = React.createContext<LocalPeerContext | undefined>(undefined);
@@ -79,6 +80,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   // obecnie nadawany stram - może to być ciemność, może to być blur, może to być kamerka
   const streamRef = useRef<MediaStream | null>(null);
   const metadataActiveRef = useRef<boolean>(true);
+
+  const managerInitializedRef = useRef<boolean>(false);
 
   const [track, setTrack] = useState<MediaStreamTrack | null>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
@@ -183,6 +186,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   useEffect(() => {
     const managerInitialized: ClientEvents<PeerMetadata, TrackMetadata>["managerInitialized"] = (event) => {
+      managerInitializedRef.current = true;
+
       setStream(() => event.video?.media?.stream || null);
       setTrack(() => event.video?.media?.track || null);
 
@@ -275,7 +280,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
       console.log({ name: "Device ready", event });
 
-
       const cameraId = snapshot.media?.video?.media?.deviceInfo?.deviceId;
       if (event.trackType === "video" && event.mediaDeviceType === "userMedia" && cameraId) {
         // todo remove? what about autost
@@ -367,6 +371,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         if (!offscreenCanvas) throw Error("OffscreenCanvas is null");
         if (!stream) throw Error("Worker stream is null");
 
+        stream.getVideoTracks().forEach((track) => track.enabled = false);
+
         worker.postMessage({
           action: "start"
         }, []);
@@ -406,6 +412,11 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       if (snapshot.devices.screenShare.stream) snapshot.devices.screenShare.stop();
     };
 
+    const devicesStarted: ClientEvents<PeerMetadata, TrackMetadata>["devicesStarted"] = async (event, client) => {
+      console.log({ name: "devicesStarted", event, client });
+    };
+
+
     client.on("joined", joinedHandler);
     client.on("localTrackMetadataChanged", localTrackMetadataChanged);
     client.on("managerInitialized", managerInitialized);
@@ -416,6 +427,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     client.on("socketOpen", socketOpen);
     client.on("authSuccess", authSuccess);
     client.on("disconnected", disconnected);
+    client.on("devicesStarted", devicesStarted);
 
     return () => {
       client.removeListener("joined", joinedHandler);
@@ -428,6 +440,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       client.removeListener("socketOpen", socketOpen);
       client.removeListener("authSuccess", authSuccess);
       client.removeListener("disconnected", disconnected);
+      client.removeListener("devicesStarted", devicesStarted);
+
     };
   }, [simulcast.status]);
 
@@ -455,8 +469,13 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     },
     start: video.start,
     status: video.status,
-    stop: video.stop
+    stop: video.stop,
+    mediaStatus: video.mediaStatus
   }), [stream, track]);
+
+  useEffect(() => {
+    console.log({ newVideo, stream, track });
+  }, [newVideo, stream, track]);
 
   const microphone = useMicrophone();
 
@@ -496,13 +515,26 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   const toggleMicrophone = useCallback((value: boolean) => {
     console.log({ name: "Toggle microphone", value });
-    microphoneIntentionRef.current = value
+    microphoneIntentionRef.current = value;
     if (value) {
       microphone.start();
     } else {
       microphone.stop();
     }
   }, []);
+
+  const restartMicrophone = useCallback(() => {
+    const micStatus = client.getSnapshot().media?.audio?.mediaStatus;
+    if (managerInitializedRef.current && microphoneIntentionRef.current && micStatus === "OK") {
+      console.log("Restarting mic!");
+      toggleMicrophone(true);
+    }
+    const camStatus = client.getSnapshot().media?.video?.mediaStatus;
+    if (managerInitializedRef.current && cameraIntentionRef.current && camStatus === "OK") {
+      console.log("Restarting camStatus!");
+      toggleCamera(true);
+    }
+  }, [toggleMicrophone, toggleCamera]);
 
   return (
     <LocalPeerMediaContext.Provider
@@ -513,7 +545,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         setBlur: applyNewSettings,
         setDevice,
         toggleCamera,
-        toggleMicrophone
+        toggleMicrophone,
+        restartMicrophone
       }}
     >
       {children}
