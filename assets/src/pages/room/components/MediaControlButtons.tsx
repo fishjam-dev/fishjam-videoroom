@@ -230,6 +230,7 @@ const getManualControls = (
             camera.start()
 
         },
+      // todo fix this
       camera.enabled
         ? {
           id: "cam-disable",
@@ -245,6 +246,7 @@ const getManualControls = (
           buttonClassName: activeButtonStyle,
           onClick: () => camera.setEnable(true)
         },
+      // todo fix this
       camera.broadcast?.trackId
         ? {
           id: "cam-remove",
@@ -406,7 +408,7 @@ const MediaControlButtons: FC<MediaControlButtonsProps> =
     // todo fix sidebar
     const controls: ControlButton[][] =
       mode === "manual"
-        ? getManualControls(navigate, microphone, screenShare, camera, client, roomId)
+        ? getManualControls(navigate, microphone, screenShare, localPeerContext.video, client, roomId)
         : [
           getAutomaticControls(
             navigate,

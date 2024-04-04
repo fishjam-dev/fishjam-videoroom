@@ -32,6 +32,8 @@ type Props = {
 };
 
 export const LocalPeerMediaProvider = ({ children }: Props) => {
+  const { manualMode } = useDeveloperInfo();
+
   const { init } = useSetupMedia({
     camera: {
       trackConstraints: VIDEO_TRACK_CONSTRAINTS,
@@ -48,8 +50,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       // todo add replaceTrackOnChange: boolean
       trackConstraints: AUDIO_TRACK_CONSTRAINTS,
       defaultTrackMetadata: { active: true, type: "audio" },
-      broadcastOnConnect: true,
-      broadcastOnDeviceStart: true
+      broadcastOnConnect: !manualMode.status,
+      broadcastOnDeviceStart: !manualMode.status
     },
     screenShare: {
       streamConfig: {
