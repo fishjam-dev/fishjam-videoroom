@@ -11,7 +11,7 @@ import MediaControlButton from "../../../pages/room/components/MediaControlButto
 import { useModal } from "../../../contexts/ModalContext";
 import useSmartphoneViewport from "../../shared/hooks/useSmartphoneViewport";
 
-const showSettingsButton = false;
+const showSettingsButton = true;
 
 const Navbar: FC = () => {
   const match = useParams();
