@@ -87,7 +87,7 @@ defmodule Videoroom.Meeting do
   end
 
   defp create_new_room(client, name) do
-    with {:ok, room, jellyfish_address} <- Room.create(client),
+    with {:ok, room, jellyfish_address} <- Room.create(client, [peerlessPurgeTimeout: 10]),
          client <- Jellyfish.Client.update_address(client, jellyfish_address),
          :ok <- add_room_to_registry(client, name, room) do
       {:ok, room, jellyfish_address}
