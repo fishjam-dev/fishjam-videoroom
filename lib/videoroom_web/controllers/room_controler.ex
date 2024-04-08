@@ -47,8 +47,7 @@ defmodule VideoroomWeb.RoomController do
   action_fallback VideoroomWeb.FallbackController
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def show(conn, %{"room_name" => name}=params) do
-    IO.inspect(params)
+  def show(conn, %{"room_name" => name}) do
     case RoomService.add_peer(name) do
       {:ok, token, jellyfish_address} ->
         conn
@@ -60,8 +59,7 @@ defmodule VideoroomWeb.RoomController do
   end
 
   @spec start_recording(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def start_recording(conn, %{"room_name" => name}=params) do
-    IO.inspect(params)
+  def start_recording(conn, %{"room_name" => name}) do
     case RoomService.start_recording(name) do
       {:ok, _component} -> resp(conn, 200, "Recording started")
       error -> resp(conn, 503, inspect(error))

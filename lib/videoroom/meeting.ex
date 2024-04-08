@@ -59,7 +59,6 @@ defmodule Videoroom.Meeting do
   @spec start_recording(name()) :: {:ok, Component.Recording.t()} | {:error, binary()}
   def start_recording(meeting_name) do
     try do
-      IO.inspect("Meeting #{meeting_name}")
       GenServer.call(registry_id(meeting_name), {:start_recording})
     catch
       :exit, {:noproc, error} ->
