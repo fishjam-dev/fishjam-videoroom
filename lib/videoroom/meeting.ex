@@ -142,14 +142,14 @@ defmodule Videoroom.Meeting do
 
   @impl true
   def handle_call({:start_recording}, _from, state) do
-    IO.inspect("Meeting handle call")
+    Logger.info("Starting recording: #{state.room_id}")
 
     case Room.add_component(state.client, state.room_id, %Component.Recording{}) do
       {:ok, component} ->
         {:reply, {:ok, component}, state}
 
       error ->
-        IO.inspect(error)
+        Logger.error("Error when starting recording #{error}")
         {:reply, {:error, "Failed to start recording"}, state}
     end
   end
