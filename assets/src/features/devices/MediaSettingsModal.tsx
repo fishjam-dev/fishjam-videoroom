@@ -7,7 +7,7 @@ import { Checkbox } from "../shared/components/Checkbox";
 import { useRecording } from "../recording/useRecording";
 import Button from "../shared/components/Button";
 
-const showBlurCheckbox = false;
+const showBlurCheckbox = true;
 
 export const MediaSettingsModal: React.FC = () => {
   const { setOpen, isOpen } = useModal();

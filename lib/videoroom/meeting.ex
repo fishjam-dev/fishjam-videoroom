@@ -21,8 +21,7 @@ defmodule Videoroom.Meeting do
       :room_id,
       :peer_timers,
       :peer_timeout,
-      :jellyfish_address,
-      :s3_credentials
+      :jellyfish_address
     ]
 
     defstruct @enforce_keys
@@ -60,6 +59,7 @@ defmodule Videoroom.Meeting do
   @spec start_recording(name()) :: {:ok, Component.Recording.t()} | {:error, binary()}
   def start_recording(meeting_name) do
     try do
+      IO.inspect("Meeting #{meeting_name}")
       GenServer.call(registry_id(meeting_name), {:start_recording})
     catch
       :exit, {:noproc, error} ->
@@ -82,7 +82,6 @@ defmodule Videoroom.Meeting do
 
     with {:ok, room, jellyfish_address} <- create_new_room(client, name) do
       peer_timeout = Application.fetch_env!(:videoroom, :peer_join_timeout)
-      s3_credentials = Application.fetch_env!(:videoroom, :s3_credentials)
 
       client = Jellyfish.Client.update_address(client, jellyfish_address)
 
@@ -95,8 +94,7 @@ defmodule Videoroom.Meeting do
          room_id: room.id,
          peer_timers: %{},
          peer_timeout: peer_timeout,
-         jellyfish_address: jellyfish_address,
-         s3_credentials: s3_credentials
+         jellyfish_address: jellyfish_address
        }}
     else
       {:error, reason} ->
@@ -106,7 +104,7 @@ defmodule Videoroom.Meeting do
   end
 
   defp create_new_room(client, name) do
-    with {:ok, room, jellyfish_address} <- Room.create(client),
+    with {:ok, room, jellyfish_address} <- Room.create(client, [video_codec: "h264"]),
          client <- Jellyfish.Client.update_address(client, jellyfish_address),
          :ok <- add_room_to_registry(client, name, room) do
       {:ok, room, jellyfish_address}
@@ -145,12 +143,11 @@ defmodule Videoroom.Meeting do
 
   @impl true
   def handle_call({:start_recording}, _from, state) do
-    case Room.add_component(state.client, state.room_id, %Component.Recording{
-           credentials: state.s3_credentials,
-           path_prefix: "videoroom"
-         }) do
+    IO.inspect("Meeting handle call")
+    case Room.add_component(state.client, state.room_id, %Component.Recording{}) do
       {:ok, component} -> {:reply, {:ok, component}, state}
-      _error -> {:reply, {:error, "Failed to start recording"}, state}
+      error -> IO.inspect(error)
+        {:reply, {:error, "Failed to start recording"}, state}
     end
   end
 
