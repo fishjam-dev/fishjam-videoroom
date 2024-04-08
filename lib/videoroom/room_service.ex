@@ -32,31 +32,14 @@ defmodule Videoroom.RoomService do
   def init(_init_arg) do
     {:ok, supervisor} = DynamicSupervisor.start_link([])
 
-    notifier =
-      :videoroom
-      |> Application.fetch_env!(:jellyfish_addresses)
-      |> Enum.reduce_while(nil, fn jellyfish_address, nil ->
-        case WSNotifier.start_link(server_address: jellyfish_address) do
-          {:ok, notifier} ->
-            Logger.info("Successfully connected to #{jellyfish_address}")
-            WSNotifier.subscribe_server_notifications(notifier)
-            Process.monitor(notifier)
-            {:halt, {jellyfish_address, notifier}}
+    {:ok, %{supervisor: supervisor, notifier: nil}, {:continue, []}}
+  end
 
-          {:error, reason} ->
-            Logger.warning(
-              "Unable to connect to #{jellyfish_address}, reason: #{inspect(reason)}"
-            )
+  @impl true
+  def handle_continue(_none, state) do
+    notifier = start_notifier()
 
-            {:cont, nil}
-        end
-      end)
-
-    if notifier == nil do
-      raise("Unable to connect to any jellyfish")
-    end
-
-    {:ok, %{supervisor: supervisor, notifier: notifier}}
+    {:noreply, %{state | notifier: notifier}}
   end
 
   @impl true
@@ -100,8 +83,46 @@ defmodule Videoroom.RoomService do
 
   @impl true
   def handle_info({:DOWN, _ref, :process, _object, _reason}, state) do
-    Logger.warning("Jellyfish WSNotifier exited")
+    Logger.warning("Jellyfish WSNotifier exited. Starting new notifier")
+
+    notifier = start_notifier()
+
+    {:noreply, %{state | notifier: notifier}}
+  end
+
+  @impl true
+  def handle_info(msg, state) do
+    Logger.warning("Ignored message: #{inspect(msg)}")
+
     {:noreply, state}
+  end
+
+  defp start_notifier() do
+    notifier =
+      :videoroom
+      |> Application.fetch_env!(:jellyfish_addresses)
+      |> Enum.reduce_while(nil, fn jellyfish_address, nil ->
+        case WSNotifier.start(server_address: jellyfish_address) do
+          {:ok, notifier} ->
+            Logger.info("Successfully connected to #{jellyfish_address}")
+            WSNotifier.subscribe_server_notifications(notifier)
+            Process.monitor(notifier)
+            {:halt, {jellyfish_address, notifier}}
+
+          {:error, reason} ->
+            Logger.warning(
+              "Unable to connect to #{jellyfish_address}, reason: #{inspect(reason)}"
+            )
+
+            {:cont, nil}
+        end
+      end)
+
+    if notifier == nil do
+      raise("Unable to connect to any jellyfish")
+    else
+      notifier
+    end
   end
 
   defp handle_unexpected_notification(%Jellyfish.Notification.RoomDeleted{}), do: :ok
