@@ -103,7 +103,7 @@ defmodule Videoroom.Meeting do
   end
 
   defp create_new_room(client, name) do
-    with {:ok, room, jellyfish_address} <- Room.create(client, [video_codec: "h264"]),
+    with {:ok, room, jellyfish_address} <- Room.create(client, video_codec: "h264"),
          client <- Jellyfish.Client.update_address(client, jellyfish_address),
          :ok <- add_room_to_registry(client, name, room) do
       {:ok, room, jellyfish_address}
@@ -143,9 +143,13 @@ defmodule Videoroom.Meeting do
   @impl true
   def handle_call({:start_recording}, _from, state) do
     IO.inspect("Meeting handle call")
+
     case Room.add_component(state.client, state.room_id, %Component.Recording{}) do
-      {:ok, component} -> {:reply, {:ok, component}, state}
-      error -> IO.inspect(error)
+      {:ok, component} ->
+        {:reply, {:ok, component}, state}
+
+      error ->
+        IO.inspect(error)
         {:reply, {:error, "Failed to start recording"}, state}
     end
   end
