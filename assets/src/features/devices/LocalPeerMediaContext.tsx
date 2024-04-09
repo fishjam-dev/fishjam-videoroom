@@ -5,12 +5,11 @@ import {
   VIDEO_TRACK_CONSTRAINTS
 } from "../../pages/room/consts";
 import { PeerMetadata, TrackMetadata, useCamera, useClient, useMicrophone, useSetupMedia } from "../../jellyfish.types";
-import { ClientEvents, UseCameraResult } from "@jellyfish-dev/react-client-sdk";
+import { ClientEvents, UseCameraResult, SimulcastConfig } from "@jellyfish-dev/react-client-sdk";
 import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
 import EmptyVideoWorker from "./emptyVideoWorker.ts?worker";
-import { SimulcastConfig } from "@jellyfish-dev/ts-client-sdk";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
@@ -74,10 +73,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const { simulcast } = useDeveloperInfo();
   const simulcastEnabled = simulcast.status;
 
-  useEffect(() => {
-    console.log({ simulcastEnabled });
-  }, []);
-
   const blurRef = useRef<boolean>(false);
 
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -128,9 +123,13 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     }
 
     if (client.status === "joined") {
-      if (!remoteTrackIdRef.current && streamRef.current && trackRef.current) {
+      const lastCameraTrack = Object.values(client?.local?.tracks || {})
+        .some((track) => track?.metadata?.type === "camera");
+
+      const newTrack = trackRef.current;
+      if (!lastCameraTrack && streamRef.current && newTrack) {
         const mediaStream = new MediaStream();
-        mediaStream.addTrack(trackRef.current);
+        mediaStream.addTrack(newTrack);
 
         broadcastedStreamRef.current = mediaStream;
 
@@ -140,7 +139,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
             : undefined;
 
         remoteTrackIdRef.current = await client.addTrack(
-          trackRef.current,
+          newTrack,
           mediaStream,
           { active: metadataActive, type: "camera" },
           simulcastConfig,
@@ -331,7 +330,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const microphone = useMicrophone();
 
   const setDevice = useCallback(async (cameraId: string | null, microphoneId: string | null, blur: boolean) => {
-    if (microphoneId) {
+    if (microphoneId && microphoneIntentionRef.current) {
       microphone.start(microphoneId);
     }
 
@@ -347,7 +346,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       }
     }
 
-    if (cameraId) {
+    if (cameraId && cameraIntentionRef.current) {
       video.start(cameraId);
     }
   }, [video]);
