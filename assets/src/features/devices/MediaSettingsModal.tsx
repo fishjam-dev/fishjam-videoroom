@@ -4,6 +4,8 @@ import { useModal } from "../../contexts/ModalContext";
 import { useLocalPeer } from "./LocalPeerMediaContext";
 import { Modal } from "../shared/components/modal/Modal";
 import { Checkbox } from "../shared/components/Checkbox";
+import { useRecording } from "../recording/useRecording";
+import Button from "../shared/components/Button";
 
 const showBlurCheckbox = false;
 
@@ -13,6 +15,7 @@ export const MediaSettingsModal: React.FC = () => {
   const [videoInput, setVideoInput] = useState<string | null>(null);
   const [audioInput, setAudioInput] = useState<string | null>(null);
   const [blurInput, setBlurInput] = useState(blur);
+  const { canStartRecording, startRecording } = useRecording();
 
   useEffect(() => {
     if (video.devices && video.deviceInfo?.deviceId) {
@@ -65,6 +68,10 @@ export const MediaSettingsModal: React.FC = () => {
         setInput={setAudioInput}
         inputValue={audioInput}
       />
+      <div className="flex justify-center mt-4">
+      <Button onClick={startRecording} variant="light" disabled={!canStartRecording}>
+        Start recording (experimental)
+      </Button></div>
     </Modal>
   );
 };

@@ -7,7 +7,6 @@ import { ToastProvider } from "./features/shared/context/ToastContext";
 import { ModalProvider } from "./contexts/ModalContext";
 import { LocalMediaMessagesBoundary } from "./features/devices/LocalMediaMessagesBoundary";
 import { LocalPeerMediaProvider } from "./features/devices/LocalPeerMediaContext";
-import { MediaSettingsModal } from "./features/devices/MediaSettingsModal";
 import { disableSafariCache } from "./features/devices/disableSafariCache";
 import ReactModal from "react-modal";
 import "./index.css";
@@ -34,7 +33,6 @@ const App: FC = () => {
                   <StreamingErrorBoundary>
                     <StreamingProvider>
                       <RouterProvider router={router} />
-                      <MediaSettingsModal />
                     </StreamingProvider>
                   </StreamingErrorBoundary>
                 </LocalMediaMessagesBoundary>

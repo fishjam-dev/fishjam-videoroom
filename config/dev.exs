@@ -43,8 +43,7 @@ config :jellyfish_server_sdk,
 # configured to run both http and https servers on
 # different ports.
 
-jellyfish_addresses =
-  System.get_env("BE_JF_ADDRESSES", "localhost:5002 localhost:5003")
+jellyfish_addresses = System.get_env("BE_JF_ADDRESSES", "localhost:5002 localhost:5003")
 
 jellyfish_addresses = String.split(jellyfish_addresses, " ")
 
