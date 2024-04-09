@@ -129,10 +129,6 @@ const ConnectComponent: FC<ConnectComponentProps> = (
 
     client?.on("joined", callback);
 
-    window["ws-close"] = () => {
-      client["client"]["websocket"].close();
-    };
-
     return () => {
       client?.removeListener("joined", callback);
       intervalId && clearInterval(intervalId);
@@ -144,9 +140,6 @@ const ConnectComponent: FC<ConnectComponentProps> = (
   useEffect(() => {
     getTokenAndAddress(roomId)
       .then((tokenAndAddress) => {
-
-        // todo make connect in membrane js idempotent
-        // because i get two connect event from this hook
         return connect({
           peerMetadata: { name: username },
           token: tokenAndAddress.token,

@@ -127,6 +127,7 @@ const getAutomaticControls = (
 ];
 
 //dev helpers
+// todo fix manual mode
 const getManualControls = (
   navigate: NavigateFunction,
   microphone: UseMicrophoneResult<TrackMetadata>,

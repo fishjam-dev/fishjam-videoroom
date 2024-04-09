@@ -10,7 +10,6 @@ import Settings from "../icons/Settings";
 import MediaControlButton from "../../../pages/room/components/MediaControlButton";
 import { useModal } from "../../../contexts/ModalContext";
 import useSmartphoneViewport from "../../shared/hooks/useSmartphoneViewport";
-import { useStatus } from "../../../jellyfish.types";
 
 const Navbar: FC = () => {
   const match = useParams();
@@ -26,8 +25,6 @@ const Navbar: FC = () => {
 
   const isSmartphone = useSmartphoneViewport().isSmartphone;
 
-  const status = useStatus();
-
   return (
     <div className="flex w-full max-w-full flex-row justify-between gap-y-4">
       {!isSmartphone ? (
@@ -40,7 +37,7 @@ const Navbar: FC = () => {
       <div className={clsx("flex flex-row items-center gap-x-3 font-aktivGrotesk")}>
         {!isSmartphone && (
           <>
-            <span>({status})Invite link</span>
+            <span>Invite link</span>
             <Button
               onClick={onLinkCopy}
               variant="light"

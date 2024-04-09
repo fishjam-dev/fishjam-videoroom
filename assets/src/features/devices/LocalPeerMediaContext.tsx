@@ -10,6 +10,7 @@ import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
 import EmptyVideoWorker from "./emptyVideoWorker.ts?worker";
+import { SimulcastConfig } from "@jellyfish-dev/ts-client-sdk";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
@@ -73,6 +74,10 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   const { simulcast } = useDeveloperInfo();
   const simulcastEnabled = simulcast.status;
 
+  useEffect(() => {
+    console.log({ simulcastEnabled });
+  }, []);
+
   const blurRef = useRef<boolean>(false);
 
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -129,20 +134,25 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
         broadcastedStreamRef.current = mediaStream;
 
+        const simulcastConfig: SimulcastConfig | undefined =
+          simulcastEnabled
+            ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] }
+            : undefined;
+
         remoteTrackIdRef.current = await client.addTrack(
           trackRef.current,
           mediaStream,
-          // todo think about track.enabled
           { active: metadataActive, type: "camera" },
-          simulcastEnabled ? { enabled: true, activeEncodings: ["l", "m", "h"], disabledEncodings: [] } : undefined,
+          simulcastConfig,
           selectBandwidthLimit("camera", simulcastEnabled)
         );
       } else if (remoteTrackIdRef.current && trackRef.current) {
-        // todo add setter as an alternative to setting whole object
         broadcastedStreamRef.current?.removeTrack(broadcastedStreamRef.current?.getVideoTracks()[0]);
         broadcastedStreamRef.current?.addTrack(trackRef.current);
 
-        // todo when you replaceTrack this not affects stream so local peer don't know that something changes
+        // todo
+        //  When you replaceTrack, this does not affect the stream, so the local peer doesn't know that something has changed.
+        //  add localTrackReplaced event
         const newMetadata: TrackMetadata = { active: metadataActive, type: "camera" };
 
         await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, newMetadata);
@@ -151,7 +161,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         remoteTrackIdRef.current = null;
       }
     }
-  }, [setStream, setTrack]);
+  }, [setStream, setTrack, simulcastEnabled]);
 
   useEffect(() => {
     const managerInitialized: ClientEvents<PeerMetadata, TrackMetadata>["managerInitialized"] = (event) => {
@@ -163,35 +173,13 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       trackRef.current = event.video?.media?.track || null;
       streamRef.current = event.video?.media?.stream || null;
 
-      const snapshot = client;
-
-      const cameraId = snapshot?.media?.video?.media?.deviceInfo?.deviceId || null;
+      const cameraId = client?.media?.video?.media?.deviceInfo?.deviceId || null;
 
       if (cameraId) {
         lastCameraIdRef.current = cameraId;
       }
     };
 
-
-    /*
-     * Przypadki:
-     * 1) uruchamiam kamerę i następnie wchodze do pokoju
-     *    - intencja: true, ma być włączona
-     *    - leci event
-     *        - disconnect (czyli wyłączam)
-     *        - i następnie joined (czyli uruchamiam bo intencja true)
-     *    - sprawdzam intencje i wiem, że muszę uruchomić ponownie
-     * 2) Wychodzę z pokoju i wracam
-     *    - leci event disconnect -> czyli wyłączam
-     *    - intencja jest true
-     *    - wracam do pokoju czyli leci
-     *        - connect (uruchamiam bo intencja jest true)
-     *        - disconnect (wyłączam)
-     *        - connect uruchamiam (bo inencja jest true)
-     *
-     * Czy z tego powodu wynika, że za każdym razem jak uruchamiam urządzenie, to sprawdzam czy jestem joined
-     * i jak tak to dodaję
-     */
     const joinedHandler: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = async () => {
       const stream = client.devices.camera.stream;
       const track = client.devices.camera.track;
