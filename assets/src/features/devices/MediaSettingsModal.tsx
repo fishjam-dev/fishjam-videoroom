@@ -4,6 +4,8 @@ import { useModal } from "../../contexts/ModalContext";
 import { useLocalPeer } from "./LocalPeerMediaContext";
 import { Modal } from "../shared/components/modal/Modal";
 import { Checkbox } from "../shared/components/Checkbox";
+import { useRecording } from "../recording/useRecording";
+import Button from "../shared/components/Button";
 import { useCamera, useMicrophone } from "../../jellyfish.types.ts";
 
 export const MediaSettingsModal: React.FC = () => {
@@ -15,6 +17,7 @@ export const MediaSettingsModal: React.FC = () => {
 
   const [videoInput, setVideoInput] = useState<string | null>(null);
   const [audioInput, setAudioInput] = useState<string | null>(null);
+  const { canStartRecording, startRecording } = useRecording();
   const [blurInput, setBlurInput] = useState(false);
 
   useEffect(() => {
@@ -67,6 +70,11 @@ export const MediaSettingsModal: React.FC = () => {
         setInput={setAudioInput}
         inputValue={audioInput}
       />
+      <div className="flex justify-center mt-4">
+        {canStartRecording && <Button onClick={startRecording} variant="light" disabled={!canStartRecording}>
+          Start recording (experimental)
+        </Button>}
+      </div>
     </Modal>
   );
 };

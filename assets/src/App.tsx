@@ -7,12 +7,10 @@ import { ToastProvider } from "./features/shared/context/ToastContext";
 import { ModalProvider } from "./contexts/ModalContext";
 import { LocalMediaMessagesBoundary } from "./features/devices/LocalMediaMessagesBoundary";
 import { LocalPeerMediaProvider } from "./features/devices/LocalPeerMediaContext";
-import { MediaSettingsModal } from "./features/devices/MediaSettingsModal";
 import { disableSafariCache } from "./features/devices/disableSafariCache";
 import ReactModal from "react-modal";
 import "./index.css";
 
-// import { StreamingProvider } from "./features/streaming/StreamingContext";
 import { StreamingErrorBoundary } from "./features/streaming/StreamingErrorBoundary";
 import { JellyfishContextProvider } from "./jellyfish.types";
 
@@ -32,10 +30,7 @@ const App: FC = () => {
               <ModalProvider>
                 <LocalMediaMessagesBoundary>
                   <StreamingErrorBoundary>
-                    {/*<StreamingProvider>*/}
                     <RouterProvider router={router} />
-                    <MediaSettingsModal />
-                    {/*</StreamingProvider>*/}
                   </StreamingErrorBoundary>
                 </LocalMediaMessagesBoundary>
               </ModalProvider>

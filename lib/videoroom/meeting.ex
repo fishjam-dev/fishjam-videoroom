@@ -6,8 +6,9 @@ defmodule Videoroom.Meeting do
 
   require Logger
 
+  alias Jellyfish.Component
   alias Jellyfish.Room
-  alias Jellyfish.Notification.{PeerConnected, PeerCrashed, RoomCrashed}
+  alias Jellyfish.Notification.{PeerConnected, PeerCrashed, PeerDisconnected, RoomCrashed}
 
   alias Videoroom.RoomRegistry
 
@@ -55,6 +56,21 @@ defmodule Videoroom.Meeting do
     end
   end
 
+  @spec start_recording(name()) :: {:ok, Component.Recording.t()} | {:error, binary()}
+  def start_recording(meeting_name) do
+    try do
+      GenServer.call(registry_id(meeting_name), {:start_recording})
+    catch
+      :exit, {:noproc, error} ->
+        Logger.error(
+          "Failed to call start_recording because meeting #{meeting_name} doesn't exist, error: #{inspect(error)}"
+        )
+
+        {:error,
+         "Failed to call start_recording to meeting #{meeting_name} because of error: #{inspect(error)}"}
+    end
+  end
+
   # Callbacks
 
   @impl true
@@ -87,7 +103,7 @@ defmodule Videoroom.Meeting do
   end
 
   defp create_new_room(client, name) do
-    with {:ok, room, jellyfish_address} <- Room.create(client, [peerlessPurgeTimeout: 10]),
+    with {:ok, room, jellyfish_address} <- Room.create(client, video_codec: :h264),
          client <- Jellyfish.Client.update_address(client, jellyfish_address),
          :ok <- add_room_to_registry(client, name, room) do
       {:ok, room, jellyfish_address}
@@ -125,6 +141,20 @@ defmodule Videoroom.Meeting do
   end
 
   @impl true
+  def handle_call({:start_recording}, _from, state) do
+    Logger.info("Starting recording: #{state.room_id}")
+
+    case Room.add_component(state.client, state.room_id, %Component.Recording{}) do
+      {:ok, component} ->
+        {:reply, {:ok, component}, state}
+
+      error ->
+        Logger.error("Error when starting recording #{error}")
+        {:reply, {:error, "Failed to start recording"}, state}
+    end
+  end
+
+  @impl true
   def handle_info({:jellyfish, notification}, state) do
     Logger.info("Jellyfish notification: #{inspect(notification)}")
     handle_notification(notification, state)
@@ -144,7 +174,7 @@ defmodule Videoroom.Meeting do
   end
 
   defp handle_notification(%type{peer_id: peer_id}, state)
-       when type in [PeerCrashed] do
+       when type in [PeerDisconnected, PeerCrashed] do
     delete_peer(peer_id, state)
   end
 

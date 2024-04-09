@@ -8,7 +8,8 @@ defmodule VideoroomWeb.Router do
   scope "/api", VideoroomWeb do
     pipe_through :api
 
-    resources "/room/", RoomController, only: [:show]
+    get "/room/:room_name", RoomController, :show
+    post "/room/:room_name/start_recording", RoomController, :start_recording
   end
 
   # Enable LiveDashboard in development

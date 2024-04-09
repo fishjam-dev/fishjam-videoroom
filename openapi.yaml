@@ -19,7 +19,7 @@ info:
   version: 0.1.0
 openapi: 3.0.0
 paths:
-  /api/room/{id}:
+  /api/room/{room_name}:
     get:
       callbacks: {}
       description: Create a new peer in a room and get its token
@@ -51,6 +51,34 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Error
       summary: Join a room
+      tags:
+        - room
+  /api/room/{room_name}/start_recording:
+    post:
+      callbacks: {}
+      description: Starts recording in the specified room
+      operationId: VideoroomWeb.RoomController.start_recording
+      parameters:
+        - description: Room name
+          in: path
+          name: room_name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeerToken'
+          description: Recording started response
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
+      summary: Start recording in a room
       tags:
         - room
 security: []

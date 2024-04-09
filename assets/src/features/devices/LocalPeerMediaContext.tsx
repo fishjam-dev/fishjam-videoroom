@@ -123,6 +123,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     }
 
     if (client.status === "joined") {
+      console.log("Joined!")
       if (!remoteTrackIdRef.current && streamRef.current && trackRef.current) {
         const mediaStream = new MediaStream();
         mediaStream.addTrack(trackRef.current);

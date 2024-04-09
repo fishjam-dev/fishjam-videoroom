@@ -1,7 +1,7 @@
 import { toPairs } from "ramda";
 import { TrackWithId } from "./pages/types";
 import { ApiTrack, RemotePeer } from "./pages/room/hooks/usePeerState";
-import { Client, create, State } from "@jellyfish-dev/react-client-sdk";
+import { create, State } from "@jellyfish-dev/react-client-sdk";
 import { z } from "zod";
 
 const trackTypeSchema = z.union([z.literal("screensharing"), z.literal("camera"), z.literal("audio")]);
@@ -30,6 +30,7 @@ export const {
   useMicrophone,
   useScreenShare,
   useTracks,
+  useClient,
   JellyfishContextProvider
 } = create<PeerMetadata, TrackMetadata>({
   peerMetadataParser: (obj) => peerMetadataSchema.parse(obj),
@@ -40,9 +41,6 @@ export const {
     delay: 5
   }
 }, { storage: true });
-
-export const useClient = (): Client<PeerMetadata, TrackMetadata> =>
-  useSelector((s) => s.client);
 
 export const useCurrentUserVideoTrackId = (): string | null =>
   useSelector(
@@ -69,23 +67,24 @@ export const toLocalTrackSelector = (state: State<PeerMetadata, TrackMetadata>, 
     })[0] || null;
 
 export const toRemotePeerSelector = (state: State<PeerMetadata, TrackMetadata>): RemotePeer[] => {
-  return toPairs(state?.remote || {}).map(([peerId, peer]) => {
-    const tracks: ApiTrack[] = toPairs(peer.tracks || {}).map(([trackId, track]) => {
+  return toPairs(state?.remote || {})
+    .map(([peerId, peer]) => {
+      const tracks: ApiTrack[] = toPairs(peer.tracks || {}).map(([trackId, track]) => {
+        return {
+          trackId,
+          metadata: track.metadata || undefined,
+          isSpeaking: track.vadStatus === "speech",
+          encoding: track.encoding || undefined,
+          mediaStream: track.stream || undefined,
+          mediaStreamTrack: track.track || undefined
+        };
+      });
+
       return {
-        trackId,
-        metadata: track.metadata || undefined,
-        isSpeaking: track.vadStatus === "speech",
-        encoding: track.encoding || undefined,
-        mediaStream: track.stream || undefined,
-        mediaStreamTrack: track.track || undefined
+        id: peerId,
+        displayName: peer?.metadata?.name || "",
+        source: "remote",
+        tracks
       };
     });
-
-    return {
-      id: peerId,
-      displayName: peer?.metadata?.name || "",
-      source: "remote",
-      tracks
-    };
-  });
 };

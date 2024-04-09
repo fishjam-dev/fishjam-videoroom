@@ -6,15 +6,11 @@ import PageLayout from "../../features/room-page/components/PageLayout";
 import { useAcquireWakeLockAutomatically } from "./hooks/useAcquireWakeLockAutomatically";
 import clsx from "clsx";
 import RoomSidebar from "./RoomSidebar";
-// import { useConnect, useClient } from "../../jellyfish.types.ts";
 import { useClient, useConnect, useDisconnect } from "../../jellyfish.types.ts";
 import { useUser } from "../../contexts/UserContext";
-// import { getSignalingAddress } from "./consts";
-// import { getTokenAndAddress } from "../../room.api";
-// import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
 import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 import { InboundRtpId, useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
-import { AudioStatsSchema, VideoStatsSchema } from "./components/StreamPlayer/rtcMosScore.ts";
+import { AudioStatsSchema, VideoStatsSchema } from "./components/StreamPlayer/rtcMOS1.ts";
 import { getTokenAndAddress } from "../../room.api.tsx";
 import { getSignalingAddress } from "./consts.ts";
 
@@ -28,7 +24,7 @@ type ConnectComponentProps = {
 const ConnectComponent: FC<ConnectComponentProps> = (
   {
     username,
-    roomId,
+    roomId
     // wasCameraDisabled
     // wasMicrophoneDisabled
   }) => {
