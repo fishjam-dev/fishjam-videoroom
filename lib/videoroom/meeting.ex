@@ -103,7 +103,7 @@ defmodule Videoroom.Meeting do
   end
 
   defp create_new_room(client, name) do
-    with {:ok, room, jellyfish_address} <- Room.create(client, video_codec: "h264"),
+    with {:ok, room, jellyfish_address} <- Room.create(client, video_codec: :h264),
          client <- Jellyfish.Client.update_address(client, jellyfish_address),
          :ok <- add_room_to_registry(client, name, room) do
       {:ok, room, jellyfish_address}
