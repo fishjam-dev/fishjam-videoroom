@@ -17,31 +17,20 @@ import { getSignalingAddress } from "./consts.ts";
 type ConnectComponentProps = {
   username: string;
   roomId: string;
-  wasMicrophoneDisabled: boolean;
-  wasCameraDisabled: boolean;
 };
 
 const ConnectComponent: FC<ConnectComponentProps> = (
   {
     username,
     roomId
-    // wasCameraDisabled
-    // wasMicrophoneDisabled
   }) => {
   const connect = useConnect();
-  // const streaming = useStreaming();
 
   const localPeer = useLocalPeer();
   const localPeerRef = useRef(localPeer);
   useEffect(() => {
     localPeerRef.current = localPeer;
   }, [localPeer]);
-
-  // const { video } = localPeer;
-  // useEffect(() => {
-  //   if (!wasCameraDisabled && !video.stream) video.start();
-  //   // if (!wasMicrophoneDisabled && !audio.stream) audio.start();
-  // }, [video.stream]);
 
   const client = useClient();
   const { statistics } = useDeveloperInfo();
@@ -176,8 +165,6 @@ const ConnectComponent: FC<ConnectComponentProps> = (
 
 type Props = {
   roomId: string;
-  wasCameraDisabled: boolean;
-  wasMicrophoneDisabled: boolean;
 };
 
 const getGroupedStats = (result: Record<string, any>, type: string) => Object.entries(result)
@@ -187,7 +174,7 @@ const getGroupedStats = (result: Record<string, any>, type: string) => Object.en
     return prev;
   }, {});
 
-const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled }: Props) => {
+const RoomPage: FC<Props> = ({ roomId }: Props) => {
   useAcquireWakeLockAutomatically();
 
   const [showSimulcastMenu, toggleSimulcastMenu] = useToggle(false);
@@ -202,12 +189,9 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
     statistics.setStatus(!statistics.status);
   };
 
-  const client = useClient();
-
   return (
     <PageLayout>
-      {username && <ConnectComponent username={username} roomId={roomId} wasCameraDisabled={wasCameraDisabled}
-                                     wasMicrophoneDisabled={wasMicrophoneDisabled} />}
+      {username && <ConnectComponent username={username} roomId={roomId} />}
       <div className="flex h-full w-full flex-col gap-y-4">
         {/* main grid - videos + future chat */}
         <section
@@ -238,15 +222,6 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
             type="submit"
           >
             {statistics.status ? "Hide statistics" : "Show statistics"}
-          </button>
-          <button onClick={() => {
-            console.log({ client });
-          }}>Show state
-          </button>
-
-          <button onClick={() => {
-            window["ws-close"]();
-          }}>Close socket
           </button>
         </div>
       </div>

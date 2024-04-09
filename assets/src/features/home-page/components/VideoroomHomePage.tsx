@@ -15,8 +15,7 @@ import HomePageLayout from "./HomePageLayout";
 
 import HomePageVideoTile from "./HomePageVideoTile";
 import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
-import { useClient, useMicrophone } from "../../../jellyfish.types.ts";
-
+import { useMicrophone } from "../../../jellyfish.types.ts";
 
 const VideoroomHomePage: FC = () => {
   const lastDisplayName: string | null = localStorage.getItem("displayName");
@@ -31,10 +30,6 @@ const VideoroomHomePage: FC = () => {
 
   const { simulcast, manualMode, smartLayerSwitching } = useDeveloperInfo();
 
-  // const [searchParams] = useSearchParams();
-  // const simulcastParam: string = searchParams?.get("simulcast") || "true";
-  // const simulcastDefaultValue: boolean = simulcastParam === "true";
-  // right now Jellyfish does not support simulcast
   const simulcastDefaultValue = true;
 
   const [simulcastInput, toggleSimulcastCheckbox] = useToggle(simulcastDefaultValue);
@@ -65,33 +60,9 @@ const VideoroomHomePage: FC = () => {
   const navigate = useNavigate();
   const { video } = useLocalPeer();
   const microphone = useMicrophone();
-  // const wasVideoStarted = useRef(false);
-  // const wasAudioStarted = useRef(false);
-
-  // useEffect(() => {
-  //   if (!wasVideoStarted.current && !video.stream) {
-  //     video.start();
-  //     wasVideoStarted.current = true;
-  //   }
-  //   if (!wasAudioStarted.current && !microphone.stream) {
-  //     microphone.start();
-  //     wasAudioStarted.current = true;
-  //   }
-  // }, [microphone.stream, video.stream]);
-
-  // const connect = useConnect();
 
   const onJoin = useCallback((e: SyntheticEvent) => {
     e.preventDefault();
-
-    // getTokenAndAddress(roomId).then((tokenAndAddress) => {
-    //   return connect({
-    //     peerMetadata: { name: displayNameInput },
-    //     token: tokenAndAddress.token,
-    //     signaling: getSignalingAddress(tokenAndAddress.serverAddress)
-    //   });
-    // });
-
 
     localStorage.setItem("displayName", displayNameInput);
     setUsername(displayNameInput);
@@ -100,7 +71,7 @@ const VideoroomHomePage: FC = () => {
     manualMode.setManualMode(manualModeInput);
 
     const href = (e.target as HTMLAnchorElement).pathname;
-    navigate(href, { state: { wasCameraDisabled: !video.enabled, wasMicrophoneDisabled: !microphone.enabled } });
+    navigate(href);
   }, [
     displayNameInput,
     manualMode,
@@ -115,8 +86,6 @@ const VideoroomHomePage: FC = () => {
     microphone
   ]);
 
-  const client = useClient();
-
   const inputs = useMemo(() => {
     return (
       <>
@@ -125,10 +94,6 @@ const VideoroomHomePage: FC = () => {
             className="mt-2 flex w-full items-center justify-center gap-x-2 text-center text-lg font-medium sm:mt-0 sm:flex-col sm:text-base sm:font-normal">
             <span>You are joining:</span>
             <span className="sm:text-2xl sm:font-medium">{roomId}</span>
-            <button onClick={() => {
-              console.log(client);
-            }}>Show state
-            </button>
           </div>
         ) : (
           <Input

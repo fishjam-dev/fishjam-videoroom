@@ -5,19 +5,16 @@ import { useNavigate } from "react-router-dom";
 
 interface Props {
   roomId: string;
-  wasCameraDisabled: boolean;
-  wasMicrophoneDisabled: boolean;
 }
 
-const LeavingRoomScreen: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled }) => {
+const LeavingRoomScreen: FC<Props> = ({ roomId }) => {
   const navigate = useNavigate();
 
   const rejoinHref = `/room/${roomId}`;
 
   const onRejoin = (e: SyntheticEvent) => {
     e.preventDefault();
-    // todo remove { state: { wasCameraDisabled, wasMicrophoneDisabled}}
-    navigate(rejoinHref, { state: { wasCameraDisabled, wasMicrophoneDisabled}});
+    navigate(rejoinHref);
   }
 
   return (

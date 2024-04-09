@@ -42,7 +42,7 @@ const getAutomaticControls = (
   microphone: UseMicrophoneResult<TrackMetadata>,
   screenShare: UseScreenShareResult<TrackMetadata>,
   camera: UseCameraResult<TrackMetadata>,
-  localPeerContext: LocalPeerContext,
+  localPeerContext: LocalPeerContext
 ): ControlButton[] => [
   camera.stream
     ? {
@@ -51,7 +51,7 @@ const getAutomaticControls = (
       hover: "Turn off the camera",
       buttonClassName: neutralButtonStyle,
       onClick: () => {
-        localPeerContext.toggleCamera(false)
+        localPeerContext.toggleCamera(false);
       }
     }
     : {
@@ -60,7 +60,7 @@ const getAutomaticControls = (
       icon: CameraOff,
       buttonClassName: activeButtonStyle,
       onClick: () => {
-        localPeerContext.toggleCamera(true)
+        localPeerContext.toggleCamera(true);
       }
     },
   microphone.stream
@@ -70,7 +70,7 @@ const getAutomaticControls = (
       hover: "Turn off the microphone",
       buttonClassName: neutralButtonStyle,
       onClick: () => {
-        localPeerContext.toggleMicrophone(false)
+        localPeerContext.toggleMicrophone(false);
       }
     }
     : {
@@ -79,7 +79,7 @@ const getAutomaticControls = (
       hover: "Turn on the microphone",
       buttonClassName: activeButtonStyle,
       onClick: () => {
-        localPeerContext.toggleMicrophone(true)
+        localPeerContext.toggleMicrophone(true);
         // todo implement replace track with silence
       }
     },
@@ -119,9 +119,7 @@ const getAutomaticControls = (
     onClick: () => {
       navigate(`/room/${roomId}`, {
         state: {
-          isLeavingRoom: true,
-          wasCameraDisabled: !camera.enabled,
-          wasMicrophoneDisabled: !microphone.enabled
+          isLeavingRoom: true
         }
       });
     }
@@ -419,7 +417,7 @@ const MediaControlButtons: FC<MediaControlButtonsProps> =
             microphone,
             screenShare,
             camera,
-            localPeerContext,
+            localPeerContext
           )
         ];
     return (
