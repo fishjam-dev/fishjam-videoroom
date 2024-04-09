@@ -6,33 +6,36 @@ import { Modal } from "../shared/components/modal/Modal";
 import { Checkbox } from "../shared/components/Checkbox";
 import { useRecording } from "../recording/useRecording";
 import Button from "../shared/components/Button";
-
-const showBlurCheckbox = false;
+import { useCamera, useMicrophone } from "../../jellyfish.types.ts";
 
 export const MediaSettingsModal: React.FC = () => {
   const { setOpen, isOpen } = useModal();
-  const { video, audio, blur, setBlur } = useLocalPeer();
+  const { setDevice } = useLocalPeer();
+
+  const camera = useCamera();
+  const microphone = useMicrophone();
+
   const [videoInput, setVideoInput] = useState<string | null>(null);
   const [audioInput, setAudioInput] = useState<string | null>(null);
-  const [blurInput, setBlurInput] = useState(blur);
   const { canStartRecording, startRecording } = useRecording();
+  const [blurInput, setBlurInput] = useState(false);
 
   useEffect(() => {
-    if (video.devices && video.deviceInfo?.deviceId) {
-      setVideoInput(video.deviceInfo?.deviceId);
+    if (camera.devices && camera.deviceInfo?.deviceId) {
+      setVideoInput(camera.deviceInfo?.deviceId);
     }
-  }, [video.devices, video.deviceInfo?.deviceId]);
+  }, [camera.devices, camera.deviceInfo?.deviceId]);
 
   useEffect(() => {
-    if (audio.devices && audio.deviceInfo?.deviceId) {
-      setAudioInput(audio.deviceInfo.deviceId);
+    if (microphone.devices && microphone.deviceInfo?.deviceId) {
+      setAudioInput(microphone.deviceInfo.deviceId);
     }
-  }, [audio.devices, audio.deviceInfo?.deviceId]);
+  }, [microphone.devices, microphone.deviceInfo?.deviceId]);
 
   const handleClose = () => {
     setOpen(false);
-    setAudioInput(audio.deviceInfo?.deviceId ?? null);
-    setVideoInput(video.deviceInfo?.deviceId ?? null);
+    setAudioInput(microphone.deviceInfo?.deviceId ?? null);
+    setVideoInput(camera.deviceInfo?.deviceId ?? null);
   };
 
   return (
@@ -43,9 +46,7 @@ export const MediaSettingsModal: React.FC = () => {
       closable
       cancelClassName="!text-additional-red-100"
       onConfirm={() => {
-        video.start(videoInput || undefined);
-        audio.start(audioInput || undefined);
-        setBlur(blurInput);
+        setDevice(videoInput, audioInput, blurInput);
         setOpen(false);
       }}
       onCancel={handleClose}
@@ -53,25 +54,27 @@ export const MediaSettingsModal: React.FC = () => {
       isOpen={isOpen}
     >
       <div className="flex flex-col gap-2">
-        <DeviceSelector name="Select camera" devices={video.devices} setInput={setVideoInput} inputValue={videoInput} />
-        {showBlurCheckbox && <Checkbox
+        <DeviceSelector name="Select camera" devices={camera.devices} setInput={setVideoInput}
+                        inputValue={videoInput} />
+        <Checkbox
           label="Blur background (experimental)"
           id="blur-background-checkbox"
           onChange={() => setBlurInput((prev) => !prev)}
           status={blurInput}
           textSize="base"
-        />}
+        />
       </div>
       <DeviceSelector
         name="Select microphone"
-        devices={audio.devices}
+        devices={microphone.devices}
         setInput={setAudioInput}
         inputValue={audioInput}
       />
       <div className="flex justify-center mt-4">
-      <Button onClick={startRecording} variant="light" disabled={!canStartRecording}>
-        Start recording (experimental)
-      </Button></div>
+        {canStartRecording && <Button onClick={startRecording} variant="light" disabled={!canStartRecording}>
+          Start recording (experimental)
+        </Button>}
+      </div>
     </Modal>
   );
 };

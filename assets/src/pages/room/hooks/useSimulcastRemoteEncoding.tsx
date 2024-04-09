@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
-import { useApi } from "../../../jellyfish.types";
+import { useClient } from "../../../jellyfish.types.ts";
 
 export type UseSimulcastRemoteEncodingResult = {
   targetEncoding: TrackEncoding | null;
@@ -10,11 +10,10 @@ export type UseSimulcastRemoteEncodingResult = {
 export const useSimulcastRemoteEncoding = (
   peerId: string | null,
   trackId: string | null
-  // webrtc: MembraneWebRTC | null
 ): UseSimulcastRemoteEncodingResult => {
   const [targetEncoding, setTargetEncodingState] = useState<TrackEncoding | null>(null);
 
-  const api = useApi();
+  const client = useClient();
 
   const lastSelectedEncoding = useRef<TrackEncoding | null>(null);
   const setTargetEncoding = useCallback(
@@ -23,10 +22,10 @@ export const useSimulcastRemoteEncoding = (
       lastSelectedEncoding.current = encoding;
       setTargetEncodingState(encoding);
 
-      if (!trackId || !peerId || !api) return;
-      api.setTargetTrackEncoding(trackId, encoding);
+      if (!trackId || !peerId || !client) return;
+      client.setTargetTrackEncoding(trackId, encoding);
     },
-    [peerId, trackId, api]
+    [peerId, trackId, client]
   );
 
   return { setTargetEncoding, targetEncoding };

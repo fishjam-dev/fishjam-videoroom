@@ -21,26 +21,14 @@ const RoomPageWrapper: React.FC = () => {
   const roomId: string | undefined = match?.roomId;
   const { state } = useLocation();
   const isLeavingRoom = !!state?.isLeavingRoom;
-  const wasCameraDisabled = !!state?.wasCameraDisabled;
-  const wasMicrophoneDisabled = !!state?.wasMicrophoneDisabled;
 
   const { username } = useUser();
 
   if (isLeavingRoom && roomId) {
-    return (
-      <LeavingRoomScreen
-        roomId={roomId}
-        wasCameraDisabled={wasCameraDisabled}
-        wasMicrophoneDisabled={wasMicrophoneDisabled}
-      />
-    );
+    return (<LeavingRoomScreen roomId={roomId} />);
   }
 
-  return username && roomId ? (
-    <RoomPage roomId={roomId} wasCameraDisabled={wasCameraDisabled} wasMicrophoneDisabled={wasMicrophoneDisabled} />
-  ) : (
-    <VideoroomHomePage />
-  );
+  return username && roomId ? (<RoomPage roomId={roomId} />) : (<VideoroomHomePage />);
 };
 
 export const router = createBrowserRouter([
@@ -50,17 +38,17 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <VideoroomHomePage />,
+        element: <VideoroomHomePage />
       },
 
       {
         path: "/room/:roomId",
-        element: <RoomPageWrapper />,
+        element: <RoomPageWrapper />
       },
       {
         path: "*",
-        element: <Page404 />,
-      },
-    ],
-  },
+        element: <Page404 />
+      }
+    ]
+  }
 ]);

@@ -5,6 +5,7 @@ export type StreamSource = (typeof StreamSourceValues)[number];
 
 export type TrackWithId = {
   stream?: MediaStream;
+  track?: MediaStreamTrack;
   remoteTrackId: string | null;
   encodingQuality: TrackEncoding | null;
   metadata?: any; // eslint-disable-line @typescript-eslint/no-explicit-any

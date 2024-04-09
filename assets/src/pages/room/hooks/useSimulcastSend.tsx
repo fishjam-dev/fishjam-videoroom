@@ -1,6 +1,6 @@
 import { useToggle } from "./useToggle";
 import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
-import { useApi, useCurrentUserVideoTrackId } from "../../../jellyfish.types";
+import { useClient, useCurrentUserVideoTrackId } from "../../../jellyfish.types";
 
 export type UseSimulcastLocalEncoding = {
   highQuality: boolean;
@@ -12,7 +12,7 @@ export type UseSimulcastLocalEncoding = {
 };
 
 export const useSimulcastSend = (): UseSimulcastLocalEncoding => {
-  const api = useApi();
+  const client = useClient()
   const trackId = useCurrentUserVideoTrackId();
 
   const toggleRemoteEncoding = (status: boolean, encodingName: TrackEncoding) => {
@@ -20,7 +20,7 @@ export const useSimulcastSend = (): UseSimulcastLocalEncoding => {
       throw Error("Toggling simulcast layer is not possible when trackId is null");
     }
 
-    status ? api?.enableTrackEncoding(trackId, encodingName) : api?.disableTrackEncoding(trackId, encodingName);
+    status ? client?.enableTrackEncoding(trackId, encodingName) : client?.disableTrackEncoding(trackId, encodingName);
   };
 
   const [highQuality, toggleHighQuality] = useToggle(true, (encoding) => {

@@ -1,81 +1,5 @@
-import { UseCameraResult } from "@jellyfish-dev/react-client-sdk";
 import { FilesetResolver, ImageSegmenter, ImageSegmenterCallback } from "@mediapipe/tasks-vision";
-import { useState, useRef, useReducer, useEffect, useCallback } from "react";
-import { useApi } from "../../jellyfish.types";
 import BlurWorker from "./BlurProcessorWorker?worker";
-
-export function useBlur<T>(video: UseCameraResult<T>): {
-  blur: boolean;
-  setBlur: (status: boolean) => void;
-  video: UseCameraResult<T>;
-} {
-  const [blur, setBlur] = useState(false);
-  const [prevStream, setPrevStream] = useState(video.stream);
-  const processor = useRef<BlurProcessor | null>(null);
-  const [, rerender] = useReducer((p) => p + 1, 0);
-  const api = useApi();
-  const apiRef = useRef(api);
-
-  useEffect(() => {
-    apiRef.current = api;
-  }, [api]);
-
-  useEffect(() => {
-    if (!video.stream) {
-      if (processor.current) {
-        processor.current.destroy();
-        processor.current = null;
-        setPrevStream(null);
-      }
-      return;
-    }
-    if(!blur) return;
-
-    if (prevStream === video.stream) return;
-    setPrevStream(video.stream);
-    processor.current = new BlurProcessor(video.stream);
-
-    return () => {
-      processor.current?.destroy();
-      processor.current = null;
-      setPrevStream(null);
-    };
-  }, [video.stream, blur]);
-
-  const stream = processor.current?.stream ?? null;
-  const track = processor.current?.track ?? null;
-
-  const setEnable = useCallback(
-    (enabled: boolean) => {
-      if (track) track.enabled = enabled;
-      rerender();
-    },
-    [track]
-  );
-
-  const noop: () => Promise<any> = useCallback((..._args) => Promise.resolve(), []);
-
-  return {
-    blur,
-    setBlur,
-    video: {
-      stream,
-      track,
-      addTrack: noop,
-      removeTrack: noop,
-      replaceTrack: noop,
-      broadcast: video.broadcast,
-      deviceInfo: video.deviceInfo,
-      devices: video.devices,
-      enabled: track?.enabled ?? false,
-      error: video.error,
-      setEnable: setEnable,
-      start: video.start,
-      status: video.status,
-      stop: video.stop,
-    },
-  };
-}
 
 export class BlurProcessor {
   private width: number;
@@ -133,12 +57,12 @@ export class BlurProcessor {
 
     this.initMediaPipe();
     this.initWebgl();
-    
+
     document.addEventListener("visibilitychange", this.visibilityListener)
     this.worker.onmessage = this.onFrameCallback;
     this.video.requestVideoFrameCallback(this.onFrameCallback);
   }
-  
+
   private visibilityListener = () => {
       if (document.visibilityState === "visible") {
         this.worksInForeground = true;
@@ -244,7 +168,7 @@ export class BlurProcessor {
 
   private onFrameCallback = () => {
     if (this.destroyed) return;
-    
+
     if (!this.segmenter || this.prevVideoTime >= this.video.currentTime) {
       if (this.worksInForeground) {
         this.video.requestVideoFrameCallback(this.onFrameCallback);

@@ -101,6 +101,7 @@ const prepareScreenSharingStreams = (
 export const VideochatSection: FC<Props> = ({ showSimulcast, unpinnedTilesHorizontal }: Props) => {
   const video = useSelector((state) => toLocalTrackSelector(state, "camera"));
   const audio = useSelector((state) => toLocalTrackSelector(state, "audio"));
+
   const screenSharing = useSelector((state) => toLocalTrackSelector(state, "screensharing"));
   const { peerId, initials } = useSelector((state) => ({
     peerId: state?.local?.id || "Unknown",

@@ -2,7 +2,6 @@ import { FC } from "react";
 
 import MediaControlButton, { MediaControlButtonProps } from "./MediaControlButton";
 import { NavigateFunction, useNavigate, useParams } from "react-router-dom";
-import { StreamingMode } from "../hooks/useMembraneMediaStreaming";
 import { useToggle } from "../hooks/useToggle";
 import Microphone from "../../../features/room-page/icons/Microphone";
 import MicrophoneOff from "../../../features/room-page/icons/MicrophoneOff";
@@ -14,11 +13,20 @@ import Chat from "../../../features/room-page/icons/Chat";
 import useSmartphoneViewport from "../../../features/shared/hooks/useSmartphoneViewport";
 import MenuDots from "../../../features/room-page/icons/MenuDots";
 import { activeButtonStyle, neutralButtonStyle, redButtonStyle } from "../../../features/room-page/consts";
-import { LocalPeerContext, useLocalPeer } from "../../../features/devices/LocalPeerMediaContext";
-import { StreamingContext, useStreaming } from "../../../features/streaming/StreamingContext";
 import { useDeveloperInfo } from "../../../contexts/DeveloperInfoContext";
+import {
+  PeerMetadata,
+  TrackMetadata,
+  useCamera,
+  useClient,
+  useMicrophone,
+  useScreenShare
+} from "../../../jellyfish.types.ts";
+import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult, Client } from "@jellyfish-dev/react-client-sdk";
+import { LocalPeerContext, useLocalPeer } from "../../../features/devices/LocalPeerMediaContext.tsx";
 
 type ControlButton = MediaControlButtonProps & { id: string };
+export type StreamingMode = "manual" | "automatic";
 
 type Sidebar = {
   isSidebarOpen: boolean;
@@ -26,91 +34,82 @@ type Sidebar = {
 };
 
 const getAutomaticControls = (
-  { microphone, camera }: StreamingContext,
-  local: LocalPeerContext,
   navigate: NavigateFunction,
   roomId: string | null,
   isSidebarOpen: boolean,
   openSidebar: () => void,
-  isMobileViewport?: boolean
+  isMobileViewport: boolean,
+  microphone: UseMicrophoneResult<TrackMetadata>,
+  screenShare: UseScreenShareResult<TrackMetadata>,
+  camera: UseCameraResult<TrackMetadata>,
+  localPeerContext: LocalPeerContext
 ): ControlButton[] => [
-  local.video.enabled
+  camera.stream
     ? {
-        id: "cam-off",
-        icon: Camera,
-        hover: "Turn off the camera",
-        buttonClassName: neutralButtonStyle,
-        onClick: () => {
-          local.video.setEnable(false);
-          camera.setActive(false);
-        },
+      id: "cam-off",
+      icon: Camera,
+      hover: "Turn off the camera",
+      buttonClassName: neutralButtonStyle,
+      onClick: () => {
+        localPeerContext.toggleCamera(false);
       }
+    }
     : {
-        id: "cam-on",
-        hover: "Turn on the camera",
-        icon: CameraOff,
-        buttonClassName: activeButtonStyle,
-        onClick: () => {
-          if (local.video.stream) {
-            local.video.setEnable(true);
-            camera.setActive(true);
-          } else {
-            local.video.start();
-          }
-        },
-      },
-  local.audio.enabled
+      id: "cam-on",
+      hover: "Turn on the camera",
+      icon: CameraOff,
+      buttonClassName: activeButtonStyle,
+      onClick: () => {
+        localPeerContext.toggleCamera(true);
+      }
+    },
+  microphone.stream
     ? {
-        id: "mic-mute",
-        icon: Microphone,
-        hover: "Turn off the microphone",
-        buttonClassName: neutralButtonStyle,
-        onClick: () => {
-          local.audio.setEnable(false);
-          microphone.setActive(false);
-        },
+      id: "mic-mute",
+      icon: Microphone,
+      hover: "Turn off the microphone",
+      buttonClassName: neutralButtonStyle,
+      onClick: () => {
+        localPeerContext.toggleMicrophone(false);
       }
+    }
     : {
-        id: "mic-unmute",
-        icon: MicrophoneOff,
-        hover: "Turn on the microphone",
-        buttonClassName: activeButtonStyle,
-        onClick: () => {
-          if (local.audio.stream) {
-            local.audio.setEnable(true);
-            microphone.setActive(true);
-          } else {
-            local.audio.start();
-          }
-        },
-      },
-  local.screenShare.enabled
+      id: "mic-unmute",
+      icon: MicrophoneOff,
+      hover: "Turn on the microphone",
+      buttonClassName: activeButtonStyle,
+      onClick: () => {
+        localPeerContext.toggleMicrophone(true);
+        // todo implement replace track with silence
+      }
+    },
+  screenShare.enabled
     ? {
-        id: "screenshare-stop",
-        icon: Screenshare,
-        hover: "Stop sharing your screen",
-        buttonClassName: neutralButtonStyle,
-        hideOnMobile: true,
-        onClick: () => {
-          local.screenShare.stop();
-        },
+      id: "screenshare-stop",
+      icon: Screenshare,
+      hover: "Stop sharing your screen",
+      buttonClassName: neutralButtonStyle,
+      hideOnMobile: true,
+      onClick: () => {
+        screenShare.stop();
       }
+    }
     : {
-        id: "screenshare-start",
-        icon: Screenshare,
-        hover: "Share your screen",
-        buttonClassName: neutralButtonStyle,
-        hideOnMobile: true,
-        onClick: () => {
-          local.screenShare.start();
-        },
-      },
+      id: "screenshare-start",
+      icon: Screenshare,
+      hover: "Share your screen",
+      buttonClassName: neutralButtonStyle,
+      hideOnMobile: true,
+      onClick: () => {
+        screenShare.start();
+      }
+    },
   {
     id: "chat",
     icon: isMobileViewport ? MenuDots : Chat,
     hover: isMobileViewport ? undefined : isSidebarOpen ? "Close the sidebar" : "Open the sidebar",
     buttonClassName: isSidebarOpen ? activeButtonStyle : neutralButtonStyle,
-    onClick: openSidebar,
+    onClick: openSidebar
   },
   {
     id: "leave-room",
@@ -118,288 +117,336 @@ const getAutomaticControls = (
     hover: "Leave the room",
     buttonClassName: redButtonStyle,
     onClick: () => {
-      navigate(`/room/${roomId}`, { state: { isLeavingRoom: true, wasCameraDisabled: !local.video.enabled, wasMicrophoneDisabled: !local.audio.enabled } });
-    },
-  },
+      navigate(`/room/${roomId}`, {
+        state: {
+          isLeavingRoom: true
+        }
+      });
+    }
+  }
 ];
 
 //dev helpers
+// todo fix manual mode
 const getManualControls = (
-  { microphone, camera, screenShare }: StreamingContext,
-  local: LocalPeerContext,
   navigate: NavigateFunction,
+  microphone: UseMicrophoneResult<TrackMetadata>,
+  screenShare: UseScreenShareResult<TrackMetadata>,
+  camera: UseCameraResult<TrackMetadata>,
+  client: Client<PeerMetadata, TrackMetadata>,
   roomId?: string
-): ControlButton[][] => 
+): ControlButton[][] =>
   [
-  [
-    local.audio.stream
-      ? {
+    [
+      microphone.stream
+        ? {
           id: "mic-stop",
           icon: Microphone,
           buttonClassName: neutralButtonStyle,
           hover: "Start the microphone",
-          onClick: () => local.audio.stop(),
+          onClick: () => microphone.stop()
         }
-      : {
+        : {
           id: "mic-start",
           icon: MicrophoneOff,
           buttonClassName: activeButtonStyle,
           hover: "Stop the microphone",
-          onClick: () => local.audio.start(),
+          onClick: () => microphone.start()
         },
-    local.audio.enabled
-      ? {
+      microphone.enabled
+        ? {
           id: "mic-disable",
           icon: Microphone,
           buttonClassName: neutralButtonStyle,
           hover: "Disable microphone stream",
-          onClick: () => local.audio.setEnable(false),
+          onClick: () => microphone.setEnable(false)
         }
-      : {
+        : {
           id: "mic-enable",
           icon: MicrophoneOff,
           buttonClassName: activeButtonStyle,
           hover: "Enable microphone stream",
-          onClick: () => local.audio.setEnable(true),
+          onClick: () => microphone.setEnable(true)
         },
-    local.audio.broadcast?.trackId
-      ? {
+      microphone.broadcast?.trackId
+        ? {
           id: "mic-remove",
           icon: Microphone,
           buttonClassName: neutralButtonStyle,
           hover: "Remove microphone track",
-          onClick: () => microphone.removeTracks(),
+          onClick: () => microphone.removeTrack()
         }
-      : {
+        : {
           id: "mic-add",
           icon: MicrophoneOff,
           buttonClassName: activeButtonStyle,
           hover: "Add microphone track",
-          onClick: () => local.audio.stream && microphone.addTracks(),
+          onClick: () => microphone.stream && microphone.addTrack({ type: "audio", active: microphone.enabled })
         },
-    local.audio.broadcast?.metadata?.active
-      ? {
+      microphone.broadcast?.metadata?.active
+        ? {
           id: "mic-metadata-false",
           icon: Microphone,
           buttonClassName: neutralButtonStyle,
           hover: "Set 'active' metadata to 'false'",
-          onClick: () => microphone.setActive(false),
+          onClick: () => {
+            if (microphone.broadcast?.trackId && microphone.broadcast.metadata) {
+              const prevMetadata = microphone.broadcast.metadata;
+              client.updateTrackMetadata(microphone.broadcast?.trackId, { ...prevMetadata, active: false });
+            }
+          }
         }
-      : {
+        : {
           id: "mic-metadata-true",
           icon: MicrophoneOff,
           buttonClassName: activeButtonStyle,
           hover: "Set 'active' metadata to 'true'",
-          onClick: () => microphone.setActive(true),
-        },
-  ],
-  [
-    local.video.stream
-      ? {
+          onClick: () => {
+            if (microphone.broadcast?.trackId && microphone.broadcast.metadata) {
+              const prevMetadata = microphone.broadcast.metadata;
+              client.updateTrackMetadata(microphone.broadcast?.trackId, { ...prevMetadata, active: true });
+            }
+          }
+        }
+    ],
+    [
+      camera.stream
+        ? {
           id: "cam-stop",
           icon: Camera,
           buttonClassName: neutralButtonStyle,
           hover: "Turn off the camera",
-          onClick: () => 
-            local.video.stop()
-          
+          onClick: () =>
+            camera.stop()
+
         }
-      : {
+        : {
           id: "cam-start",
           hover: "Turn on the camera",
           icon: CameraOff,
           buttonClassName: activeButtonStyle,
-          onClick: () => 
-            local.video.start()
-          
+          onClick: () =>
+            camera.start()
+
         },
-    local.video.enabled
-      ? {
+      // todo fix this
+      camera.enabled
+        ? {
           id: "cam-disable",
           icon: Camera,
           buttonClassName: neutralButtonStyle,
           hover: "Disable the camera stream",
-          onClick: () => local.video.setEnable(false),
+          onClick: () => camera.setEnable(false)
         }
-      : {
+        : {
           id: "cam-enable",
           hover: "Enable the the camera stream",
           icon: CameraOff,
           buttonClassName: activeButtonStyle,
-          onClick: () => local.video.setEnable(true),
+          onClick: () => camera.setEnable(true)
         },
-    local.video.broadcast?.trackId
-      ? {
+      // todo fix this
+      camera.broadcast?.trackId
+        ? {
           id: "cam-remove",
           icon: Camera,
           buttonClassName: neutralButtonStyle,
           hover: "Remove camera track",
-          onClick: () => camera.removeTracks()
+          onClick: () => camera.removeTrack()
         }
-      : {
+        : {
           id: "cam-add",
           icon: CameraOff,
           buttonClassName: activeButtonStyle,
           hover: "Add camera track",
-          onClick: () => local.video.stream && camera.addTracks()
+          onClick: () => camera.stream && camera.addTrack({ type: "camera", active: camera.enabled })
         },
-    local.video.broadcast?.metadata?.active
-      ? {
+      camera.broadcast?.metadata?.active
+        ? {
           id: "cam-metadata-false",
           icon: Camera,
           buttonClassName: neutralButtonStyle,
           hover: "Set 'active' metadata to 'false'",
-          onClick: () => camera.setActive(false),
+          onClick: () => {
+            if (camera.broadcast?.trackId && camera.broadcast.metadata) {
+              const prevMetadata = camera.broadcast.metadata;
+              client.updateTrackMetadata(camera.broadcast?.trackId, { ...prevMetadata, active: false });
+            }
+          }
         }
-      : {
+        : {
           id: "cam-metadata-true",
           icon: CameraOff,
           buttonClassName: activeButtonStyle,
           hover: "Set 'active' metadata to 'true'",
-          onClick: () => camera.setActive(true),
-        },
-  ],
-  [
-    local.screenShare.stream
-      ? {
+          onClick: () => {
+            if (camera.broadcast?.trackId && camera.broadcast.metadata) {
+              const prevMetadata = camera.broadcast.metadata;
+              client.updateTrackMetadata(camera.broadcast?.trackId, { ...prevMetadata, active: true });
+            }
+          }
+        }
+    ],
+    [
+      screenShare.stream
+        ? {
           id: "screen-stop",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
           hover: "Stop the screensharing",
           hideOnMobile: true,
-          onClick: () => local.screenShare.stop(),
+          onClick: () => screenShare.stop()
         }
-      : {
+        : {
           id: "screen-start",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
-          hover: "Start the screensharing",
+          hover: "Start the screen share",
           hideOnMobile: true,
-          onClick: () => local.screenShare.start(),
+          onClick: () => screenShare.start()
         },
-    local.screenShare.enabled
-      ? {
+      screenShare.enabled
+        ? {
           id: "screen-disable",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
-          hover: "Disable screensharing stream",
+          hover: "Disable screen share stream",
           hideOnMobile: true,
-          onClick: () => local.screenShare.setEnable(false),
+          onClick: () => screenShare.setEnable(false)
         }
-      : {
+        : {
           id: "screen-enable",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
-          hover: "Enable screensharing stream",
+          hover: "Enable screen share stream",
           hideOnMobile: true,
-          onClick: () => local.screenShare.setEnable(true),
+          onClick: () => screenShare.setEnable(true)
         },
-    local.screenShare.broadcast?.trackId
-      ? {
+      screenShare.broadcast?.trackId
+        ? {
           id: "screen-remove",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
-          hover: "Remove screensharing track",
+          hover: "Remove screen share track",
           hideOnMobile: true,
-          onClick: () => screenShare.removeTracks(),
+          onClick: () => screenShare.removeTrack()
         }
-      : {
+        : {
           id: "screen-add",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
-          hover: "Add screensharing track",
+          hover: "Add screen share track",
           hideOnMobile: true,
-          onClick: () => local.screenShare.stream && screenShare.addTracks(),
+          onClick: () => screenShare.stream && screenShare.addTrack()
         },
-    local.screenShare.broadcast?.metadata?.active
-      ? {
+      screenShare.broadcast?.metadata?.active
+        ? {
           id: "screen-metadata-false",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
           hover: "Set 'active' metadata to 'false'",
           hideOnMobile: true,
-          onClick: () => screenShare.setActive(false),
+          onClick: () => {
+            if (screenShare.broadcast?.trackId && screenShare.broadcast.metadata) {
+              const prevMetadata = screenShare.broadcast.metadata;
+              client.updateTrackMetadata(screenShare.broadcast?.trackId, { ...prevMetadata, active: false });
+            }
+
+          }
         }
-      : {
+        : {
           id: "screen-metadata-true",
           icon: Screenshare,
           buttonClassName: neutralButtonStyle,
           hover: "Set 'active' metadata to 'true'",
           hideOnMobile: true,
-          onClick: () => screenShare.setActive(true),
-        },
-  ],
-  [
-    {
-      id: "leave-room",
-      icon: HangUp,
-      hover: "Leave the room",
-      buttonClassName: redButtonStyle,
-      onClick: () => {
-        navigate(`/room/${roomId}`, { state: { isLeavingRoom: true } });
-      },
-    },
-  ],
-];
+          onClick: () => {
+            if (screenShare.broadcast?.trackId && screenShare.broadcast.metadata) {
+              const prevMetadata = screenShare.broadcast.metadata;
+              client.updateTrackMetadata(screenShare.broadcast?.trackId, { ...prevMetadata, active: true });
+            }
+          }
+        }
+    ],
+    [
+      {
+        id: "leave-room",
+        icon: HangUp,
+        hover: "Leave the room",
+        buttonClassName: redButtonStyle,
+        onClick: () => {
+          navigate(`/room/${roomId}`, { state: { isLeavingRoom: true } });
+        }
+      }
+    ]
+  ];
 
 type MediaControlButtonsProps = Sidebar;
 
-const MediaControlButtons: FC<MediaControlButtonsProps> = ({
-  openSidebar,
-  isSidebarOpen,
-}: MediaControlButtonsProps) => {
-  const { manualMode } = useDeveloperInfo();
-  const mode: StreamingMode = manualMode.status ? "manual" : "automatic";
+const MediaControlButtons: FC<MediaControlButtonsProps> =
+  ({
+     openSidebar,
+     isSidebarOpen
+   }: MediaControlButtonsProps) => {
+    const { manualMode } = useDeveloperInfo();
+    const mode: StreamingMode = manualMode.status ? "manual" : "automatic";
 
-  const [show, toggleShow] = useToggle(true);
-  const streaming = useStreaming();
-  const { isSmartphone } = useSmartphoneViewport();
-  const { roomId } = useParams();
+    const [show, toggleShow] = useToggle(true);
+    const { isSmartphone } = useSmartphoneViewport();
+    const { roomId } = useParams();
 
-  const navigate = useNavigate();
-  const localPeer = useLocalPeer();
+    const navigate = useNavigate();
 
-  // todo fix sidebar
-  const controls: ControlButton[][] =
-    mode === "manual"
-      ? getManualControls(streaming, localPeer, navigate, roomId)
-      : [
+    const camera: UseCameraResult<TrackMetadata> = useCamera();
+    const microphone: UseMicrophoneResult<TrackMetadata> = useMicrophone();
+    const screenShare: UseScreenShareResult<TrackMetadata> = useScreenShare();
+    const client = useClient();
+
+    const localPeerContext = useLocalPeer();
+
+    // todo fix sidebar
+    const controls: ControlButton[][] =
+      mode === "manual"
+        ? getManualControls(navigate, microphone, screenShare, localPeerContext.video, client, roomId)
+        : [
           getAutomaticControls(
-            streaming,
-            localPeer,
             navigate,
             roomId || null,
             isSidebarOpen,
             openSidebar,
-            isSmartphone
-          ),
+            !!isSmartphone,
+            microphone,
+            screenShare,
+            camera,
+            localPeerContext
+          )
         ];
-  return (
-    <div>
-      <div
-        onClick={toggleShow}
-        className="absolute left-1/2 top-[-15px] z-[-10] h-[15px] w-[50px] -translate-x-1/2 rounded-t-lg hover:bg-brand-dark-gray/90"
-      ></div>
-      {show && (
-        <div className="inset-x-0 z-10 flex flex-wrap justify-center gap-x-4 rounded-t-md">
-          {controls.map((group, index) => (
-            <div key={index} className="flex justify-center gap-x-4">
-              {group.map(({ hover, onClick, buttonClassName, id, icon, hideOnMobile }) => (
-                <MediaControlButton
-                  key={id}
-                  onClick={onClick}
-                  hover={hover}
-                  buttonClassName={buttonClassName}
-                  icon={icon}
-                  hideOnMobile={hideOnMobile}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+    return (
+      <div>
+        <div
+          onClick={toggleShow}
+          className="absolute left-1/2 top-[-15px] z-[-10] h-[15px] w-[50px] -translate-x-1/2 rounded-t-lg hover:bg-brand-dark-gray/90"
+        ></div>
+        {show && (
+          <div className="inset-x-0 z-10 flex flex-wrap justify-center gap-x-4 rounded-t-md">
+            {controls.map((group, index) => (
+              <div key={index} className="flex justify-center gap-x-4">
+                {group.map(({ hover, onClick, buttonClassName, id, icon, hideOnMobile }) => (
+                  <MediaControlButton
+                    key={id}
+                    onClick={onClick}
+                    hover={hover}
+                    buttonClassName={buttonClassName}
+                    icon={icon}
+                    hideOnMobile={hideOnMobile}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
 export default MediaControlButtons;

@@ -1,7 +1,7 @@
 import { FC, PropsWithChildren } from "react";
 import useToast from "../shared/hooks/useToast";
 import useEffectOnChange from "../shared/hooks/useEffectOnChange";
-import { useLocalPeer } from "./LocalPeerMediaContext";
+import { useCamera, useMicrophone, useScreenShare } from "../../jellyfish.types.ts";
 
 const prepareErrorMessage = (videoDeviceError: string | null, audioDeviceError: string | null): null | string => {
   if (videoDeviceError && audioDeviceError) {
@@ -15,12 +15,16 @@ const prepareErrorMessage = (videoDeviceError: string | null, audioDeviceError: 
 
 export const LocalMediaMessagesBoundary: FC<PropsWithChildren> = ({ children }) => {
   const { addToast } = useToast();
-  const { video, audio, screenShare } = useLocalPeer();
+
+  // todo change to events
+  const microphone = useMicrophone()
+  const camera = useCamera()
+  const screenShare = useScreenShare()
 
   useEffectOnChange(
-    [video.error, audio.error],
+    [camera.error, microphone.error],
     () => {
-      const message = prepareErrorMessage(video.error?.name ?? null, audio.error?.name ?? null);
+      const message = prepareErrorMessage(camera.error?.name ?? null, microphone.error?.name ?? null);
 
       if (message) {
         addToast({

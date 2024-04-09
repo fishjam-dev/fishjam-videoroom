@@ -1,7 +1,7 @@
 import { toPairs } from "ramda";
 import { TrackWithId } from "./pages/types";
 import { ApiTrack, RemotePeer } from "./pages/room/hooks/usePeerState";
-import { State, JellyfishClient, create } from "@jellyfish-dev/react-client-sdk";
+import { create, State } from "@jellyfish-dev/react-client-sdk";
 import { z } from "zod";
 
 const trackTypeSchema = z.union([z.literal("screensharing"), z.literal("camera"), z.literal("audio")]);
@@ -24,20 +24,23 @@ export const {
   useSelector,
   useStatus,
   useConnect,
+  useDisconnect,
   useSetupMedia,
   useCamera,
   useMicrophone,
-  useScreenshare,
+  useScreenShare,
   useTracks,
-  JellyfishContextProvider,
-  useApi
+  useClient,
+  JellyfishContextProvider
 } = create<PeerMetadata, TrackMetadata>({
   peerMetadataParser: (obj) => peerMetadataSchema.parse(obj),
-  trackMetadataParser: (obj) => trackMetadataSchema.parse(obj)
-});
-
-export const useJellyfishClient = (): JellyfishClient<PeerMetadata, TrackMetadata> | null =>
-  useSelector((s) => s.connectivity.client);
+  trackMetadataParser: (obj) => trackMetadataSchema.parse(obj),
+  reconnect: {
+    initialDelay: 10, // ms
+    delay: 200, // ms
+    maxAttempts: 1,
+  }
+}, { storage: true });
 
 export const useCurrentUserVideoTrackId = (): string | null =>
   useSelector(
@@ -51,9 +54,10 @@ export const toLocalTrackSelector = (state: State<PeerMetadata, TrackMetadata>, 
   toPairs(state?.local?.tracks || {})
     .filter(([_, value]) => value?.metadata?.type === type)
     .map(([key, value]): TrackWithId => {
-      const { stream, metadata, encoding } = value;
+      const { stream, metadata, encoding, track } = value;
       return {
         stream: stream || undefined,
+        track: track || undefined,
         remoteTrackId: key,
         metadata,
         isSpeaking: true,

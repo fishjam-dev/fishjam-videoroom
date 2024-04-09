@@ -6,31 +6,25 @@ import PageLayout from "../../features/room-page/components/PageLayout";
 import { useAcquireWakeLockAutomatically } from "./hooks/useAcquireWakeLockAutomatically";
 import clsx from "clsx";
 import RoomSidebar from "./RoomSidebar";
-import { useConnect, useJellyfishClient } from "../../jellyfish.types.ts";
+import { useClient, useConnect, useDisconnect } from "../../jellyfish.types.ts";
 import { useUser } from "../../contexts/UserContext";
-import { getSignalingAddress } from "./consts";
-import { getTokenAndAddress } from "../../room.api";
-import { useStreaming } from "../../features/streaming/StreamingContext.tsx";
 import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 import { InboundRtpId, useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
 import { AudioStatsSchema, VideoStatsSchema } from "./components/StreamPlayer/rtcMOS1.ts";
+import { getTokenAndAddress } from "../../room.api.tsx";
+import { getSignalingAddress } from "./consts.ts";
 
 type ConnectComponentProps = {
   username: string;
   roomId: string;
-  wasMicrophoneDisabled: boolean;
-  wasCameraDisabled: boolean;
 };
 
 const ConnectComponent: FC<ConnectComponentProps> = (
   {
     username,
-    roomId,
-    wasCameraDisabled,
-    wasMicrophoneDisabled
+    roomId
   }) => {
   const connect = useConnect();
-  const streaming = useStreaming();
 
   const localPeer = useLocalPeer();
   const localPeerRef = useRef(localPeer);
@@ -38,13 +32,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
     localPeerRef.current = localPeer;
   }, [localPeer]);
 
-  const { video, audio } = localPeer;
-  useEffect(() => {
-    if (!wasCameraDisabled && !video.stream) video.start();
-    if (!wasMicrophoneDisabled && !audio.stream) audio.start();
-  }, [video.stream, audio.stream]);
-
-  const client = useJellyfishClient();
+  const client = useClient();
   const { statistics } = useDeveloperInfo();
 
   let intervalId: NodeJS.Timer | null = null;
@@ -147,26 +135,20 @@ const ConnectComponent: FC<ConnectComponentProps> = (
     };
   }, [client]);
 
+  const disconnect = useDisconnect();
+
   useEffect(() => {
-    const disconnectCallback = getTokenAndAddress(roomId).then((tokenAndAddress) => {
-      return connect({
-        peerMetadata: { name: username },
-        token: tokenAndAddress.token,
-        signaling: getSignalingAddress(tokenAndAddress.serverAddress)
+    getTokenAndAddress(roomId)
+      .then((tokenAndAddress) => {
+        return connect({
+          peerMetadata: { name: username },
+          token: tokenAndAddress.token,
+          signaling: getSignalingAddress(tokenAndAddress.serverAddress)
+        });
       });
-    });
 
     return () => {
-      streaming.camera.removeTracks();
-      streaming.microphone.removeTracks();
-      streaming.screenShare.removeTracks();
-      const { video, audio, screenShare } = localPeerRef.current;
-      video.stop();
-      audio.stop();
-      screenShare.stop();
-      disconnectCallback.then((disconnect) => {
-        disconnect();
-      });
+      disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -176,8 +158,6 @@ const ConnectComponent: FC<ConnectComponentProps> = (
 
 type Props = {
   roomId: string;
-  wasCameraDisabled: boolean;
-  wasMicrophoneDisabled: boolean;
 };
 
 const getGroupedStats = (result: Record<string, any>, type: string) => Object.entries(result)
@@ -187,7 +167,7 @@ const getGroupedStats = (result: Record<string, any>, type: string) => Object.en
     return prev;
   }, {});
 
-const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled }: Props) => {
+const RoomPage: FC<Props> = ({ roomId }: Props) => {
   useAcquireWakeLockAutomatically();
 
   const [showSimulcastMenu, toggleSimulcastMenu] = useToggle(false);
@@ -204,8 +184,7 @@ const RoomPage: FC<Props> = ({ roomId, wasCameraDisabled, wasMicrophoneDisabled 
 
   return (
     <PageLayout>
-      {username && <ConnectComponent username={username} roomId={roomId} wasCameraDisabled={wasCameraDisabled}
-                                     wasMicrophoneDisabled={wasMicrophoneDisabled} />}
+      {username && <ConnectComponent username={username} roomId={roomId} />}
       <div className="flex h-full w-full flex-col gap-y-4">
         {/* main grid - videos + future chat */}
         <section

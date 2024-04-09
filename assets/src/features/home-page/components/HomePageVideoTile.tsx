@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import MediaControlButton from "../../../pages/room/components/MediaControlButton";
 import InitialsImage, { computeInitials } from "../../room-page/components/InitialsImage";
 import { activeButtonStyle, neutralButtonStyle } from "../../room-page/consts";
@@ -8,18 +8,23 @@ import Microphone from "../../room-page/icons/Microphone";
 import MicrophoneOff from "../../room-page/icons/MicrophoneOff";
 import Settings from "../../room-page/icons/Settings";
 import { useModal } from "../../../contexts/ModalContext";
-import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
 import GenericMediaPlayerTile from "../../../pages/room/components/StreamPlayer/GenericMediaPlayerTile";
+import { useMicrophone } from "../../../jellyfish.types.ts";
+import { useLocalPeer } from "../../devices/LocalPeerMediaContext.tsx";
 
 type HomePageVideoTileProps = {
   displayName: string;
 };
 
 const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
-  const { audio, video } = useLocalPeer();
-  
+  const microphone = useMicrophone();
+  const { video, toggleCamera, toggleMicrophone, restartDevices } = useLocalPeer();
   const initials = computeInitials(displayName);
   const { setOpen } = useModal();
+
+  useEffect(() => {
+    restartDevices();
+  }, []);
 
   return (
     <div className="h-full w-full">
@@ -37,7 +42,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn off the camera"
                   buttonClassName={neutralButtonStyle}
                   onClick={() => {
-                    video.stop();
+                    toggleCamera(false);
                   }}
                 />
               ) : (
@@ -46,21 +51,17 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the camera"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    if (video.stream) {
-                      video.setEnable(true);
-                    } else {
-                      video.start();
-                    }
+                    toggleCamera(true);
                   }}
                 />
               )}
-              {audio.enabled ? (
+              {microphone.enabled ? (
                 <MediaControlButton
                   icon={Microphone}
                   hover="Turn off the microphone"
                   buttonClassName={neutralButtonStyle}
                   onClick={() => {
-                    audio.stop();
+                    toggleMicrophone(false);
                   }}
                 />
               ) : (
@@ -69,11 +70,7 @@ const HomePageVideoTile: FC<HomePageVideoTileProps> = ({ displayName }) => {
                   hover="Turn on the microphone"
                   buttonClassName={activeButtonStyle}
                   onClick={() => {
-                    if (audio.stream) {
-                      audio.setEnable(true);
-                    } else {
-                      audio.start();
-                    }
+                    toggleMicrophone(true);
                   }}
                 />
               )}

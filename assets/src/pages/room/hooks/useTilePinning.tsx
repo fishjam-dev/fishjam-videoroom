@@ -4,11 +4,11 @@ import {
   toLocalTrackSelector,
   TrackMetadata,
   TrackType,
-  useJellyfishClient,
+  useClient,
   useSelector
 } from "../../../jellyfish.types";
 import useEffectOnChange from "../../../features/shared/hooks/useEffectOnChange";
-import { MessageEvents } from "@jellyfish-dev/react-client-sdk";
+import { ClientEvents, MessageEvents } from "@jellyfish-dev/react-client-sdk";
 import { LOCAL_SCREEN_SHARING_ID, LOCAL_VIDEO_ID } from "../consts";
 
 type PinningFlags = {
@@ -125,7 +125,7 @@ export type PinState = {
 const useTilePinning = (): TilePinningApi => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
 
-  const client = useJellyfishClient();
+  const client = useClient();
 
   const screenSharing = useSelector((state) => toLocalTrackSelector(state, "screensharing"));
 
@@ -144,8 +144,8 @@ const useTilePinning = (): TilePinningApi => {
       dispatch({ type: "remotePeerAdded", tileId: peer.id });
     };
 
-    const onJoinSuccess: MessageEvents<PeerMetadata, TrackMetadata>["joined"] = (_, peersInRoom) => {
-      peersInRoom.forEach((peer) => {
+    const onJoinSuccess: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = ({ peers }) => {
+      peers.forEach((peer) => {
         dispatch({ type: "remotePeerAdded", tileId: peer.id });
       });
     };
