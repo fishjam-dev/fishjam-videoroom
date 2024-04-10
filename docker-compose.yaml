@@ -1,7 +1,7 @@
 version: '3.8'
 
 x-jellyfish-template: &jellyfish-template
-  image: "ghcr.io/jellyfish-dev/jellyfish:${JELLYFISH_VERSION:-edge}"
+  image: "ghcr.io/jellyfish-dev/jellyfish:${JELLYFISH_VERSION:-0.4.2}"
   restart: unless-stopped
   environment: &jellyfish-environment
     JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN:-development}
@@ -49,7 +49,7 @@ services:
       dockerfile: ./Dockerfile
       args:
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
-        JELLYFISH_VERSION: ${JELLYFISH_VERSION:-0.3.0}
+        JELLYFISH_VERSION: ${JELLYFISH_VERSION:-0.4.2}
         JELLYROOM_VERSION: ${JELLYROOM_VERSION:-build}
     container_name: frontend
     restart: unless-stopped
