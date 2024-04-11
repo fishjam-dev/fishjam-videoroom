@@ -116,6 +116,23 @@ defmodule VideoroomWeb.RoomJsonTest do
 
       assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
     end
+
+    test "Meeting is deleted if room doesn't exist", %{conn: conn, client: client} do
+      {meeting_name, token} = add_peer(conn)
+
+      assert {:ok, [%Room{id: jf_room_id, peers: peers}]} = Room.get_all(client)
+      assert length(peers) == 1
+      _peer = join_room(token)
+
+      assert :ok = Room.delete(client, jf_room_id)
+
+      assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
+
+      conn = get(conn, ~p"/api/room/#{meeting_name}")
+      assert json_response(conn, 503)["errors"] == "Failed to add peer"
+
+      {_name, _token} = add_peer(conn, meeting_name)
+    end
   end
 
   defp add_peer(conn, name \\ nil) do
