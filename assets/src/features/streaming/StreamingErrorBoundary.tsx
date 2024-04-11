@@ -1,7 +1,7 @@
 import { FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import useToast from "../shared/hooks/useToast";
 import { ErrorMessage, messageComparator } from "../../pages/room/errorMessage";
-import { useClient, useScreenShare } from "../../jellyfish.types";
+import { useClient } from "../../jellyfish.types";
 import useEffectOnChange from "../shared/hooks/useEffectOnChange";
 
 export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
@@ -55,14 +55,6 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
       client.off("socketClose", onSocketClose);
     };
   }, [client, handleError]);
-
-  const screenShare = useScreenShare()
-
-  useEffectOnChange(screenShare.stream, () => {
-    if (screenShare.stream) {
-      addToast({ id: "screen-sharing", message: "You are sharing the screen now", timeout: 4000 });
-    }
-  });
 
   useEffectOnChange(
     errorMessage,
