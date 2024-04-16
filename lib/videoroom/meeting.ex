@@ -122,6 +122,8 @@ defmodule Videoroom.Meeting do
 
   @impl true
   def handle_call(:add_peer, _from, state) do
+    text = "Request failed: Room #{state.room_id} does not exist"
+
     case Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC) do
       {:ok, peer, token} ->
         Logger.info("Added peer #{peer.id}")
@@ -130,6 +132,13 @@ defmodule Videoroom.Meeting do
         state = put_in(state.peer_timers[peer.id], timer)
 
         {:reply, {:ok, token, state.jellyfish_address}, state}
+
+      {:error, ^text} ->
+        Logger.error(
+          "Failed to add peer, because of room #{state.room_id} does not exist on jellyfish: #{state.jellyfish_address}"
+        )
+
+        {:stop, :normal, {:error, "Failed to add peer"}, state}
 
       error ->
         Logger.error(

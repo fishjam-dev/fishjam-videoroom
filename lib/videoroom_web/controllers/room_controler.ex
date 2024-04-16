@@ -53,8 +53,11 @@ defmodule VideoroomWeb.RoomController do
         conn
         |> render("show.json", token: token, jellyfish_address: jellyfish_address)
 
-      {:error, reason} ->
-        conn |> resp(503, inspect(reason))
+      {:error, reason} when is_binary(reason) ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> put_status(503)
+        |> json(%{errors: reason})
     end
   end
 
