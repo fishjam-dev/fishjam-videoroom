@@ -80,7 +80,7 @@ defmodule Videoroom.Meeting do
         )
 
         {:error,
-         "Failed to call start_recording to meeting #{meeting_name} because of error: #{inspect(error)}"}
+         "Failed to stop meeting #{meeting_name} because of error: #{inspect(error)}"}
     end
   end
 
