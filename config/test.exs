@@ -14,8 +14,9 @@ config :jellyfish_server_sdk,
 config :videoroom,
   divo: "docker-compose-dev.yaml",
   divo_wait: [dwell: 1500, max_tries: 50],
-  peer_join_timeout: 500,
-  jellyfish_addresses: ["localhost:5002"]
+  jellyfish_addresses: ["localhost:5002"],
+  peer_disconnected_timeout: 1,
+  peerless_purge_timeout: 3
 
 config :logger, level: :info
 

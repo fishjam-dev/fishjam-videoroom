@@ -75,7 +75,27 @@ defmodule Videoroom.RoomService do
       send(pid, {:jellyfish, notification})
     else
       _error ->
-        handle_unexpected_notification(notification)
+        Logger.warning(
+          "Received notification #{inspect(notification)} which doesn't have a corresponding meeting"
+        )
+    end
+
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({:jellyfish, %Jellyfish.Notification.RoomDeleted{room_id: room_id}}, state) do
+    case RoomRegistry.lookup_room(room_id) do
+      {:ok, room} ->
+        GenServer.stop(room)
+
+      {:error, :unregistered} ->
+        Logger.debug("""
+        Received RoomDeleted notification but room doesn't exist in registry,
+        that means we already removed it
+        """)
+
+        nil
     end
 
     {:noreply, state}
@@ -123,13 +143,5 @@ defmodule Videoroom.RoomService do
     else
       notifier
     end
-  end
-
-  defp handle_unexpected_notification(%Jellyfish.Notification.RoomDeleted{}), do: :ok
-
-  defp handle_unexpected_notification(notification) do
-    Logger.warning(
-      "Received notification #{inspect(notification)} which doesn't have a corresponding meeting"
-    )
   end
 end

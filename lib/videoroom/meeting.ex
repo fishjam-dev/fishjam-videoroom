@@ -8,7 +8,7 @@ defmodule Videoroom.Meeting do
 
   alias Jellyfish.Component
   alias Jellyfish.Room
-  alias Jellyfish.Notification.{PeerConnected, PeerCrashed, PeerDisconnected, RoomCrashed}
+  alias Jellyfish.Notification.{PeerCrashed, RoomCrashed}
 
   alias Videoroom.RoomRegistry
 
@@ -19,8 +19,6 @@ defmodule Videoroom.Meeting do
       :name,
       :client,
       :room_id,
-      :peer_timers,
-      :peer_timeout,
       :jellyfish_address
     ]
 
@@ -79,9 +77,15 @@ defmodule Videoroom.Meeting do
 
     client = Jellyfish.Client.new(server_address: jellyfish_address)
 
-    with {:ok, room, jellyfish_address} <- create_new_room(client, name) do
-      peer_timeout = Application.fetch_env!(:videoroom, :peer_join_timeout)
+    peer_disconnected_timeout = Application.fetch_env!(:videoroom, :peer_disconnected_timeout)
+    peerless_purge_timeout = Application.fetch_env!(:videoroom, :peerless_purge_timeout)
 
+    with {:ok, room, jellyfish_address} <-
+           create_new_room(client, name,
+             video_codec: :h264,
+             peer_disconnected_timeout: peer_disconnected_timeout,
+             peerless_purge_timeout: peerless_purge_timeout
+           ) do
       client = Jellyfish.Client.update_address(client, jellyfish_address)
 
       Logger.info("Created meeting room id: #{room.id}")
@@ -91,8 +95,6 @@ defmodule Videoroom.Meeting do
          client: client,
          name: name,
          room_id: room.id,
-         peer_timers: %{},
-         peer_timeout: peer_timeout,
          jellyfish_address: jellyfish_address
        }}
     else
@@ -102,8 +104,8 @@ defmodule Videoroom.Meeting do
     end
   end
 
-  defp create_new_room(client, name) do
-    with {:ok, room, jellyfish_address} <- Room.create(client, video_codec: :h264),
+  defp create_new_room(client, name, opts) do
+    with {:ok, room, jellyfish_address} <- Room.create(client, opts),
          client <- Jellyfish.Client.update_address(client, jellyfish_address),
          :ok <- add_room_to_registry(client, name, room) do
       {:ok, room, jellyfish_address}
@@ -127,9 +129,6 @@ defmodule Videoroom.Meeting do
     case Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC) do
       {:ok, peer, token} ->
         Logger.info("Added peer #{peer.id}")
-
-        timer = Process.send_after(self(), {:peer_timeout, peer.id}, state.peer_timeout)
-        state = put_in(state.peer_timers[peer.id], timer)
 
         {:reply, {:ok, token, state.jellyfish_address}, state}
 
@@ -174,17 +173,9 @@ defmodule Videoroom.Meeting do
     delete_peer(peer_id, state)
   end
 
-  defp handle_notification(%PeerConnected{peer_id: peer_id}, state) do
-    {timer, peer_timers} = Map.get_and_update(state.peer_timers, peer_id, fn p -> {p, nil} end)
-
-    Process.cancel_timer(timer)
-
-    {:noreply, %{state | peer_timers: peer_timers}}
-  end
-
-  defp handle_notification(%type{peer_id: peer_id}, state)
-       when type in [PeerDisconnected, PeerCrashed] do
-    delete_peer(peer_id, state)
+  defp handle_notification(%PeerCrashed{peer_id: peer_id}, state) do
+    state = delete_peer(peer_id, state)
+    {:noreply, state}
   end
 
   defp handle_notification(%RoomCrashed{}, state) do
@@ -200,26 +191,7 @@ defmodule Videoroom.Meeting do
   defp delete_peer(peer_id, state) do
     Room.delete_peer(state.client, state.room_id, peer_id)
 
-    peer_timers = Map.delete(state.peer_timers, peer_id)
-    state = %{state | peer_timers: peer_timers}
-
-    if Enum.empty?(peer_timers) do
-      with {:ok, room} <- Room.get(state.client, state.room_id),
-           true <- Enum.empty?(room.peers) do
-        :ok
-      else
-        {:error, reason} ->
-          Logger.error("Error when deleting meeting #{reason}")
-
-        false ->
-          Logger.error("Deleting non-empty room")
-      end
-
-      Logger.info("Deleted meeting")
-      {:stop, :normal, state}
-    else
-      {:noreply, state}
-    end
+    state
   end
 
   @impl true
