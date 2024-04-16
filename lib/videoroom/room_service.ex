@@ -87,7 +87,7 @@ defmodule Videoroom.RoomService do
   def handle_info({:jellyfish, %Jellyfish.Notification.RoomDeleted{room_id: room_id}}, state) do
     case RoomRegistry.lookup_room(room_id) do
       {:ok, room} ->
-        GenServer.stop(room)
+        Meeting.stop(room)
 
       {:error, :unregistered} ->
         Logger.debug("""

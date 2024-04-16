@@ -69,6 +69,21 @@ defmodule Videoroom.Meeting do
     end
   end
 
+  @spec stop(name()) :: :ok | {:error, binary()}
+  def stop(meeting_name) do
+    try do
+      GenServer.stop(registry_id(meeting_name))
+    catch
+      :exit, {:noproc, error} ->
+        Logger.error(
+          "Failed to call start_recording because meeting #{meeting_name} doesn't exist, error: #{inspect(error)}"
+        )
+
+        {:error,
+         "Failed to call start_recording to meeting #{meeting_name} because of error: #{inspect(error)}"}
+    end
+  end
+
   # Callbacks
 
   @impl true
