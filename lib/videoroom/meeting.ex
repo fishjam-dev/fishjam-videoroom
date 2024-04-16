@@ -76,7 +76,7 @@ defmodule Videoroom.Meeting do
     catch
       :exit, {:noproc, error} ->
         Logger.error(
-          "Failed to call start_recording because meeting #{meeting_name} doesn't exist, error: #{inspect(error)}"
+          "Failed to stop meeting #{meeting_name} because it doesn't exist, error: #{inspect(error)}"
         )
 
         {:error,
