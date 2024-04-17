@@ -150,14 +150,11 @@ defmodule VideoroomWeb.RoomJsonTest do
 
       _ws_caller = :sys.get_state(notifier)[:caller_pid]
 
-      Process.alive?(notifier)
-
       :erlang.trace(room_service_pid, true, [:receive])
 
       Process.exit(notifier, :terminate)
 
       Process.sleep(100)
-      Process.alive?(notifier)
 
       {_name, _token} = add_peer(conn)
       assert {:ok, [%Room{id: jf_room_id}]} = Room.get_all(client)
