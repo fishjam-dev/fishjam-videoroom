@@ -79,8 +79,7 @@ defmodule Videoroom.Meeting do
           "Failed to stop meeting #{meeting_name} because it doesn't exist, error: #{inspect(error)}"
         )
 
-        {:error,
-         "Failed to stop meeting #{meeting_name} because of error: #{inspect(error)}"}
+        {:error, "Failed to stop meeting #{meeting_name} because of error: #{inspect(error)}"}
     end
   end
 
