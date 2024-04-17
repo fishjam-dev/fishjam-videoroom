@@ -141,7 +141,7 @@ defmodule Videoroom.Meeting do
     text = "Request failed: Room #{state.room_id} does not exist"
 
     case Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC) do
-      {:ok, peer, token} ->
+      {:ok, %{peer: peer, token: token}} ->
         Logger.info("Added peer #{peer.id}")
 
         {:reply, {:ok, token, state.jellyfish_address}, state}

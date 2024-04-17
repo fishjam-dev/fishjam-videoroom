@@ -44,8 +44,7 @@ defmodule Videoroom.MixProject do
       # Jellyfish deps
       # {:jellyfish_server_sdk, "~> 0.3.0"},
       # {:jellyfish_server_sdk, github: "jellyfish-dev/elixir_server_sdk"},
-      {:jellyfish_server_sdk,
-       github: "jellyfish-dev/elixir_server_sdk", branch: "feature/RTC-512/timeout_remove_peer"},
+      {:jellyfish_server_sdk, github: "jellyfish-dev/elixir_server_sdk"},
 
       # Dev
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
