@@ -19,6 +19,8 @@ type ConnectComponentProps = {
   roomId: string;
 };
 
+const userId = crypto.randomUUID()
+
 const ConnectComponent: FC<ConnectComponentProps> = (
   {
     username,
@@ -138,12 +140,13 @@ const ConnectComponent: FC<ConnectComponentProps> = (
   const disconnect = useDisconnect();
 
   useEffect(() => {
-    getTokenAndAddress(roomId)
-      .then((tokenAndAddress) => {
+    getTokenAndAddress(roomId, userId)
+      .then(({ token, url }) => {
+
         return connect({
           peerMetadata: { name: username },
-          token: tokenAndAddress.token,
-          signaling: getSignalingAddress(tokenAndAddress.serverAddress)
+          token: token,
+          signaling: getSignalingAddress(url)
         });
       });
 
