@@ -51,6 +51,14 @@ defmodule Videoroom.Meeting do
 
         {:error,
          "Failed to call add peer to meeting #{meeting_name} because of error: #{inspect(error)}"}
+
+      :exit, {:room_not_exist, _} ->
+        Logger.error(
+          "Failed to call add peer because room created by #{meeting_name} doesn't exist on jellyfish"
+        )
+
+        {:error,
+         "Failed to call add peer because room created by #{meeting_name} doesn't exist on jellyfish"}
     end
   end
 
@@ -151,7 +159,7 @@ defmodule Videoroom.Meeting do
           "Failed to add peer, because of room #{state.room_id} does not exist on jellyfish: #{state.jellyfish_address}"
         )
 
-        {:stop, :normal, {:error, "Failed to add peer"}, state}
+        {:stop, :room_not_exist, {:error, "Failed to add peer"}, state}
 
       error ->
         Logger.error(
