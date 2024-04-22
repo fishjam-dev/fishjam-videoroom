@@ -8,7 +8,7 @@ defmodule Videoroom.Meeting do
 
   alias Jellyfish.Component
   alias Jellyfish.Room
-  alias Jellyfish.Notification.{PeerCrashed, RoomCrashed}
+  alias Jellyfish.Notification.{PeerCrashed, RoomCrashed, RoomDeleted}
 
   alias Videoroom.RoomRegistry
 
@@ -194,6 +194,11 @@ defmodule Videoroom.Meeting do
 
   defp handle_notification(%RoomCrashed{}, state) do
     Logger.warning("Room #{state.room_id} crashed")
+    {:stop, :normal, state}
+  end
+
+  defp handle_notification(%RoomDeleted{}, state) do
+    Logger.info("Room #{state.room_id} was deleted")
     {:stop, :normal, state}
   end
 

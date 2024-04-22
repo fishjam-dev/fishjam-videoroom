@@ -52,16 +52,15 @@ defmodule Videoroom.RoomService do
          ) do
       {:error, {:already_started, _}} ->
         Logger.debug("Room with name #{room_name} is already started")
-        {:reply, Meeting.add_peer(room_name), state}
 
       {:error, error} ->
         Logger.error("During spawning child error occurs: #{inspect(error)}")
 
-        {:reply, {:error, "Can't start room becasue of error:  #{inspect(error)}"}, state}
-
       _other ->
-        {:reply, Meeting.add_peer(room_name), state}
+        nil
     end
+
+    {:reply, Meeting.add_peer(room_name), state}
   end
 
   @impl true
@@ -79,24 +78,6 @@ defmodule Videoroom.RoomService do
         Logger.warning(
           "Received notification #{inspect(notification)} which doesn't have a corresponding meeting"
         )
-    end
-
-    {:noreply, state}
-  end
-
-  @impl true
-  def handle_info({:jellyfish, %Jellyfish.Notification.RoomDeleted{room_id: room_id}}, state) do
-    case RoomRegistry.lookup_room(room_id) do
-      {:ok, room} ->
-        Meeting.stop(room)
-
-      {:error, :unregistered} ->
-        Logger.debug("""
-        Received RoomDeleted notification but room doesn't exist in registry,
-        that means we already removed it
-        """)
-
-        nil
     end
 
     {:noreply, state}
