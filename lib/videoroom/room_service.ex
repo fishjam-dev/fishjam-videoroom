@@ -51,16 +51,17 @@ defmodule Videoroom.RoomService do
            {Videoroom.Meeting, %{name: room_name, jellyfish_address: jellyfish_address}}
          ) do
       {:error, {:already_started, _}} ->
-        nil
+        Logger.debug("Room with name #{room_name} is already started")
+        {:reply, Meeting.add_peer(room_name), state}
 
       {:error, error} ->
         Logger.error("During spawning child error occurs: #{inspect(error)}")
 
-      _other ->
-        nil
-    end
+        {:reply, {:error, "Can't start room becasue of error:  #{inspect(error)}"}, state}
 
-    {:reply, Meeting.add_peer(room_name), state}
+      _other ->
+        {:reply, Meeting.add_peer(room_name), state}
+    end
   end
 
   @impl true
