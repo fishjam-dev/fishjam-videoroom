@@ -131,7 +131,7 @@ defmodule VideoroomWeb.RoomJsonTest do
       assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
 
       conn = get(conn, ~p"/api/room/#{meeting_name}")
-      assert json_response(conn, 503)["errors"] == "Failed to add peer"
+      assert json_response(conn, 503)["errors"] == "Meeting is being removed"
 
       {_name, _token} = add_peer(conn, meeting_name)
     end

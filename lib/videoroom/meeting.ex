@@ -59,6 +59,10 @@ defmodule Videoroom.Meeting do
 
         {:error,
          "Failed to call add peer because room created by #{meeting_name} doesn't exist on jellyfish"}
+
+      :exit, {:normal, _} ->
+        Logger.error("Failed to call add peer because meeting is removed")
+        {:error, "Meeting is being removed"}
     end
   end
 
