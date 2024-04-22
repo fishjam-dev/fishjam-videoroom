@@ -24,6 +24,7 @@ import {
 } from "../../../jellyfish.types.ts";
 import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult, Client } from "@jellyfish-dev/react-client-sdk";
 import { LocalPeerContext, useLocalPeer } from "../../../features/devices/LocalPeerMediaContext.tsx";
+import { useUser } from "../../../contexts/UserContext.tsx";
 
 type ControlButton = MediaControlButtonProps & { id: string };
 export type StreamingMode = "manual" | "automatic";
@@ -80,7 +81,6 @@ const getAutomaticControls = (
       buttonClassName: activeButtonStyle,
       onClick: () => {
         localPeerContext.toggleMicrophone(true);
-        // todo implement replace track with silence
       }
     },
   screenShare.enabled
@@ -134,6 +134,7 @@ const getManualControls = (
   screenShare: UseScreenShareResult<TrackMetadata>,
   camera: UseCameraResult<TrackMetadata>,
   client: Client<PeerMetadata, TrackMetadata>,
+  displayName: string,
   roomId?: string
 ): ControlButton[][] =>
   [
@@ -181,7 +182,11 @@ const getManualControls = (
           icon: MicrophoneOff,
           buttonClassName: activeButtonStyle,
           hover: "Add microphone track",
-          onClick: () => microphone.stream && microphone.addTrack({ type: "audio", active: microphone.enabled })
+          onClick: () => microphone.stream && microphone.addTrack({
+            type: "audio",
+            active: microphone.enabled,
+            displayName
+          })
         },
       microphone.broadcast?.metadata?.active
         ? {
@@ -259,7 +264,7 @@ const getManualControls = (
           icon: CameraOff,
           buttonClassName: activeButtonStyle,
           hover: "Add camera track",
-          onClick: () => camera.stream && camera.addTrack({ type: "camera", active: camera.enabled })
+          onClick: () => camera.stream && camera.addTrack({ type: "camera", active: camera.enabled, displayName })
         },
       camera.broadcast?.metadata?.active
         ? {
@@ -403,11 +408,12 @@ const MediaControlButtons: FC<MediaControlButtonsProps> =
     const client = useClient();
 
     const localPeerContext = useLocalPeer();
+    const { username } = useUser();
 
     // todo fix sidebar
     const controls: ControlButton[][] =
       mode === "manual"
-        ? getManualControls(navigate, microphone, screenShare, localPeerContext.video, client, roomId)
+        ? getManualControls(navigate, microphone, screenShare, localPeerContext.video, client, username || "", roomId)
         : [
           getAutomaticControls(
             navigate,

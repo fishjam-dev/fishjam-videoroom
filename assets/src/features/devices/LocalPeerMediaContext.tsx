@@ -9,6 +9,7 @@ import { ClientEvents, UseCameraResult, SimulcastConfig } from "@jellyfish-dev/r
 import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
+import { useUser } from "../../contexts/UserContext.tsx";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
@@ -29,11 +30,14 @@ type Props = {
 
 export const LocalPeerMediaProvider = ({ children }: Props) => {
   const { manualMode } = useDeveloperInfo();
+  const { username } = useUser();
+
+  const displayName = username ?? "";
 
   const { init } = useSetupMedia({
     camera: {
       trackConstraints: VIDEO_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: undefined,
+      defaultTrackMetadata: { active: true, type: "camera", displayName },
       broadcastOnConnect: false,
       broadcastOnDeviceStart: false,
       defaultSimulcastConfig: {
@@ -45,7 +49,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     microphone: {
       // todo add replaceTrackOnChange: boolean
       trackConstraints: AUDIO_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: { active: true, type: "audio" },
+      defaultTrackMetadata: { active: true, type: "audio", displayName },
       broadcastOnConnect: !manualMode.status,
       broadcastOnDeviceStart: !manualMode.status
     },
@@ -54,7 +58,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         videoTrackConstraints: SCREENSHARING_TRACK_CONSTRAINTS
         // todo add audio
       },
-      defaultTrackMetadata: { active: true, type: "screensharing" },
+      defaultTrackMetadata: { active: true, type: "screensharing", displayName },
       broadcastOnConnect: true,
       broadcastOnDeviceStart: true
     },
@@ -137,7 +141,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         remoteTrackIdRef.current = await client.addTrack(
           newTrack,
           mediaStream,
-          { active: metadataActive, type: "camera" },
+          { active: metadataActive, type: "camera", displayName },
           simulcastConfig,
           selectBandwidthLimit("camera", simulcastEnabled)
         );
@@ -148,14 +152,14 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         // todo
         //  When you replaceTrack, this does not affect the stream, so the local peer doesn't know that something has changed.
         //  add localTrackReplaced event
-        const newMetadata: TrackMetadata = { active: metadataActive, type: "camera" };
+        const newMetadata: TrackMetadata = { active: metadataActive, type: "camera", displayName };
         await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, newMetadata);
       } else if (remoteTrackIdRef.current && !stream) {
         await client.removeTrack(remoteTrackIdRef.current);
         remoteTrackIdRef.current = null;
       }
     }
-  }, [setStream, setTrack, simulcastEnabled]);
+  }, [setStream, setTrack, simulcastEnabled, displayName]);
 
   useEffect(() => {
     const managerInitialized: ClientEvents<PeerMetadata, TrackMetadata>["managerInitialized"] = (event) => {

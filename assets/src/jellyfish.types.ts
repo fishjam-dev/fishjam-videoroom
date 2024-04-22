@@ -15,7 +15,9 @@ export type PeerMetadata = z.infer<typeof peerMetadataSchema>
 
 const trackMetadataSchema = z.object({
   type: trackTypeSchema,
-  active: z.boolean()
+  active: z.boolean(),
+  // required for recordings
+  displayName: z.string()
 });
 
 export type TrackMetadata = z.infer<typeof trackMetadataSchema>;
