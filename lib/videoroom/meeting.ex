@@ -8,7 +8,7 @@ defmodule Videoroom.Meeting do
 
   alias Jellyfish.Component
   alias Jellyfish.Room
-  alias Jellyfish.Notification.{PeerCrashed, RoomCrashed}
+  alias Jellyfish.Notification.{PeerCrashed, RoomCrashed, RoomDeleted}
 
   alias Videoroom.RoomRegistry
 
@@ -51,6 +51,18 @@ defmodule Videoroom.Meeting do
 
         {:error,
          "Failed to call add peer to meeting #{meeting_name} because of error: #{inspect(error)}"}
+
+      :exit, {:room_not_exist, _} ->
+        Logger.error(
+          "Failed to call add peer because room created by #{meeting_name} doesn't exist on jellyfish"
+        )
+
+        {:error,
+         "Failed to call add peer because room created by #{meeting_name} doesn't exist on jellyfish"}
+
+      :exit, {:normal, _} ->
+        Logger.error("Failed to call add peer because meeting is removed")
+        {:error, "Meeting is being removed"}
     end
   end
 
@@ -151,7 +163,7 @@ defmodule Videoroom.Meeting do
           "Failed to add peer, because of room #{state.room_id} does not exist on jellyfish: #{state.jellyfish_address}"
         )
 
-        {:stop, :normal, {:error, "Failed to add peer"}, state}
+        {:stop, :room_not_exist, {:error, "Failed to add peer"}, state}
 
       error ->
         Logger.error(
@@ -194,6 +206,11 @@ defmodule Videoroom.Meeting do
 
   defp handle_notification(%RoomCrashed{}, state) do
     Logger.warning("Room #{state.room_id} crashed")
+    {:stop, :normal, state}
+  end
+
+  defp handle_notification(%RoomDeleted{}, state) do
+    Logger.info("Room #{state.room_id} was deleted")
     {:stop, :normal, state}
   end
 
