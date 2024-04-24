@@ -3,7 +3,7 @@ defmodule VideoroomWeb.RoomJsonTest do
 
   alias Jellyfish.Room
   alias Videoroom.Test.Peer
-  alias Jellyfish.Notification.{PeerConnected, PeerDisconnected, RoomDeleted}
+  alias Jellyfish.Notification.{PeerConnected, PeerDisconnected, RoomCreated, RoomDeleted}
 
   @url Application.compile_env!(:jellyfish_server_sdk, :server_address)
   @peer_url "ws://#{@url}/socket/peer/websocket"
@@ -80,6 +80,8 @@ defmodule VideoroomWeb.RoomJsonTest do
 
     leave_room(peer1)
     leave_room(peer3)
+
+    assert_receive {:jellyfish, %RoomDeleted{}}, @timeout
   end
 
   test "Peer joins and leaves in quick succession - the same room", %{conn: conn} do
@@ -129,9 +131,42 @@ defmodule VideoroomWeb.RoomJsonTest do
       assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
 
       conn = get(conn, ~p"/api/room/#{meeting_name}")
-      assert json_response(conn, 503)["errors"] == "Failed to add peer"
+      assert json_response(conn, 503)["errors"] == "Meeting is being removed"
 
       {_name, _token} = add_peer(conn, meeting_name)
+    end
+  end
+
+  describe "Notifier down" do
+    test "Can join room after notifier exits with normal", %{
+      conn: conn,
+      client: client
+    } do
+      room_service_pid = Process.whereis(Videoroom.RoomService)
+
+      state = :sys.get_state(room_service_pid)
+
+      {_jellyfish_address, notifier} = state.notifier
+
+      _ws_caller = :sys.get_state(notifier)[:caller_pid]
+
+      :erlang.trace(room_service_pid, true, [:receive])
+
+      Process.exit(notifier, :terminate)
+
+      Process.sleep(100)
+
+      {_name, _token} = add_peer(conn)
+      assert {:ok, [%Room{id: jf_room_id}]} = Room.get_all(client)
+
+      notification = %RoomCreated{room_id: jf_room_id}
+
+      assert_receive {:jellyfish, ^notification}, @timeout
+
+      assert_receive {:trace, _pid, :receive, {:jellyfish, ^notification}},
+                     @timeout
+
+      assert_receive {:jellyfish, %RoomDeleted{}}, @timeout
     end
   end
 

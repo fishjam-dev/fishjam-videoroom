@@ -9,7 +9,7 @@ import { ClientEvents, UseCameraResult, SimulcastConfig } from "@jellyfish-dev/r
 import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
-import EmptyVideoWorker from "./emptyVideoWorker.ts?worker";
+import { useUser } from "../../contexts/UserContext.tsx";
 
 export type LocalPeerContext = {
   video: UseCameraResult<TrackMetadata>;
@@ -30,11 +30,14 @@ type Props = {
 
 export const LocalPeerMediaProvider = ({ children }: Props) => {
   const { manualMode } = useDeveloperInfo();
+  const { username } = useUser();
+
+  const displayName = username ?? "";
 
   const { init } = useSetupMedia({
     camera: {
       trackConstraints: VIDEO_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: undefined,
+      defaultTrackMetadata: { active: true, type: "camera", displayName },
       broadcastOnConnect: false,
       broadcastOnDeviceStart: false,
       defaultSimulcastConfig: {
@@ -46,7 +49,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     microphone: {
       // todo add replaceTrackOnChange: boolean
       trackConstraints: AUDIO_TRACK_CONSTRAINTS,
-      defaultTrackMetadata: { active: true, type: "audio" },
+      defaultTrackMetadata: { active: true, type: "audio", displayName },
       broadcastOnConnect: !manualMode.status,
       broadcastOnDeviceStart: !manualMode.status
     },
@@ -55,7 +58,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         videoTrackConstraints: SCREENSHARING_TRACK_CONSTRAINTS
         // todo add audio
       },
-      defaultTrackMetadata: { active: true, type: "screensharing" },
+      defaultTrackMetadata: { active: true, type: "screensharing", displayName },
       broadcastOnConnect: true,
       broadcastOnDeviceStart: true
     },
@@ -83,9 +86,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   const [track, setTrack] = useState<MediaStreamTrack | null>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
-  const workerRef = useRef<Worker | null>(null);
-  const blackCanvasStreamRef = useRef<MediaStream | null>(null);
-  const offscreenCanvasRef = useRef<OffscreenCanvas | null>(null);
   const remoteTrackIdRef = useRef<string | null>(null);
 
   const cameraIntentionRef = useRef<boolean>(true);
@@ -141,7 +141,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         remoteTrackIdRef.current = await client.addTrack(
           newTrack,
           mediaStream,
-          { active: metadataActive, type: "camera" },
+          { active: metadataActive, type: "camera", displayName },
           simulcastConfig,
           selectBandwidthLimit("camera", simulcastEnabled)
         );
@@ -152,15 +152,14 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         // todo
         //  When you replaceTrack, this does not affect the stream, so the local peer doesn't know that something has changed.
         //  add localTrackReplaced event
-        const newMetadata: TrackMetadata = { active: metadataActive, type: "camera" };
-
+        const newMetadata: TrackMetadata = { active: metadataActive, type: "camera", displayName };
         await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, newMetadata);
       } else if (remoteTrackIdRef.current && !stream) {
         await client.removeTrack(remoteTrackIdRef.current);
         remoteTrackIdRef.current = null;
       }
     }
-  }, [setStream, setTrack, simulcastEnabled]);
+  }, [setStream, setTrack, simulcastEnabled, displayName]);
 
   useEffect(() => {
     const managerInitialized: ClientEvents<PeerMetadata, TrackMetadata>["managerInitialized"] = (event) => {
@@ -185,7 +184,11 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
       if (cameraIntentionRef.current && !remoteTrackIdRef.current && stream && track) {
         await changeMediaStream(stream, track, blurRef.current, metadataActiveRef.current);
-      } else if (cameraIntentionRef.current && lastCameraIdRef.current) {
+      } else if (
+        cameraIntentionRef.current
+        && lastCameraIdRef.current
+        && client.deviceManager.video.mediaStatus !== "Requesting"
+      ) {
         await client.deviceManager.start({ videoDeviceId: lastCameraIdRef.current });
       }
 
@@ -205,7 +208,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         const track = client?.media?.video?.media?.track;
 
         if (client.status === "joined" && event.trackType === "video" && stream && track) {
-          workerRef.current?.postMessage({ action: "stop" }, []); // todo what is the second parameter
           await changeMediaStream(stream, track, blurRef.current, track.enabled);
         }
       }
@@ -234,41 +236,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         trackRef.current = null;
       }
       if (client.status === "joined" && event.trackType === "video" && event.mediaDeviceType === "userMedia" && trackRef.current && remoteTrackIdRef.current) {
-        if (!workerRef.current) {
-          workerRef.current = new EmptyVideoWorker();
-          const canvasElement = document.createElement("canvas");
-
-          offscreenCanvasRef.current = canvasElement.transferControlToOffscreen();
-
-          const worker = workerRef.current;
-          if (!worker) throw Error("Worker is null");
-
-          const offscreenCanvas = offscreenCanvasRef.current;
-          if (!offscreenCanvas) throw Error("OffscreenCanvas is null");
-
-          worker.postMessage({
-            action: "init",
-            canvas: offscreenCanvas
-          }, [offscreenCanvas]);
-
-          blackCanvasStreamRef.current = canvasElement.captureStream(24);
-        }
-
-        const worker = workerRef.current;
-        const offscreenCanvas = offscreenCanvasRef.current;
-        const stream = blackCanvasStreamRef.current;
-
-        if (!worker) throw Error("Worker is null");
-        if (!offscreenCanvas) throw Error("OffscreenCanvas is null");
-        if (!stream) throw Error("Worker stream is null");
-
-        stream.getVideoTracks().forEach((track) => track.enabled = false);
-
-        worker.postMessage({
-          action: "start"
-        }, []);
-
-        await changeMediaStream(stream, stream.getVideoTracks()[0], false, false);
+        await changeMediaStream(null, null, false, false);
       }
     };
 

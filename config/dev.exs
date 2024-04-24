@@ -50,7 +50,8 @@ jellyfish_addresses = String.split(jellyfish_addresses, " ")
 # Enable dev routes for dashboard and mailbox
 config :videoroom,
   dev_routes: true,
-  peer_join_timeout: 60_000,
+  peer_disconnected_timeout: 60,
+  peerless_purge_timeout: 120,
   jellyfish_addresses: jellyfish_addresses
 
 # Do not include metadata nor timestamps in development logs
