@@ -1,35 +1,39 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  server: {
-    // https://vitejs.dev/config/server-options.html#server-host
-    // true - listen on all addresses, including LAN and public addresses
-    host: false,
-    // https: true,
-    port: 8080,
-    strictPort: true,
-    proxy: {
-      "/api": {
-        target: "http://127.0.0.1:5004",
-        changeOrigin: false,
-      },
-      "/socket/peer/websocket": {
-        ws: true,
-        target: "ws://127.0.0.1:5002",
-        changeOrigin: false,
-      },
+export default defineConfig((configEnv) => {
+  const env = loadEnv(configEnv.mode, process.cwd(), "");
+
+  return ({
+    server: {
+      // https://vitejs.dev/config/server-options.html#server-host
+      // true - listen on all addresses, including LAN and public addresses
+      host: false,
+      // https: true,
+      port: 8080,
+      strictPort: true,
+      proxy: {
+        "/api": {
+          target: env.API_URL ?? "http://127.0.0.1:5004",
+          changeOrigin: !!env.API_URL
+        },
+        "/socket/peer/websocket": {
+          ws: true,
+          target: "ws://127.0.0.1:5002",
+          changeOrigin: false
+        }
+      }
     },
-  },
-  plugins: [
-    react(),
-    checker({
-      typescript: true,
-      eslint: {
-        lintCommand: "eslint --ext .ts,.tsx",
-      },
-    }),
-  ],
+    plugins: [
+      react(),
+      checker({
+        typescript: true,
+        eslint: {
+          lintCommand: "eslint --ext .ts,.tsx"
+        }
+      })
+    ]
+  });
 });
