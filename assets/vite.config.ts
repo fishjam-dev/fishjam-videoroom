@@ -12,11 +12,11 @@ export default defineConfig((configEnv) => {
       // true - listen on all addresses, including LAN and public addresses
       host: false,
       // https: true,
-      port: 8080,
+      port: 5005,
       strictPort: true,
       proxy: {
         "/api": {
-          target: env.API_URL ?? "http://127.0.0.1:5004",
+          target: env.API_URL ?? "http://0.0.0.0:5004",
           changeOrigin: !!env.API_URL
         },
         "/socket/peer/websocket": {

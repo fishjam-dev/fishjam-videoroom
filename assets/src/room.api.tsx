@@ -1,8 +1,7 @@
 import axios from "axios";
 import { ConnectionData, RoomApi } from "./api";
-import { BACKEND_URL } from "./pages/room/consts";
 
-const API = new RoomApi(undefined, BACKEND_URL.origin, axios);
+const API = new RoomApi(undefined, window.location.origin, axios);
 
 export const getTokenAndAddress = (roomId: string, username: string): Promise<ConnectionData> =>
   API.apiRoomsRoomIdUsersUserIdGet(roomId, username).then((resp) => {

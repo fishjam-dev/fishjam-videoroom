@@ -34,26 +34,10 @@ export const DEFAULT_AUTOSTART_MICROPHONE_VALUE = true;
 export const DEFAULT_MANUAL_MODE_CHECKBOX_VALUE = false;
 export const DEFAULT_SMART_LAYER_SWITCHING_CHECKBOX_VALUE = true;
 
-const isSecure = new URL(window.location.origin).protocol === "https:";
-// @ts-ignore
-const isDevEnv = import.meta.env.MODE === "development";
-
-const protocol = isSecure ? "https" : "http";
-
-// @ts-ignore
-export const BACKEND_URL = isDevEnv ?
-  new URL(window.location.origin) :
-  new URL(`${protocol}://${import.meta.env.VITE_BE_HOST}`);
-
 // @ts-ignore
 export const JELLYFISH_VERSION = import.meta.env.VITE_JELLYFISH_VERSION;
 // @ts-ignore
 export const JELLYROOM_VERSION = import.meta.env.VITE_JELLYROOM_VERSION;
-
-// videoroom_backend should return this address (host and port)
-// @ts-ignore
-const origin_websocket_url = new URL(window.location.origin);
-origin_websocket_url.protocol = isSecure ? "wss:" : "ws:";
 
 export const getSignalingAddress = (url: string) => {
   const jellyfishUrl = new URL(url);
@@ -64,8 +48,6 @@ export const getSignalingAddress = (url: string) => {
     host: jellyfishUrl.host
   });
 };
-
-export const JELLYFISH_WEBSOCKET_PROTOCOL = isSecure ? "wss" : "ws";
 
 export const MAX_TILE_HEIGHT_FOR_MEDIUM_ENCODING = 600;
 export const MAX_TILE_HEIGHT_FOR_LOW_ENCODING = 250;
