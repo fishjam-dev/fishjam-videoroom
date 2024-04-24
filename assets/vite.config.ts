@@ -9,7 +9,7 @@ export default defineConfig({
     // true - listen on all addresses, including LAN and public addresses
     host: false,
     // https: true,
-    port: 5005,
+    port: 8080,
     strictPort: true,
     proxy: {
       "/api": {
