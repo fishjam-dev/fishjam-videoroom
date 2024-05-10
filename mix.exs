@@ -42,7 +42,7 @@ defmodule Videoroom.MixProject do
       {:cors_plug, "~> 2.0"},
 
       # Jellyfish deps
-      # {:jellyfish_server_sdk, "~> 0.3.0"},
+      # {:jellyfish_server_sdk, "~> 0.5.0"},
       {:jellyfish_server_sdk, github: "jellyfish-dev/elixir_server_sdk"},
 
       # Dev

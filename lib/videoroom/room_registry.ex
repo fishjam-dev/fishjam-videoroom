@@ -10,6 +10,9 @@ defmodule Videoroom.RoomRegistry do
     :ets.new(@room_table, [:named_table, :set, :public])
   end
 
+  @spec list_rooms() :: [tuple()]
+  def list_rooms(), do: :ets.tab2list(@room_table)
+
   @spec lookup_meeting(Meeting.name()) :: {:ok, Jellyfish.Room.id()} | {:error, :unregistered}
   def lookup_meeting(name), do: lookup(name)
 

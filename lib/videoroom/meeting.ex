@@ -211,6 +211,10 @@ defmodule Videoroom.Meeting do
 
   defp handle_notification(%RoomDeleted{}, state) do
     Logger.info("Room #{state.room_id} was deleted")
+
+    IO.inspect(RoomRegistry.list_rooms(), label: :WTF_local)
+    IO.inspect(Room.get_all(state.client), label: :WTF_jellyfish)
+
     {:stop, :normal, state}
   end
 

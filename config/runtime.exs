@@ -70,8 +70,8 @@ if config_env() == :prod do
   config :videoroom,
     jellyfish_addresses: jellyfish_addresses,
     peer_disconnected_timeout:
-      String.to_integer(System.get_env("PEER_DISCONNECTED_TIMEOUT") || "30"),
-    peerless_purge_timeout: String.to_integer(System.get_env("PEERLESS_PURGE_TIMEOUT") || "60")
+      String.to_integer(System.get_env("PEER_DISCONNECTED_TIMEOUT") || "15"),
+    peerless_purge_timeout: String.to_integer(System.get_env("PEERLESS_PURGE_TIMEOUT") || "30")
 
   # ## SSL Support
   #
