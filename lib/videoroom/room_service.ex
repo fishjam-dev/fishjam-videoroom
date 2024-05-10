@@ -32,7 +32,7 @@ defmodule Videoroom.RoomService do
   def init(_init_arg) do
     {:ok, supervisor} = DynamicSupervisor.start_link([])
 
-    {:ok, %{supervisor: supervisor, notifier: nil}, {:continue, []}}
+    {:ok, %{supervisor: supervisor, notifier: nil, room_name_to_from: %{}}, {:continue, []}}
   end
 
   @impl true
@@ -56,7 +56,8 @@ defmodule Videoroom.RoomService do
       {:error, error} ->
         Logger.error("During spawning child error occurs: #{inspect(error)}")
 
-      _other ->
+      other ->
+        Logger.info("Room added #{inspect(other)}")
         nil
     end
 
