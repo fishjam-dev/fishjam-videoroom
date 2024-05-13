@@ -32,7 +32,7 @@ defmodule Videoroom.RoomService do
   def init(_init_arg) do
     {:ok, supervisor} = DynamicSupervisor.start_link([])
 
-    {:ok, %{supervisor: supervisor, notifier: nil, room_name_to_from: %{}}, {:continue, []}}
+    {:ok, %{supervisor: supervisor, notifier: nil}, {:continue, []}}
   end
 
   @impl true
