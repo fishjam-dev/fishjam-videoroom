@@ -1,19 +1,19 @@
 name: Staging Build and Deploy
 on:
   push:
-    branches: 
+    branches:
       - "main"
 
-env: 
-  DOMAIN: jellyroom.membrane.work
-  BE_HOST: server.jellyroom.membrane.work
+env:
+  DOMAIN: room.fishjam.work
+  BE_HOST: server.room.fishjam.work
   PROJECT: staging
   COMPOSE_FILE_NAME: docker-compose-deploy.yaml
 
 jobs:
   deploy1:
     runs-on: ubuntu-latest
-    steps:  
+    steps:
       - uses: actions/checkout@v2
 
       - name: Set versions
