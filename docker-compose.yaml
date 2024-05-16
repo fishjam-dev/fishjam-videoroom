@@ -1,7 +1,7 @@
 version: '3.8'
 
 x-jellyfish-template: &jellyfish-template
-  image: "ghcr.io/jellyfish-dev/jellyfish:${JELLYFISH_VERSION:-edge}"
+  image: "ghcr.io/fishjam-dev/jellyfish:${JELLYFISH_VERSION:-edge}"
   restart: unless-stopped
   environment: &jellyfish-environment
     JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN:-development}
@@ -86,7 +86,7 @@ services:
       args:
         PROM_JELLYFISH_TARGETS: ${PROM_JELLYFISH_TARGETS:-jellyfish1:9568,jellyfish2:9568}
         # Through 172.17.0.1 address docker containers (not running in network mode host) can access
-        # services running on host OS (localhost). In this example through this address prometheus could access 
+        # services running on host OS (localhost). In this example through this address prometheus could access
         # node-exporter which is running in network mode host.
         PROM_NODE_TARGETS: '172.17.0.1:9100'
     container_name: prometheus

@@ -7,8 +7,8 @@ on:
       - "**"
 
 env:
-  DOMAIN: jellyroom.membrane.ovh
-  BE_HOST: server.jellyroom.membrane.ovh
+  DOMAIN: room.fishjam.ovh
+  BE_HOST: server.room.fishjam.ovh
   PROJECT: sandbox
   COMPOSE_FILE_NAME: docker-compose-deploy.yaml
 
