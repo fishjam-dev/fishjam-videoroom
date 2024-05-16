@@ -5,8 +5,8 @@ on:
       - 'v*.*.*'
 
 env:
-  DOMAIN: jellyroom.membrane.stream
-  BE_HOST: server.jellyroom.membrane.stream
+  DOMAIN: room.fishjam.stream
+  BE_HOST: server.room.fishjam.stream
   PROJECT: production
   COMPOSE_FILE_NAME: docker-compose-deploy.yaml
 
