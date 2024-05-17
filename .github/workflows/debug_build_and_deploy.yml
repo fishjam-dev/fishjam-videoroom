@@ -22,5 +22,5 @@ jobs:
           hosts: ${{ secrets.STAGING_HOST_2 }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
-            ls -al
+            cat test.txt
 
