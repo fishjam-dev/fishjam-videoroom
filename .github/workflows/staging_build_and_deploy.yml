@@ -38,7 +38,7 @@ jobs:
       - name: Remove old containers on first host
         uses: JimCronqvist/action-ssh@master
         with:
-          hosts: ${{ secrets.STAGING_IP }}
+          hosts: ${{ secrets.STAGING_HOST }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
             docker ps -aq | xargs -r docker stop | xargs -r docker rm 
