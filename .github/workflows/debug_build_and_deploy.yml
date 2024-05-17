@@ -19,7 +19,7 @@ jobs:
       - name: Debug staging
         uses: JimCronqvist/action-ssh@master
         with:
-          hosts: ${{ secrets.STAGING_HOST_2 }}
+          hosts: ${{ secrets.STAGING_HOST }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
             cat test.txt
