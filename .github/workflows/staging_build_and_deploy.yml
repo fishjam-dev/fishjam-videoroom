@@ -46,7 +46,7 @@ jobs:
       - name: Deploy docker compose to a pre-configured server on first host
         uses: TapTap21/docker-remote-deployment-action@v1.1
         with:
-          remote_docker_host: ${{ secrets.STAGING_IP }}
+          remote_docker_host: ${{ secrets.STAGING_HOST }}
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
