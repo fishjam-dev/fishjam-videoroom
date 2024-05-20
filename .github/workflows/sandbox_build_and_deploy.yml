@@ -5,6 +5,7 @@ on:
       - "sandbox"
     paths:
       - "**"
+  workflow_dispatch:
 
 env:
   DOMAIN: room.fishjam.ovh
