@@ -4,7 +4,7 @@ import BlockingScreen from "../../shared/components/BlockingScreen";
 
 import Navbar from "./Navbar";
 import useSmartphoneViewport from "../../shared/hooks/useSmartphoneViewport";
-import { JELLYFISH_VERSION, JELLYROOM_VERSION } from "../../../pages/room/consts";
+import { JELLYFISH_VERSION, FISHJAM_ROOM_VERSION } from "../../../pages/room/consts";
 
 const HomePageLayout: FC<PropsWithChildren> = ({ children }) => {
   const { isSmartphone, isHorizontal } = useSmartphoneViewport();
@@ -25,7 +25,7 @@ const HomePageLayout: FC<PropsWithChildren> = ({ children }) => {
         <div className="top-4 mb-4 self-start flex justify-between sm:absolute sm:inset-x-4 sm:mb-0">
           <Navbar />
           <div className="ml-4 text-right">
-            {`${JELLYROOM_VERSION} (jellyfish ${JELLYFISH_VERSION})`}
+            {`${FISHJAM_ROOM_VERSION} (jellyfish ${JELLYFISH_VERSION})`}
           </div>
         </div>
 

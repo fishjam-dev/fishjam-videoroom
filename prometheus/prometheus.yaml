@@ -5,10 +5,10 @@ global:
     monitor: 'codelab-monitor'
 
 scrape_configs:
-  - job_name: 'jellyfishes'
+  - job_name: 'fishjams'
     static_configs:
       - targets: [$PROM_JELLYFISH_TARGETS]
-  
+
   - job_name: 'nodes'
     static_configs:
       - targets: [$PROM_NODE_TARGETS]

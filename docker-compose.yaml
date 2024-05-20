@@ -1,25 +1,25 @@
 version: '3.8'
 
-x-jellyfish-template: &jellyfish-template
-  image: "ghcr.io/fishjam-dev/jellyfish:${JELLYFISH_VERSION:-edge}"
+x-fishjam-template: &fishjam-template
+  image: "ghcr.io/fishjam-dev/fishjam:${JELLYFISH_VERSION:-edge}"
   restart: unless-stopped
-  environment: &jellyfish-environment
+  environment: &fishjam-environment
     JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN:-development}
     JF_CHECK_ORIGIN: "${JF_CHECK_ORIGIN:-false}"
     JF_DIST_ENABLED: "${JF_DIST_ENABLED:-true}"
-    JF_DIST_NODES: "app@jellyfish1 app@jellyfish2"
+    JF_DIST_NODES: "app@fishjam1 app@fishjam2"
     JF_WEBRTC_TURN_IP: $EXTERNAL_IP
     JF_WEBRTC_TURN_LISTEN_IP: "0.0.0.0"
 
 services:
-  jellyfish1:
-    <<: *jellyfish-template
-    container_name: jellyfish1
+  fishjam1:
+    <<: *fishjam-template
+    container_name: fishjam1
     environment:
-      <<: *jellyfish-environment
+      <<: *fishjam-environment
       JF_HOST: "${JF1_HOST:-${JF1_IP:-$EXTERNAL_IP}:5002}"
       JF_PORT: 5002
-      JF_DIST_NODE_NAME: app@jellyfish1
+      JF_DIST_NODE_NAME: app@fishjam1
       JF_WEBRTC_TURN_PORT_RANGE: "50000-50100"
       JF_WEBRTC_TURN_TCP_PORT: "49999"
     ports:
@@ -27,15 +27,15 @@ services:
       - "49999:49999"
       - "50000-50100:50000-50100/udp"
 
-  jellyfish2:
-    <<: *jellyfish-template
+  fishjam2:
+    <<: *fishjam-template
     restart: unless-stopped
-    container_name: jellyfish2
+    container_name: fishjam2
     environment:
-      <<: *jellyfish-environment
+      <<: *fishjam-environment
       JF_HOST: "${JF2_HOST:-${JF2_IP:-$EXTERNAL_IP}:5003}"
       JF_PORT: 5003
-      JF_DIST_NODE_NAME: app@jellyfish2
+      JF_DIST_NODE_NAME: app@fishjam2
       JF_WEBRTC_TURN_PORT_RANGE: "50101-50200"
       JF_WEBRTC_TURN_TCP_PORT: "49998"
     ports:
@@ -50,13 +50,13 @@ services:
       args:
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
         JELLYFISH_VERSION: ${JELLYFISH_VERSION:-0.3.0}
-        JELLYROOM_VERSION: ${JELLYROOM_VERSION:-build}
+        FISHJAM_ROOM_VERSION: ${FISHJAM_ROOM_VERSION:-build}
     container_name: frontend
     restart: unless-stopped
     depends_on:
       - backend
-      - jellyfish1
-      - jellyfish2
+      - fishjam1
+      - fishjam2
     ports:
       - "5005:5005"
 
@@ -69,13 +69,13 @@ services:
       BE_PORT: 5004
       BE_HOST: ${BE_HOST:-$DOMAIN}
       BE_PHX_SERVER: "true"
-      BE_JF_ADDRESSES: ${BE_JF_ADDRESSES:-jellyfish1:5002 jellyfish2:5003}
+      BE_JF_ADDRESSES: ${BE_JF_ADDRESSES:-fishjam1:5002 fishjam2:5003}
       BE_JF_SECURE_CONNECTION: ${BE_JF_SECURE_CONNECTION:-false}
       BE_JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN:-development}
     restart: unless-stopped
     depends_on:
-      - jellyfish1
-      - jellyfish2
+      - fishjam1
+      - fishjam2
     ports:
       - "5004:5004"
 
@@ -84,7 +84,7 @@ services:
       context: ./prometheus
       dockerfile: Dockerfile
       args:
-        PROM_JELLYFISH_TARGETS: ${PROM_JELLYFISH_TARGETS:-jellyfish1:9568,jellyfish2:9568}
+        PROM_JELLYFISH_TARGETS: ${PROM_JELLYFISH_TARGETS:-fishjam1:9568,fishjam2:9568}
         # Through 172.17.0.1 address docker containers (not running in network mode host) can access
         # services running on host OS (localhost). In this example through this address prometheus could access
         # node-exporter which is running in network mode host.
@@ -99,8 +99,8 @@ services:
     volumes:
       - prometheus_data:/prometheus
     depends_on:
-      - jellyfish1
-      - jellyfish2
+      - fishjam1
+      - fishjam2
 
   grafana:
     build:

@@ -84,7 +84,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "sum(jellyfish_rooms{instance=~\"$instance\"}) by(instance)",
+                            "expr": "sum(fishjam_rooms{instance=~\"$instance\"}) by(instance)",
                             "instant": false,
                             "legendFormat": "{{instance}}",
                             "range": true,
@@ -99,7 +99,7 @@
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "Present the current number of rooms by jellyfish instance.",
+                    "description": "Present the current number of rooms by fishjam instance.",
                     "fieldConfig": {
                         "defaults": {
                             "color": {
@@ -181,7 +181,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "sum(jellyfish_rooms{instance=~\"$instance\"}) by(instance)",
+                            "expr": "sum(fishjam_rooms{instance=~\"$instance\"}) by(instance)",
                             "instant": false,
                             "legendFormat": "{{instance}}",
                             "range": true,
@@ -210,7 +210,7 @@
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "Ingress throughput from each of the jellyfish instances",
+                    "description": "Ingress throughput from each of the fishjam instances",
                     "fieldConfig": {
                         "defaults": {
                             "color": {
@@ -293,7 +293,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "irate(jellyfish_traffic_ingress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+ \nirate(jellyfish_traffic_ingress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
+                            "expr": "irate(fishjam_traffic_ingress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+ \nirate(fishjam_traffic_ingress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
                             "instant": false,
                             "legendFormat": "{{instance}}",
                             "range": true,
@@ -308,7 +308,7 @@
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "Egress throughput from each of the jellyfish instances",
+                    "description": "Egress throughput from each of the fishjam instances",
                     "fieldConfig": {
                         "defaults": {
                             "color": {
@@ -391,7 +391,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "irate(jellyfish_traffic_egress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+\nirate(jellyfish_traffic_egress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
+                            "expr": "irate(fishjam_traffic_egress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+\nirate(fishjam_traffic_egress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
                             "instant": false,
                             "legendFormat": "{{instance}}",
                             "range": true,
@@ -406,7 +406,7 @@
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "Ingress and Egress throughput from each of the jellyfish instances",
+                    "description": "Ingress and Egress throughput from each of the fishjam instances",
                     "fieldConfig": {
                         "defaults": {
                             "color": {
@@ -505,7 +505,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "irate(jellyfish_traffic_ingress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+\nirate(jellyfish_traffic_ingress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
+                            "expr": "irate(fishjam_traffic_ingress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+\nirate(fishjam_traffic_ingress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
                             "instant": false,
                             "legendFormat": "{{instance}} ingress",
                             "range": true,
@@ -517,7 +517,7 @@
                                 "uid": "${ds}"
                             },
                             "editorMode": "code",
-                            "expr": "irate(jellyfish_traffic_egress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+\nirate(jellyfish_traffic_egress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
+                            "expr": "irate(fishjam_traffic_egress_webrtc_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8\n+\nirate(fishjam_traffic_egress_http_total_bytes{instance=~\"$instance\"}[$__rate_interval])*8",
                             "hide": false,
                             "instant": false,
                             "legendFormat": "{{instance}} egress",
@@ -547,7 +547,7 @@
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "VM usage from each of the jellyfish instances",
+                    "description": "VM usage from each of the fishjam instances",
                     "fieldConfig": {
                         "defaults": {
                             "color": {
@@ -644,7 +644,7 @@
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "VM queue lengths from each of the jellyfish instances",
+                    "description": "VM queue lengths from each of the fishjam instances",
                     "fieldConfig": {
                         "defaults": {
                             "color": {
@@ -736,7 +736,7 @@
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "VM queue lengths from each of the jellyfish instances",
+                    "description": "VM queue lengths from each of the fishjam instances",
                     "fieldConfig": {
                         "defaults": {
                             "color": {
@@ -828,7 +828,7 @@
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "VM queue lengths from each of the jellyfish instances",
+                    "description": "VM queue lengths from each of the fishjam instances",
                     "fieldConfig": {
                         "defaults": {
                             "color": {
@@ -1487,7 +1487,7 @@
                     "type": "prometheus",
                     "uid": "PBFA97CFB590B2093"
                 },
-                "definition": "label_values(jellyfish_rooms,instance)",
+                "definition": "label_values(fishjam_rooms,instance)",
                 "description": "Allows you limit graphs only to selected instances",
                 "hide": 0,
                 "includeAll": true,
@@ -1496,7 +1496,7 @@
                 "name": "instance",
                 "options": [],
                 "query": {
-                    "query": "label_values(jellyfish_rooms,instance)",
+                    "query": "label_values(fishjam_rooms,instance)",
                     "refId": "PrometheusVariableQueryEditor-VariableQuery"
                 },
                 "refresh": 1,
@@ -1562,13 +1562,13 @@
                     "selected": true,
                     "text": [
                         "backend",
-                        "jellyfish1",
-                        "jellyfish2"
+                        "fishjam1",
+                        "fishjam2"
                     ],
                     "value": [
                         "backend",
-                        "jellyfish1",
-                        "jellyfish2"
+                        "fishjam1",
+                        "fishjam2"
                     ]
                 },
                 "datasource": {

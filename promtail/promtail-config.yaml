@@ -4,8 +4,8 @@ server:
 
 clients:
   - url: http://$LOKI_ADDRESS:3100/loki/api/v1/push
-    external_labels: 
-      project: jellyroom
+    external_labels:
+      project: fishjam_room
 
 scrape_configs:
   - job_name: docker

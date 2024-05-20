@@ -5,7 +5,7 @@ defmodule VideoroomWeb.RoomJsonTest do
   alias Videoroom.Test.Peer
   alias Jellyfish.Notification.{PeerConnected, PeerDisconnected, RoomCreated, RoomDeleted}
 
-  @url Application.compile_env!(:jellyfish_server_sdk, :server_address)
+  @url Application.compile_env!(:fishjam_server_sdk, :server_address)
   @peer_url "ws://#{@url}/socket/peer/websocket"
 
   @timeout 5000
@@ -39,7 +39,7 @@ defmodule VideoroomWeb.RoomJsonTest do
     assert length(peers) == 1
 
     leave_room(peer)
-    assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
+    assert_receive {:fishjam, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
   end
 
   test "Two peers join the same room", %{conn: conn, client: client} do
@@ -55,7 +55,7 @@ defmodule VideoroomWeb.RoomJsonTest do
     leave_room(peer1)
 
     leave_room(peer2)
-    assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
+    assert_receive {:fishjam, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
   end
 
   test "Two rooms at the same time", %{conn: conn, client: client} do
@@ -70,7 +70,7 @@ defmodule VideoroomWeb.RoomJsonTest do
 
     leave_room(peer2)
 
-    assert_receive {:jellyfish, %RoomDeleted{}}, @timeout
+    assert_receive {:fishjam, %RoomDeleted{}}, @timeout
 
     {_name, token3} = add_peer(conn, first_meeting)
     peer3 = join_room(token3)
@@ -81,7 +81,7 @@ defmodule VideoroomWeb.RoomJsonTest do
     leave_room(peer1)
     leave_room(peer3)
 
-    assert_receive {:jellyfish, %RoomDeleted{}}, @timeout
+    assert_receive {:fishjam, %RoomDeleted{}}, @timeout
   end
 
   test "Peer joins and leaves in quick succession - the same room", %{conn: conn} do
@@ -92,10 +92,10 @@ defmodule VideoroomWeb.RoomJsonTest do
     leave_room(peer1, async: true)
 
     peer2 = join_room(token2)
-    assert_receive {:jellyfish, %PeerDisconnected{}}, @timeout
+    assert_receive {:fishjam, %PeerDisconnected{}}, @timeout
 
     leave_room(peer2)
-    assert_receive {:jellyfish, %RoomDeleted{}}, @timeout
+    assert_receive {:fishjam, %RoomDeleted{}}, @timeout
   end
 
   describe "Peer timeout" do
@@ -103,7 +103,7 @@ defmodule VideoroomWeb.RoomJsonTest do
       {_name, _token} = add_peer(conn)
       assert {:ok, [%Room{id: jf_room_id}]} = Room.get_all(client)
 
-      assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
+      assert_receive {:fishjam, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
     end
 
     test "Room closes when all peers leave or time out", %{conn: conn, client: client} do
@@ -116,7 +116,7 @@ defmodule VideoroomWeb.RoomJsonTest do
       peer = join_room(token)
       leave_room(peer)
 
-      assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
+      assert_receive {:fishjam, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
     end
 
     test "Meeting is deleted if room doesn't exist", %{conn: conn, client: client} do
@@ -128,7 +128,7 @@ defmodule VideoroomWeb.RoomJsonTest do
 
       assert :ok = Room.delete(client, jf_room_id)
 
-      assert_receive {:jellyfish, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
+      assert_receive {:fishjam, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
 
       conn = get(conn, ~p"/api/room/#{meeting_name}")
       assert json_response(conn, 503)["errors"] == "Meeting is being removed"
@@ -146,7 +146,7 @@ defmodule VideoroomWeb.RoomJsonTest do
 
       state = :sys.get_state(room_service_pid)
 
-      {_jellyfish_address, notifier} = state.notifier
+      {_fishjam_address, notifier} = state.notifier
 
       _ws_caller = :sys.get_state(notifier)[:caller_pid]
 
@@ -161,12 +161,12 @@ defmodule VideoroomWeb.RoomJsonTest do
 
       notification = %RoomCreated{room_id: jf_room_id}
 
-      assert_receive {:jellyfish, ^notification}, @timeout
+      assert_receive {:fishjam, ^notification}, @timeout
 
-      assert_receive {:trace, _pid, :receive, {:jellyfish, ^notification}},
+      assert_receive {:trace, _pid, :receive, {:fishjam, ^notification}},
                      @timeout
 
-      assert_receive {:jellyfish, %RoomDeleted{}}, @timeout
+      assert_receive {:fishjam, %RoomDeleted{}}, @timeout
     end
   end
 
@@ -181,7 +181,7 @@ defmodule VideoroomWeb.RoomJsonTest do
   defp join_room(token) do
     {:ok, peer} = Peer.start_link(@peer_url, token)
 
-    assert_receive({:jellyfish, %PeerConnected{}}, @timeout)
+    assert_receive({:fishjam, %PeerConnected{}}, @timeout)
 
     peer
   end
@@ -190,7 +190,7 @@ defmodule VideoroomWeb.RoomJsonTest do
     send(peer, :terminate)
 
     unless async?,
-      do: assert_receive({:jellyfish, %PeerDisconnected{}}, @timeout)
+      do: assert_receive({:fishjam, %PeerDisconnected{}}, @timeout)
   end
 
   defp delete_all_rooms() do

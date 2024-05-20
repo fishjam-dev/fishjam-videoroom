@@ -1,9 +1,9 @@
 version: '2.2'
 
-x-jellyfish-template: &jellyfish-template
-  image: "ghcr.io/fishjam-dev/jellyfish:${JELLYFISH_VERSION}"
+x-fishjam-template: &fishjam-template
+  image: "ghcr.io/fishjam-dev/fishjam:${JELLYFISH_VERSION}"
   restart: unless-stopped
-  environment: &jellyfish-environment
+  environment: &fishjam-environment
     JF_PORT: $JF_PORT
     JF_CHECK_ORIGIN: "${JF_CHECK_ORIGIN:-true}"
     JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
@@ -31,20 +31,20 @@ x-node-exporter: &node-exporter-template
     - /:/host:ro,rslave
 
 services:
-  jellyfish1:
-    <<: *jellyfish-template
-    container_name: jellyfish1
+  fishjam1:
+    <<: *fishjam-template
+    container_name: fishjam1
     environment:
-      <<: *jellyfish-environment
+      <<: *fishjam-environment
       JF_HOST: "${JF1_HOST:-$JF1_IP:$JF_PORT}"
       JF_DIST_NODE_NAME: app@$JF1_IP
       JF_WEBRTC_TURN_IP: "${JF1_IP}"
 
-  jellyfish2:
-    <<: *jellyfish-template
-    container_name: jellyfish2
+  fishjam2:
+    <<: *fishjam-template
+    container_name: fishjam2
     environment:
-      <<: *jellyfish-environment
+      <<: *fishjam-environment
       JF_HOST: "${JF2_HOST:-$JF2_IP:$JF_PORT}"
       JF_DIST_NODE_NAME: app@$JF2_IP
       JF_WEBRTC_TURN_IP: "${JF2_IP}"
@@ -55,13 +55,13 @@ services:
       dockerfile: ./Dockerfile
       args:
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
-        JELLYROOM_VERSION: ${JELLYROOM_VERSION}
+        FISHJAM_ROOM_VERSION: ${FISHJAM_ROOM_VERSION}
         JELLYFISH_VERSION: ${JELLYFISH_VERSION}
     container_name: frontend
     restart: unless-stopped
     depends_on:
       - backend
-      - jellyfish1
+      - fishjam1
     ports:
       - "5005:5005"
 
@@ -79,7 +79,7 @@ services:
       BE_JF_ADDRESSES: ${BE_JF_ADDRESSES:-$JF1_IP:$JF_PORT $JF2_IP:$JF_PORT}
     restart: unless-stopped
     depends_on:
-      - jellyfish1
+      - fishjam1
     ports:
       - "5004:5004"
 
@@ -88,7 +88,7 @@ services:
       context: ./prometheus
       dockerfile: Dockerfile
       args:
-        PROM_JELLYFISH_TARGETS: ${PROM_JELLYFISH_TARGETS:-jellyfish1:9568,jellyfish2:9568}
+        PROM_JELLYFISH_TARGETS: ${PROM_JELLYFISH_TARGETS:-fishjam1:9568,fishjam2:9568}
         PROM_NODE_TARGETS: ${PROM_NODE_TARGETS:-node_exporter:9100}
     container_name: prometheus
     restart: on-failure
@@ -100,7 +100,7 @@ services:
     volumes:
       - prometheus_data:/prometheus
     depends_on:
-      - jellyfish1
+      - fishjam1
 
   grafana:
     build:

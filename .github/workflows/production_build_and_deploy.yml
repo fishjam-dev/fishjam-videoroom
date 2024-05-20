@@ -20,16 +20,16 @@ jobs:
         id: versions
         run: |
           cat << EOF >> $GITHUB_OUTPUT
-          jellyroom=${GITHUB_REF#refs/*/}
-          jellyfish=$(cat .jellyfish-version)
+          fishjam_room=${GITHUB_REF#refs/*/}
+          fishjam=$(cat .fishjam-version)
           EOF
 
       - name: Prepare .env file for the deployment
         id: variables_population
         run: |
           echo "DOMAIN=${{env.DOMAIN}} 
-          JELLYROOM_VERSION=${{ steps.versions.outputs.jellyroom }}
-          JELLYFISH_VERSION=${{ steps.versions.outputs.jellyfish }}
+          FISHJAM_ROOM_VERSION=${{ steps.versions.outputs.fishjam_room }}
+          JELLYFISH_VERSION=${{ steps.versions.outputs.fishjam }}
           JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN_CLOUD_PRODUCTION}}
           BE_HOST=${{env.BE_HOST}}
           BE_JF_SECURE_CONNECTION=true

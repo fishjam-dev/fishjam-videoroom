@@ -48,7 +48,7 @@ export const BACKEND_URL = isDevEnv ?
   // @ts-ignore
 export const JELLYFISH_VERSION = import.meta.env.VITE_JELLYFISH_VERSION
 // @ts-ignore
-export const JELLYROOM_VERSION = import.meta.env.VITE_JELLYROOM_VERSION
+export const FISHJAM_ROOM_VERSION = import.meta.env.VITE_FISHJAM_ROOM_VERSION
 
 // videoroom_backend should return this address (host and port)
 // @ts-ignore

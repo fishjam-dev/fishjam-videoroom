@@ -4,10 +4,10 @@ FROM alpine:3.18 as builder
 WORKDIR '/app'
 
 ARG FE_BE_HOST
-ARG JELLYROOM_VERSION
+ARG FISHJAM_ROOM_VERSION
 ARG JELLYFISH_VERSION
 ENV VITE_BE_HOST=$FE_BE_HOST
-ENV VITE_JELLYROOM_VERSION=$JELLYROOM_VERSION
+ENV VITE_FISHJAM_ROOM_VERSION=$FISHJAM_ROOM_VERSION
 ENV VITE_JELLYFISH_VERSION=$JELLYFISH_VERSION
 
 # Install nodejs and npm
@@ -19,7 +19,7 @@ RUN adduser --disabled-password --gecos "" node
 # Own the app directory
 RUN chown node:node ./
 
-# It's adviced to run the container as non-root user 
+# It's adviced to run the container as non-root user
 # for added security if the base image has the user
 USER node
 
@@ -29,7 +29,7 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci
 
-# Copy application files 
+# Copy application files
 COPY . .
 
 # Build the app
