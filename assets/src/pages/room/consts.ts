@@ -55,7 +55,7 @@ export const FISHJAM_ROOM_VERSION = import.meta.env.VITE_FISHJAM_ROOM_VERSION
 const origin_websocket_url = new URL(window.location.origin)
 origin_websocket_url.protocol = isSecure ? "wss:" : "ws:";
 
-export const getSignalingAddress = (serverAddress: String) => {
+export const getSignalingAddress = (serverAddress: string) => {
   return {
     host: serverAddress.toString(),
     path: "/socket/peer/websocket",

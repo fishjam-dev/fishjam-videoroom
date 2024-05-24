@@ -112,9 +112,7 @@ defmodule Videoroom.RoomService do
             {:halt, {fishjam_address, notifier}}
 
           {:error, reason} ->
-            Logger.warning(
-              "Unable to connect to #{fishjam_address}, reason: #{inspect(reason)}"
-            )
+            Logger.warning("Unable to connect to #{fishjam_address}, reason: #{inspect(reason)}")
 
             {:cont, nil}
         end
