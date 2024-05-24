@@ -3,7 +3,7 @@ import { FC } from "react";
 import Button from "../../shared/components/Button";
 import ChevronDown from "../icons/ChevronDown";
 import PeopleComponent from "./PeopleComponent";
-import { useSelector } from "../../../jellyfish.types";
+import { useSelector } from "../../../fishjam";
 
 type SidebarProps = {
   onClose?: () => void;

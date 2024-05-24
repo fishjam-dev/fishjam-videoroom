@@ -41,7 +41,7 @@ defmodule Videoroom.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:cors_plug, "~> 2.0"},
 
-      # Jellyfish deps
+      # Fishjam deps
       {:fishjam_server_sdk, "~> 0.6.0"},
 
       # Dev

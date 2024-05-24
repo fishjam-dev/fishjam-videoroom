@@ -15,7 +15,7 @@ import HomePageLayout from "./HomePageLayout";
 
 import HomePageVideoTile from "./HomePageVideoTile";
 import { useLocalPeer } from "../../devices/LocalPeerMediaContext";
-import { useMicrophone } from "../../../jellyfish.types.ts";
+import { useMicrophone } from "../../../fishjam.ts";
 
 const VideoroomHomePage: FC = () => {
   const lastDisplayName: string | null = localStorage.getItem("displayName");

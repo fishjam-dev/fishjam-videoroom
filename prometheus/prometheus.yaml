@@ -7,7 +7,7 @@ global:
 scrape_configs:
   - job_name: 'fishjams'
     static_configs:
-      - targets: [$PROM_JELLYFISH_TARGETS]
+      - targets: [$PROM_FISHJAM_TARGETS]
 
   - job_name: 'nodes'
     static_configs:

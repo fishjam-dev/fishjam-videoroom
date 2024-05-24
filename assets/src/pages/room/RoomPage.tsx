@@ -6,7 +6,7 @@ import PageLayout from "../../features/room-page/components/PageLayout";
 import { useAcquireWakeLockAutomatically } from "./hooks/useAcquireWakeLockAutomatically";
 import clsx from "clsx";
 import RoomSidebar from "./RoomSidebar";
-import { useClient, useConnect, useDisconnect } from "../../jellyfish.types.ts";
+import { useClient, useConnect, useDisconnect } from "../../fishjam.ts";
 import { useUser } from "../../contexts/UserContext";
 import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 import { InboundRtpId, useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";

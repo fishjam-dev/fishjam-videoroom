@@ -1,7 +1,7 @@
 version: '3.8'
 
 x-fishjam-template: &fishjam-template
-  image: "ghcr.io/fishjam-dev/fishjam:${JELLYFISH_VERSION:-edge}"
+  image: "ghcr.io/fishjam-dev/fishjam:${FISHJAM_VERSION:-edge}"
   restart: unless-stopped
   environment: &fishjam-environment
     JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN:-development}
@@ -49,7 +49,7 @@ services:
       dockerfile: ./Dockerfile
       args:
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
-        JELLYFISH_VERSION: ${JELLYFISH_VERSION:-0.3.0}
+        FISHJAM_VERSION: ${FISHJAM_VERSION:-0.3.0}
         FISHJAM_ROOM_VERSION: ${FISHJAM_ROOM_VERSION:-build}
     container_name: frontend
     restart: unless-stopped
@@ -84,7 +84,7 @@ services:
       context: ./prometheus
       dockerfile: Dockerfile
       args:
-        PROM_JELLYFISH_TARGETS: ${PROM_JELLYFISH_TARGETS:-fishjam1:9568,fishjam2:9568}
+        PROM_FISHJAM_TARGETS: ${PROM_FISHJAM_TARGETS:-fishjam1:9568,fishjam2:9568}
         # Through 172.17.0.1 address docker containers (not running in network mode host) can access
         # services running on host OS (localhost). In this example through this address prometheus could access
         # node-exporter which is running in network mode host.

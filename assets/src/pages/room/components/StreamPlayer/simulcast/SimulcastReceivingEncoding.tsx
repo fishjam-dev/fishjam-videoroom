@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
+import { TrackEncoding } from "@fishjam-dev/react-client";
 
 type Props = {
   encoding?: TrackEncoding;

@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { FC } from "react";
 import { computeInitials } from "./InitialsImage";
-import { useSelector } from "../../../jellyfish.types";
+import { useSelector } from "../../../fishjam";
 
 type PeopleListItem = {
   peerId: string;

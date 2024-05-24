@@ -2,7 +2,7 @@ version: "3"
 
 services:
   fishjam:
-    image: "ghcr.io/fishjam-dev/fishjam:${JELLYFISH_VERSION:-edge}"
+    image: "ghcr.io/fishjam-dev/fishjam:${FISHJAM_VERSION:-edge}"
     container_name: fishjam
     restart: on-failure
     healthcheck:

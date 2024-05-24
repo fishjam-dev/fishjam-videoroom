@@ -6,9 +6,9 @@ import {
   TrackType,
   useClient,
   useSelector
-} from "../../../jellyfish.types";
+} from "../../../fishjam";
 import useEffectOnChange from "../../../features/shared/hooks/useEffectOnChange";
-import { ClientEvents, MessageEvents } from "@jellyfish-dev/react-client-sdk";
+import { ClientEvents, MessageEvents } from "@fishjam-dev/react-client";
 import { LOCAL_SCREEN_SHARING_ID, LOCAL_VIDEO_ID } from "../consts";
 
 type PinningFlags = {

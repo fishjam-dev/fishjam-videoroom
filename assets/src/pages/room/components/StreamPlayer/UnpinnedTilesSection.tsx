@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import RemoteMediaPlayerTile from "./RemoteMediaPlayerTile";
-import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
+import { TrackEncoding } from "@fishjam-dev/react-client";
 import clsx from "clsx";
 import { MediaPlayerTileConfig, TrackWithId } from "../../../types";
 import PeerInfoLayer from "./PeerInfoLayer";

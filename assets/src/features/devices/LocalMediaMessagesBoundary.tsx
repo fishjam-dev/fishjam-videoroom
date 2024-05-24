@@ -7,8 +7,8 @@ import {
   useCamera,
   useClient,
   useMicrophone
-} from "../../jellyfish.types.ts";
-import { ClientEvents } from "@jellyfish-dev/react-client-sdk";
+} from "../../fishjam.ts";
+import { ClientEvents } from "@fishjam-dev/react-client";
 
 const prepareErrorMessage = (videoDeviceError: string | null, audioDeviceError: string | null): null | string => {
   if (videoDeviceError && audioDeviceError) {

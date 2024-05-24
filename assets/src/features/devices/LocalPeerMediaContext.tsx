@@ -4,8 +4,8 @@ import {
   SCREENSHARING_TRACK_CONSTRAINTS,
   VIDEO_TRACK_CONSTRAINTS
 } from "../../pages/room/consts";
-import { PeerMetadata, TrackMetadata, useCamera, useClient, useMicrophone, useSetupMedia } from "../../jellyfish.types";
-import { ClientEvents, UseCameraResult, SimulcastConfig } from "@jellyfish-dev/react-client-sdk";
+import { PeerMetadata, TrackMetadata, useCamera, useClient, useMicrophone, useSetupMedia } from "../../fishjam";
+import { ClientEvents, UseCameraResult, SimulcastConfig } from "@fishjam-dev/react-client";
 import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";

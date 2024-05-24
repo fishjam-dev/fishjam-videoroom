@@ -8,7 +8,7 @@ services:
       args:
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
         FISHJAM_ROOM_VERSION: ${FISHJAM_ROOM_VERSION}
-        JELLYFISH_VERSION: ${JELLYFISH_VERSION}
+        FISHJAM_VERSION: ${FISHJAM_VERSION}
     container_name: frontend
     restart: unless-stopped
     depends_on:

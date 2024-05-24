@@ -1,4 +1,4 @@
-import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
+import { TrackEncoding } from "@fishjam-dev/react-client";
 import { useEffect, useState } from "react";
 
 export const useStoreFirstNonNullValue = (variable: TrackEncoding | null) => {

@@ -1,6 +1,6 @@
 import { useToggle } from "./useToggle";
-import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
-import { useClient, useCurrentUserVideoTrackId } from "../../../jellyfish.types";
+import { TrackEncoding } from "@fishjam-dev/react-client";
+import { useClient, useCurrentUserVideoTrackId } from "../../../fishjam";
 
 export type UseSimulcastLocalEncoding = {
   highQuality: boolean;

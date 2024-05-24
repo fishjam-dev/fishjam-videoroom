@@ -1,9 +1,9 @@
 defmodule VideoroomWeb.RoomJsonTest do
   use VideoroomWeb.ConnCase, async: false
 
-  alias Jellyfish.Room
+  alias Fishjam.Room
   alias Videoroom.Test.Peer
-  alias Jellyfish.Notification.{PeerConnected, PeerDisconnected, RoomCreated, RoomDeleted}
+  alias Fishjam.Notification.{PeerConnected, PeerDisconnected, RoomCreated, RoomDeleted}
 
   @url Application.compile_env!(:fishjam_server_sdk, :server_address)
   @peer_url "ws://#{@url}/socket/peer/websocket"
@@ -11,9 +11,9 @@ defmodule VideoroomWeb.RoomJsonTest do
   @timeout 5000
 
   setup context do
-    client = Jellyfish.Client.new()
-    {:ok, notifier} = Jellyfish.WSNotifier.start()
-    :ok = Jellyfish.WSNotifier.subscribe_server_notifications(notifier)
+    client = Fishjam.Client.new()
+    {:ok, notifier} = Fishjam.WSNotifier.start()
+    :ok = Fishjam.WSNotifier.subscribe_server_notifications(notifier)
 
     prev_env = Application.get_all_env(:videoroom)
 
@@ -194,7 +194,7 @@ defmodule VideoroomWeb.RoomJsonTest do
   end
 
   defp delete_all_rooms() do
-    client = Jellyfish.Client.new()
+    client = Fishjam.Client.new()
     {:ok, rooms} = Room.get_all(client)
 
     rooms

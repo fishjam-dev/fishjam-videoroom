@@ -9,7 +9,7 @@ components:
       type: string
       x-struct: Elixir.Videoroom.ApiSpec.Error
     PeerToken:
-      description: Peer token used for authorizing websocket connection to the Jellyfish Server
+      description: Peer token used for authorizing websocket connection to the Fishjam Server
       example: SFMyNTY.g2gDdAAhiOL4CdsaboT9-jtMzhoI
       title: PeerToken
       type: string
