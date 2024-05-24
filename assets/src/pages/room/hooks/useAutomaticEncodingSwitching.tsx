@@ -1,4 +1,4 @@
-import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
+import { TrackEncoding } from "@fishjam-dev/react-client";
 import { useCallback, useEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useStoreFirstNonNullValue } from "./useStoreFirstNonNullValue";

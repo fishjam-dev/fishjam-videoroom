@@ -49,9 +49,9 @@ defmodule VideoroomWeb.RoomController do
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"room_name" => name}) do
     case RoomService.add_peer(name) do
-      {:ok, token, jellyfish_address} ->
+      {:ok, token, fishjam_address} ->
         conn
-        |> render("show.json", token: token, jellyfish_address: jellyfish_address)
+        |> render("show.json", token: token, fishjam_address: fishjam_address)
 
       {:error, reason} when is_binary(reason) ->
         conn

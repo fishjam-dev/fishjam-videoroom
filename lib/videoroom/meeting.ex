@@ -6,9 +6,9 @@ defmodule Videoroom.Meeting do
 
   require Logger
 
-  alias Jellyfish.Component
-  alias Jellyfish.Room
-  alias Jellyfish.Notification.{PeerCrashed, RoomCrashed, RoomDeleted}
+  alias Fishjam.Component
+  alias Fishjam.Room
+  alias Fishjam.Notification.{PeerCrashed, RoomCrashed, RoomDeleted}
 
   alias Videoroom.RoomRegistry
 
@@ -19,7 +19,7 @@ defmodule Videoroom.Meeting do
       :name,
       :client,
       :room_id,
-      :jellyfish_address
+      :fishjam_address
     ]
 
     defstruct @enforce_keys
@@ -54,11 +54,11 @@ defmodule Videoroom.Meeting do
 
       :exit, {:room_not_exist, _} ->
         Logger.error(
-          "Failed to call add peer because room created by #{meeting_name} doesn't exist on jellyfish"
+          "Failed to call add peer because room created by #{meeting_name} doesn't exist on fishjam"
         )
 
         {:error,
-         "Failed to call add peer because room created by #{meeting_name} doesn't exist on jellyfish"}
+         "Failed to call add peer because room created by #{meeting_name} doesn't exist on fishjam"}
 
       :exit, {:normal, _} ->
         Logger.error("Failed to call add peer because meeting is removed")
@@ -98,21 +98,21 @@ defmodule Videoroom.Meeting do
   # Callbacks
 
   @impl true
-  def init(%{name: name, jellyfish_address: jellyfish_address}) do
+  def init(%{name: name, fishjam_address: fishjam_address}) do
     Logger.metadata(room_name: name)
 
-    client = Jellyfish.Client.new(server_address: jellyfish_address)
+    client = Fishjam.Client.new(server_address: fishjam_address)
 
     peer_disconnected_timeout = Application.fetch_env!(:videoroom, :peer_disconnected_timeout)
     peerless_purge_timeout = Application.fetch_env!(:videoroom, :peerless_purge_timeout)
 
-    with {:ok, room, jellyfish_address} <-
+    with {:ok, room, fishjam_address} <-
            create_new_room(client, name,
              video_codec: :h264,
              peer_disconnected_timeout: peer_disconnected_timeout,
              peerless_purge_timeout: peerless_purge_timeout
            ) do
-      client = Jellyfish.Client.update_address(client, jellyfish_address)
+      client = Fishjam.Client.update_address(client, fishjam_address)
 
       Logger.info("Created meeting room id: #{room.id}")
 
@@ -121,7 +121,7 @@ defmodule Videoroom.Meeting do
          client: client,
          name: name,
          room_id: room.id,
-         jellyfish_address: jellyfish_address
+         fishjam_address: fishjam_address
        }}
     else
       {:error, reason} ->
@@ -131,10 +131,10 @@ defmodule Videoroom.Meeting do
   end
 
   defp create_new_room(client, name, opts) do
-    with {:ok, room, jellyfish_address} <- Room.create(client, opts),
-         client <- Jellyfish.Client.update_address(client, jellyfish_address),
+    with {:ok, room, fishjam_address} <- Room.create(client, opts),
+         client <- Fishjam.Client.update_address(client, fishjam_address),
          :ok <- add_room_to_registry(client, name, room) do
-      {:ok, room, jellyfish_address}
+      {:ok, room, fishjam_address}
     end
   end
 
@@ -152,22 +152,22 @@ defmodule Videoroom.Meeting do
   def handle_call(:add_peer, _from, state) do
     text = "Request failed: Room #{state.room_id} does not exist"
 
-    case Room.add_peer(state.client, state.room_id, Jellyfish.Peer.WebRTC) do
+    case Room.add_peer(state.client, state.room_id, Fishjam.Peer.WebRTC) do
       {:ok, %{peer: peer, token: token}} ->
         Logger.info("Added peer #{peer.id}")
 
-        {:reply, {:ok, token, state.jellyfish_address}, state}
+        {:reply, {:ok, token, state.fishjam_address}, state}
 
       {:error, ^text} ->
         Logger.error(
-          "Failed to add peer, because of room #{state.room_id} does not exist on jellyfish: #{state.jellyfish_address}"
+          "Failed to add peer, because of room #{state.room_id} does not exist on fishjam: #{state.fishjam_address}"
         )
 
         {:stop, :room_not_exist, {:error, "Failed to add peer"}, state}
 
       error ->
         Logger.error(
-          "Failed to add peer, because of error: #{inspect(error)} on jellyfish: #{state.jellyfish_address}"
+          "Failed to add peer, because of error: #{inspect(error)} on fishjam: #{state.fishjam_address}"
         )
 
         {:reply, {:error, "Failed to add peer"}, state}
@@ -189,8 +189,8 @@ defmodule Videoroom.Meeting do
   end
 
   @impl true
-  def handle_info({:jellyfish, notification}, state) do
-    Logger.info("Jellyfish notification: #{inspect(notification)}")
+  def handle_info({:fishjam, notification}, state) do
+    Logger.info("Fishjam notification: #{inspect(notification)}")
     handle_notification(notification, state)
   end
 

@@ -9,7 +9,7 @@ import MicrophoneOff from "../../room-page/icons/MicrophoneOff";
 import Settings from "../../room-page/icons/Settings";
 import { useModal } from "../../../contexts/ModalContext";
 import GenericMediaPlayerTile from "../../../pages/room/components/StreamPlayer/GenericMediaPlayerTile";
-import { useMicrophone } from "../../../jellyfish.types.ts";
+import { useMicrophone } from "../../../fishjam.ts";
 import { useLocalPeer } from "../../devices/LocalPeerMediaContext.tsx";
 
 type HomePageVideoTileProps = {

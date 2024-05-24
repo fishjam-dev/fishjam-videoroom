@@ -6,18 +6,18 @@ services:
     command: sh -c "cd app/ && apk add git && mix local.hex --force && mix local.rebar --force && mix deps.get && mix test --warnings-as-errors"
     environment:
       MIX_ENV: integration_test
-      BE_JF_ADDRESSES: jellyfish:5002
+      BE_JF_ADDRESSES: fishjam:5002
       BE_JF_SECURE_CONNECTION: false
 
     volumes:
       - .:/app
     depends_on:
-      jellyfish:
+      fishjam:
         condition: service_healthy
 
-  jellyfish:
+  fishjam:
     extends:
       file: docker-compose-dev.yaml
-      service: jellyfish
+      service: fishjam
     environment:
-      - JF_HOST=jellyfish:5002
+      - JF_HOST=fishjam:5002

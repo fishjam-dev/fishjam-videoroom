@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { PeerMetadata, TrackMetadata, useClient, useStatus } from "../../jellyfish.types";
+import { PeerMetadata, TrackMetadata, useClient, useStatus } from "../../fishjam";
 import { useParams } from "react-router-dom";
 import useToast from "../shared/hooks/useToast";
 import { startRecording as startRecordingOpenApi } from "../../room.api";
-import { ClientEvents } from "@jellyfish-dev/react-client-sdk";
+import { ClientEvents } from "@fishjam-dev/react-client";
 
 type UseRecording = {
   canStartRecording: boolean;

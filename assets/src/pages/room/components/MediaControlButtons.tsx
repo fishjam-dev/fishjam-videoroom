@@ -21,8 +21,8 @@ import {
   useClient,
   useMicrophone,
   useScreenShare
-} from "../../../jellyfish.types.ts";
-import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult, Client } from "@jellyfish-dev/react-client-sdk";
+} from "../../../fishjam.ts";
+import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult, Client } from "@fishjam-dev/react-client";
 import { LocalPeerContext, useLocalPeer } from "../../../features/devices/LocalPeerMediaContext.tsx";
 import { useUser } from "../../../contexts/UserContext.tsx";
 

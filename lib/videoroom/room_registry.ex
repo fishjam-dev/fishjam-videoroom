@@ -10,10 +10,10 @@ defmodule Videoroom.RoomRegistry do
     :ets.new(@room_table, [:named_table, :set, :public])
   end
 
-  @spec lookup_meeting(Meeting.name()) :: {:ok, Jellyfish.Room.id()} | {:error, :unregistered}
+  @spec lookup_meeting(Meeting.name()) :: {:ok, Fishjam.Room.id()} | {:error, :unregistered}
   def lookup_meeting(name), do: lookup(name)
 
-  @spec lookup_room(Jellyfish.Room.id()) :: {:ok, Meeting.name()} | {:error, :unregistered}
+  @spec lookup_room(Fishjam.Room.id()) :: {:ok, Meeting.name()} | {:error, :unregistered}
   def lookup_room(id), do: lookup(id)
 
   defp lookup(name_or_id) do
@@ -26,7 +26,7 @@ defmodule Videoroom.RoomRegistry do
     end
   end
 
-  @spec insert_new(Meeting.name(), Jellyfish.Room.id()) :: boolean()
+  @spec insert_new(Meeting.name(), Fishjam.Room.id()) :: boolean()
   def insert_new(name, room_id) do
     :ets.insert_new(@room_table, [{name, room_id}, {room_id, name}])
   end

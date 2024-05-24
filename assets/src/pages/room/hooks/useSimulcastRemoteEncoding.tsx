@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
-import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
-import { useClient } from "../../../jellyfish.types.ts";
+import { TrackEncoding } from "@fishjam-dev/react-client";
+import { useClient } from "../../../fishjam.ts";
 
 export type UseSimulcastRemoteEncodingResult = {
   targetEncoding: TrackEncoding | null;

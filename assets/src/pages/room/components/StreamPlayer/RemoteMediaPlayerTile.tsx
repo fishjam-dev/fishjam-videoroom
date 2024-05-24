@@ -1,9 +1,9 @@
 import { ComponentProps, FC } from "react";
-import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
+import { TrackEncoding } from "@fishjam-dev/react-client";
 import { useAutomaticEncodingSwitching } from "../../hooks/useAutomaticEncodingSwitching";
 import { SimulcastEncodingToReceive } from "./simulcast/SimulcastEncodingToReceive";
 import GenericMediaPlayerTile from "./GenericMediaPlayerTile";
-import { useTracks } from "../../../../jellyfish.types.ts";
+import { useTracks } from "../../../../fishjam.ts";
 import { StatisticsLayer } from "./StatisticsLayer.tsx";
 import { useDeveloperInfo } from "../../../../contexts/DeveloperInfoContext.tsx";
 

@@ -16,7 +16,7 @@ config :videoroom, VideoroomWeb.Endpoint,
   secret_key_base: "Ovvgkm2prqt9EuqBAuHVGRtJj35AcVVnwSkk3dcTmZYZ9Gfigrg1bOSokrung9aT",
   watchers: []
 
-config :jellyfish_server_sdk,
+config :fishjam_server_sdk,
   server_address: "localhost:5002",
   server_api_token: System.get_env("BE_JF_SERVER_API_TOKEN", "development")
 
@@ -43,16 +43,16 @@ config :jellyfish_server_sdk,
 # configured to run both http and https servers on
 # different ports.
 
-jellyfish_addresses = System.get_env("BE_JF_ADDRESSES", "localhost:5002 localhost:5003")
+fishjam_addresses = System.get_env("BE_JF_ADDRESSES", "localhost:5002 localhost:5003")
 
-jellyfish_addresses = String.split(jellyfish_addresses, " ")
+fishjam_addresses = String.split(fishjam_addresses, " ")
 
 # Enable dev routes for dashboard and mailbox
 config :videoroom,
   dev_routes: true,
   peer_disconnected_timeout: 60,
   peerless_purge_timeout: 120,
-  jellyfish_addresses: jellyfish_addresses
+  fishjam_addresses: fishjam_addresses
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

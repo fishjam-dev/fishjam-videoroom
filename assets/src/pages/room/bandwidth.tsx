@@ -1,5 +1,5 @@
-import { BandwidthLimit, SimulcastBandwidthLimit, TrackBandwidthLimit } from "@jellyfish-dev/react-client-sdk";
-import { TrackType } from "../../jellyfish.types.ts";
+import { BandwidthLimit, SimulcastBandwidthLimit, TrackBandwidthLimit } from "@fishjam-dev/react-client";
+import { TrackType } from "../../fishjam.ts";
 
 const NO_LIMIT: BandwidthLimit = 0;
 const DEFAULT_LIMIT: BandwidthLimit = 1500;

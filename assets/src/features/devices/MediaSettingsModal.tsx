@@ -6,7 +6,7 @@ import { Modal } from "../shared/components/modal/Modal";
 import { Checkbox } from "../shared/components/Checkbox";
 import { useRecording } from "../recording/useRecording";
 import Button from "../shared/components/Button";
-import { useCamera, useMicrophone } from "../../jellyfish.types.ts";
+import { useCamera, useMicrophone } from "../../fishjam.ts";
 
 export const MediaSettingsModal: React.FC = () => {
   const { setOpen, isOpen } = useModal();

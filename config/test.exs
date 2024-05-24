@@ -7,14 +7,14 @@ config :videoroom, VideoroomWeb.Endpoint,
   secret_key_base: "ZARcyCI5SXpckH0BXnmeifEvUBnxxyqIR6PZDcmHKOUH3EbUHCeep0pdjXLYYdSq",
   server: false
 
-config :jellyfish_server_sdk,
+config :fishjam_server_sdk,
   server_address: "localhost:5002",
   server_api_token: "development"
 
 config :videoroom,
   divo: "docker-compose-dev.yaml",
   divo_wait: [dwell: 1500, max_tries: 50],
-  jellyfish_addresses: ["localhost:5002"],
+  fishjam_addresses: ["localhost:5002"],
   peer_disconnected_timeout: 1,
   peerless_purge_timeout: 3
 

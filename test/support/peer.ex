@@ -5,8 +5,8 @@ defmodule Videoroom.Test.Peer do
 
   use WebSockex
 
-  alias Jellyfish.PeerMessage
-  alias Jellyfish.PeerMessage.AuthRequest
+  alias Fishjam.PeerMessage
+  alias Fishjam.PeerMessage.AuthRequest
 
   @spec start_link(binary | WebSockex.Conn.t(), any) :: {:ok, pid}
   def start_link(url, token) do

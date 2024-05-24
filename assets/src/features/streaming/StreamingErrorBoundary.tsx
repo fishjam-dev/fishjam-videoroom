@@ -1,7 +1,7 @@
 import { FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import useToast from "../shared/hooks/useToast";
 import { ErrorMessage, messageComparator } from "../../pages/room/errorMessage";
-import { useClient } from "../../jellyfish.types";
+import { useClient } from "../../fishjam";
 import useEffectOnChange from "../shared/hooks/useEffectOnChange";
 
 export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {

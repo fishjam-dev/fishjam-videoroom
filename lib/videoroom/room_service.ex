@@ -3,13 +3,13 @@ defmodule Videoroom.RoomService do
   use GenServer
 
   require Logger
-  alias Jellyfish.Component
-  alias Jellyfish.WSNotifier
+  alias Fishjam.Component
+  alias Fishjam.WSNotifier
 
   alias Videoroom.Meeting
   alias Videoroom.RoomRegistry
 
-  @type jellyfish_address :: String.t()
+  @type fishjam_address :: String.t()
 
   @spec start_link(any) :: GenServer.on_start()
   def start_link(_opts) do
@@ -17,7 +17,7 @@ defmodule Videoroom.RoomService do
   end
 
   @spec add_peer(Meeting.name()) ::
-          {:ok, Jellyfish.Room.peer_token(), jellyfish_address()} | {:error, binary()}
+          {:ok, Fishjam.Room.peer_token(), fishjam_address()} | {:error, binary()}
   def add_peer(meeting_name) do
     GenServer.call(__MODULE__, {:add_peer, meeting_name})
   end
@@ -44,11 +44,11 @@ defmodule Videoroom.RoomService do
 
   @impl true
   def handle_call({:add_peer, room_name}, _from, state) do
-    {jellyfish_address, _pid} = state.notifier
+    {fishjam_address, _pid} = state.notifier
 
     case DynamicSupervisor.start_child(
            state.supervisor,
-           {Videoroom.Meeting, %{name: room_name, jellyfish_address: jellyfish_address}}
+           {Videoroom.Meeting, %{name: room_name, fishjam_address: fishjam_address}}
          ) do
       {:error, {:already_started, _}} ->
         Logger.debug("Room with name #{room_name} is already started")
@@ -69,10 +69,10 @@ defmodule Videoroom.RoomService do
   end
 
   @impl true
-  def handle_info({:jellyfish, %{room_id: room_id} = notification}, state) do
+  def handle_info({:fishjam, %{room_id: room_id} = notification}, state) do
     with {:ok, room_name} <- RoomRegistry.lookup_room(room_id),
          [{pid, _value}] <- Registry.lookup(Videoroom.Registry, room_name) do
-      send(pid, {:jellyfish, notification})
+      send(pid, {:fishjam, notification})
     else
       _error ->
         Logger.warning(
@@ -85,7 +85,7 @@ defmodule Videoroom.RoomService do
 
   @impl true
   def handle_info({:DOWN, _ref, :process, _object, _reason}, state) do
-    Logger.warning("Jellyfish WSNotifier exited. Starting new notifier")
+    Logger.warning("Fishjam WSNotifier exited. Starting new notifier")
 
     notifier = start_notifier()
 
@@ -102,26 +102,24 @@ defmodule Videoroom.RoomService do
   defp start_notifier() do
     notifier =
       :videoroom
-      |> Application.fetch_env!(:jellyfish_addresses)
-      |> Enum.reduce_while(nil, fn jellyfish_address, nil ->
-        case WSNotifier.start(server_address: jellyfish_address) do
+      |> Application.fetch_env!(:fishjam_addresses)
+      |> Enum.reduce_while(nil, fn fishjam_address, nil ->
+        case WSNotifier.start(server_address: fishjam_address) do
           {:ok, notifier} ->
-            Logger.info("Successfully connected to #{jellyfish_address}")
+            Logger.info("Successfully connected to #{fishjam_address}")
             WSNotifier.subscribe_server_notifications(notifier)
             Process.monitor(notifier)
-            {:halt, {jellyfish_address, notifier}}
+            {:halt, {fishjam_address, notifier}}
 
           {:error, reason} ->
-            Logger.warning(
-              "Unable to connect to #{jellyfish_address}, reason: #{inspect(reason)}"
-            )
+            Logger.warning("Unable to connect to #{fishjam_address}, reason: #{inspect(reason)}")
 
             {:cont, nil}
         end
       end)
 
     if notifier == nil do
-      raise("Unable to connect to any jellyfish")
+      raise("Unable to connect to any fishjam")
     else
       notifier
     end

@@ -46,16 +46,16 @@ export const BACKEND_URL = isDevEnv ?
   new URL(`${protocol}://${import.meta.env.VITE_BE_HOST}`)
 
   // @ts-ignore
-export const JELLYFISH_VERSION = import.meta.env.VITE_JELLYFISH_VERSION
+export const FISHJAM_VERSION = import.meta.env.VITE_FISHJAM_VERSION
 // @ts-ignore
-export const JELLYROOM_VERSION = import.meta.env.VITE_JELLYROOM_VERSION
+export const FISHJAM_ROOM_VERSION = import.meta.env.VITE_FISHJAM_ROOM_VERSION
 
 // videoroom_backend should return this address (host and port)
 // @ts-ignore
 const origin_websocket_url = new URL(window.location.origin)
 origin_websocket_url.protocol = isSecure ? "wss:" : "ws:";
 
-export const getSignalingAddress = (serverAddress: String) => {
+export const getSignalingAddress = (serverAddress: string) => {
   return {
     host: serverAddress.toString(),
     path: "/socket/peer/websocket",
@@ -63,7 +63,7 @@ export const getSignalingAddress = (serverAddress: String) => {
   }
 }
 
-export const JELLYFISH_WEBSOCKET_PROTOCOL = isSecure ? "wss" : "ws";
+export const FISHJAM_WEBSOCKET_PROTOCOL = isSecure ? "wss" : "ws";
 
 export const MAX_TILE_HEIGHT_FOR_MEDIUM_ENCODING = 600;
 export const MAX_TILE_HEIGHT_FOR_LOW_ENCODING = 250;

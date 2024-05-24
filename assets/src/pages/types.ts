@@ -1,4 +1,4 @@
-import { TrackEncoding } from "@jellyfish-dev/react-client-sdk";
+import { TrackEncoding } from "@fishjam-dev/react-client";
 
 const StreamSourceValues = ["local", "remote"] as const;
 export type StreamSource = (typeof StreamSourceValues)[number];

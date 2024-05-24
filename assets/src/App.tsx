@@ -12,7 +12,7 @@ import ReactModal from "react-modal";
 import "./index.css";
 
 import { StreamingErrorBoundary } from "./features/streaming/StreamingErrorBoundary";
-import { JellyfishContextProvider } from "./jellyfish.types";
+import { FishjamContextProvider } from "./fishjam";
 
 // When returning to the videoroom page from another domain using the 'Back' button on the Safari browser,
 // the page is served from the cache, which prevents lifecycle events from being triggered.
@@ -24,7 +24,7 @@ const App: FC = () => {
   return (
     <UserProvider>
       <DeveloperInfoProvider>
-        <JellyfishContextProvider>
+        <FishjamContextProvider>
           <LocalPeerMediaProvider>
             <ToastProvider>
               <ModalProvider>
@@ -36,7 +36,7 @@ const App: FC = () => {
               </ModalProvider>
             </ToastProvider>
           </LocalPeerMediaProvider>
-        </JellyfishContextProvider>
+        </FishjamContextProvider>
       </DeveloperInfoProvider>
     </UserProvider>
   );

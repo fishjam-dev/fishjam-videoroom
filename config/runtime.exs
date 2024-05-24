@@ -25,7 +25,7 @@ if config_env() == :test do
   # before RoomService exits, which results in a bunch of error
   # logs at the end of tests - RoomService is linked to the
   # Notifier and Notifier to the WS connection to the JF
-  Divo.Suite.start(services: [:jellyfish], auto_start: false)
+  Divo.Suite.start(services: [:fishjam], auto_start: false)
 end
 
 if config_env() == :prod do
@@ -52,14 +52,14 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  jellyfish_addresses =
+  fishjam_addresses =
     System.get_env("BE_JF_ADDRESSES") || raise "Environment variable BE_JF_ADDRESSES is missing."
 
-  jellyfish_addresses = String.split(jellyfish_addresses, " ")
+  fishjam_addresses = String.split(fishjam_addresses, " ")
 
   secure_connection? = System.get_env("BE_JF_SECURE_CONNECTION", "false") == "true"
 
-  config :jellyfish_server_sdk,
+  config :fishjam_server_sdk,
     secure?: secure_connection?,
     server_api_token:
       System.get_env("BE_JF_SERVER_API_TOKEN") ||
@@ -68,7 +68,7 @@ if config_env() == :prod do
         """)
 
   config :videoroom,
-    jellyfish_addresses: jellyfish_addresses,
+    fishjam_addresses: fishjam_addresses,
     peer_disconnected_timeout:
       String.to_integer(System.get_env("PEER_DISCONNECTED_TIMEOUT") || "30"),
     peerless_purge_timeout: String.to_integer(System.get_env("PEERLESS_PURGE_TIMEOUT") || "60")
