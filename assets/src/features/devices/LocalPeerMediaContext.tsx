@@ -5,14 +5,14 @@ import {
   VIDEO_TRACK_CONSTRAINTS
 } from "../../pages/room/consts";
 import { PeerMetadata, TrackMetadata, useCamera, useClient, useMicrophone, useSetupMedia } from "../../fishjam";
-import { ClientEvents, UseCameraResult, SimulcastConfig } from "@fishjam-dev/react-client";
+import { ClientEvents, CameraAPI, SimulcastConfig } from "@fishjam-dev/react-client";
 import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
 import { useUser } from "../../contexts/UserContext.tsx";
 
 export type LocalPeerContext = {
-  video: UseCameraResult<TrackMetadata>;
+  video: CameraAPI<TrackMetadata>;
   init: () => void;
   blur: boolean;
   setBlur: (status: boolean, restart: boolean) => void;
@@ -140,7 +140,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
         remoteTrackIdRef.current = await client.addTrack(
           newTrack,
-          mediaStream,
           { active: metadataActive, type: "camera", displayName },
           simulcastConfig,
           selectBandwidthLimit("camera", simulcastEnabled)
@@ -149,9 +148,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         broadcastedStreamRef.current?.removeTrack(broadcastedStreamRef.current?.getVideoTracks()[0]);
         broadcastedStreamRef.current?.addTrack(trackRef.current);
 
-        // todo
-        //  When you replaceTrack, this does not affect the stream, so the local peer doesn't know that something has changed.
-        //  add localTrackReplaced event
         const newMetadata: TrackMetadata = { active: metadataActive, type: "camera", displayName };
         await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, newMetadata);
       } else if (remoteTrackIdRef.current && !stream) {
@@ -276,7 +272,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   const noop: () => Promise<any> = useCallback((..._args) => Promise.resolve(), []);
 
-  const newVideo: UseCameraResult<TrackMetadata> = useMemo(() => ({
+  const newVideo: CameraAPI<TrackMetadata> = useMemo(() => ({
     stream: stream || null,
     track: track || null,
     addTrack: noop,
