@@ -67,6 +67,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   });
 
   const video = useCamera();
+  const microphone = useMicrophone();
 
   const [blur, setBlur] = useState(false);
   const processor = useRef<BlurProcessor | null>(null);
@@ -127,6 +128,9 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         .some((track) => track?.metadata?.type === "camera");
 
       const newTrack = trackRef.current;
+
+      const newMetadata = { active: metadataActive, type: "camera", displayName } as const;
+
       if (!lastCameraTrack && streamRef.current && newTrack) {
         const mediaStream = new MediaStream();
         mediaStream.addTrack(newTrack);
@@ -140,7 +144,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
         remoteTrackIdRef.current = await client.addTrack(
           newTrack,
-          { active: metadataActive, type: "camera", displayName },
+          newMetadata,
           simulcastConfig,
           selectBandwidthLimit("camera", simulcastEnabled)
         );
@@ -148,11 +152,9 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         broadcastedStreamRef.current?.removeTrack(broadcastedStreamRef.current?.getVideoTracks()[0]);
         broadcastedStreamRef.current?.addTrack(trackRef.current);
 
-        const newMetadata: TrackMetadata = { active: metadataActive, type: "camera", displayName };
         await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, newMetadata);
       } else if (remoteTrackIdRef.current && !stream) {
-        await client.removeTrack(remoteTrackIdRef.current);
-        remoteTrackIdRef.current = null;
+        await client.replaceTrack(remoteTrackIdRef.current, null, newMetadata);
       }
     }
   }, [setStream, setTrack, simulcastEnabled, displayName]);
@@ -259,9 +261,40 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       client.removeListener("devicesReady", devicesReady);
       client.removeListener("deviceStopped", deviceStopped);
       client.removeListener("disconnected", disconnected);
-
     };
   }, [simulcast.status]);
+
+  useEffect(() => {
+    const localTrackMuted: ClientEvents<PeerMetadata, TrackMetadata>["localTrackMuted"] = async ({ trackId }, client) => {
+      if (client?.local?.tracks?.[trackId]?.metadata?.type === "audio") {
+        const newMetadata: TrackMetadata = {
+          ...(microphone?.broadcast?.metadata ?? { type: "audio", displayName }),
+          active: false
+        };
+
+        microphone.updateTrackMetadata(newMetadata);
+      }
+    };
+
+    const localTrackUnmuted: ClientEvents<PeerMetadata, TrackMetadata>["localTrackUnmuted"] = async ({ trackId }) => {
+      if (client?.local?.tracks?.[trackId]?.metadata?.type === "audio") {
+        const newMetadata: TrackMetadata = {
+          ...(microphone?.broadcast?.metadata ?? { type: "audio", displayName }),
+          active: true
+        };
+
+        microphone.updateTrackMetadata(newMetadata);
+      }
+    };
+
+    client.on("localTrackMuted", localTrackMuted);
+    client.on("localTrackUnmuted", localTrackUnmuted);
+
+    return () => {
+      client.removeListener("localTrackMuted", localTrackMuted);
+      client.removeListener("localTrackUnmuted", localTrackUnmuted);
+    };
+  }, []);
 
   const applyNewSettings = useCallback(async (newBlurValue: boolean, restart: boolean) => {
     if (restart) {
@@ -290,8 +323,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     stop: video.stop,
     mediaStatus: video.mediaStatus
   }), [stream, track]);
-
-  const microphone = useMicrophone();
 
   const setDevice = useCallback(async (cameraId: string | null, microphoneId: string | null, blur: boolean) => {
     if (microphoneId && microphoneIntentionRef.current) {
