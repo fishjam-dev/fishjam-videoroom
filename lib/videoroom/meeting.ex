@@ -183,7 +183,7 @@ defmodule Videoroom.Meeting do
         {:reply, {:ok, component}, state}
 
       error ->
-        Logger.error("Error when starting recording #{error}")
+        Logger.error("Error when starting recording #{inspect(error)}")
         {:reply, {:error, "Failed to start recording"}, state}
     end
   end
