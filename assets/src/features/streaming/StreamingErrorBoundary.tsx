@@ -30,7 +30,7 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
     };
 
     const onConnectionError: ClientEvents<PeerMetadata, TrackMetadata>["connectionError"] = (error) => {
-      console.warn(error);
+      console.warn({ error, type: error?.event?.type });
       handleError(`Connection error occurred. ${error?.message ?? ""}`);
     };
 
