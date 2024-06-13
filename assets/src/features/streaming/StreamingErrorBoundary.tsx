@@ -3,7 +3,7 @@ import useToast from "../shared/hooks/useToast";
 import { ErrorMessage, messageComparator } from "../../pages/room/errorMessage";
 import { PeerMetadata, TrackMetadata, useClient } from "../../fishjam";
 import useEffectOnChange from "../shared/hooks/useEffectOnChange";
-import { MessageEvents } from "@fishjam-dev/ts-client";
+import { ClientEvents } from "@fishjam-dev/react-client";
 
 export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
   const { addToast } = useToast();
@@ -24,26 +24,26 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     if (!client) return;
 
-    const onSocketError: MessageEvents<PeerMetadata, TrackMetadata>["socketError"] = (error: Event) => {
+    const onSocketError: ClientEvents<PeerMetadata, TrackMetadata>["socketError"] = (error: Event) => {
       console.warn(error);
       handleError(`Socket error occurred.`, "onSocketError");
     };
 
-    const onConnectionError: MessageEvents<PeerMetadata, TrackMetadata>["connectionError"] = (error) => {
+    const onConnectionError: ClientEvents<PeerMetadata, TrackMetadata>["connectionError"] = (error) => {
       console.warn(error);
       handleError(`Connection error occurred. ${error?.message ?? ""}`);
     };
 
-    const onJoinError: MessageEvents<PeerMetadata, TrackMetadata>["joinError"] = (event) => {
+    const onJoinError: ClientEvents<PeerMetadata, TrackMetadata>["joinError"] = (event) => {
       console.log(event)
       handleError(`Failed to join the room`);
     };
-    const onAuthError: MessageEvents<PeerMetadata, TrackMetadata>["authError"] = (reason) => {
+    const onAuthError: ClientEvents<PeerMetadata, TrackMetadata>["authError"] = (reason) => {
       console.warn(reason);
       handleError(`Socket error occurred.`, "onAuthError");
     };
 
-    const onSocketClose: MessageEvents<PeerMetadata, TrackMetadata>["socketClose"] = (event) => {
+    const onSocketClose: ClientEvents<PeerMetadata, TrackMetadata>["socketClose"] = (event) => {
       console.warn(event);
       handleError(`Signaling socket closed.`, "onSocketClose");
     };
