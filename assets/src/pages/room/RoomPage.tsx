@@ -35,7 +35,7 @@ const ConnectComponent: FC<ConnectComponentProps> = (
   const client = useClient();
   const { statistics } = useDeveloperInfo();
 
-  let intervalId: NodeJS.Timer | null = null;
+  let intervalId: NodeJS.Timeout | null = null;
 
   useEffect(() => {
     const callback = () => {
