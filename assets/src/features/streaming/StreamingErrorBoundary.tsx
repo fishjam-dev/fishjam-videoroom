@@ -1,8 +1,9 @@
 import { FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import useToast from "../shared/hooks/useToast";
 import { ErrorMessage, messageComparator } from "../../pages/room/errorMessage";
-import { useClient } from "../../fishjam";
+import { PeerMetadata, TrackMetadata, useClient } from "../../fishjam";
 import useEffectOnChange from "../shared/hooks/useEffectOnChange";
+import { MessageEvents } from "@fishjam-dev/ts-client";
 
 export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
   const { addToast } = useToast();
@@ -23,21 +24,27 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     if (!client) return;
 
-    const onSocketError = (_: Event) => {
+    const onSocketError: MessageEvents<PeerMetadata, TrackMetadata>["socketError"] = (error: Event) => {
+      console.warn(error);
       handleError(`Socket error occurred.`, "onSocketError");
     };
 
-    const onConnectionError = (message: string) => {
-      handleError(`Connection error occurred. ${message ?? ""}`);
+    const onConnectionError: MessageEvents<PeerMetadata, TrackMetadata>["connectionError"] = (error) => {
+      console.warn(error);
+      handleError(`Connection error occurred. ${error?.message ?? ""}`);
     };
-    const onJoinError = (_: unknown) => {
+
+    const onJoinError: MessageEvents<PeerMetadata, TrackMetadata>["joinError"] = (event) => {
+      console.log(event)
       handleError(`Failed to join the room`);
     };
-    const onAuthError = () => {
+    const onAuthError: MessageEvents<PeerMetadata, TrackMetadata>["authError"] = (reason) => {
+      console.warn(reason);
       handleError(`Socket error occurred.`, "onAuthError");
     };
 
-    const onSocketClose = (_: Event) => {
+    const onSocketClose: MessageEvents<PeerMetadata, TrackMetadata>["socketClose"] = (event) => {
+      console.warn(event);
       handleError(`Signaling socket closed.`, "onSocketClose");
     };
 
