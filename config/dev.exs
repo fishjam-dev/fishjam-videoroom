@@ -17,6 +17,7 @@ config :videoroom, VideoroomWeb.Endpoint,
   watchers: []
 
 config :fishjam_server_sdk,
+  server_address: "localhost:5002",
   server_api_token: System.get_env("BE_JF_SERVER_API_TOKEN", "development")
 
 # ## SSL Support
@@ -33,7 +34,7 @@ config :fishjam_server_sdk,
 #
 #     https: [
 #       port: 4001,
-#       cipher_suite: :strong,f
+#       cipher_suite: :strong,
 #       keyfile: "priv/cert/selfsigned_key.pem",
 #       certfile: "priv/cert/selfsigned.pem"
 #     ],

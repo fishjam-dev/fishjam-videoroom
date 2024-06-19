@@ -30,7 +30,7 @@ const VideoroomHomePage: FC = () => {
 
   const { simulcast, manualMode, smartLayerSwitching } = useDeveloperInfo();
 
-  const simulcastDefaultValue = false;
+  const simulcastDefaultValue = true;
 
   const [simulcastInput, toggleSimulcastCheckbox] = useToggle(simulcastDefaultValue);
   const [manualModeInput, toggleManualModeCheckbox] = useToggle(DEFAULT_MANUAL_MODE_CHECKBOX_VALUE);

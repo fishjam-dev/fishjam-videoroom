@@ -108,7 +108,9 @@ defmodule Videoroom.Meeting do
 
     with {:ok, room, fishjam_address} <-
            create_new_room(client, name,
-             video_codec: :h264
+             video_codec: :h264,
+             peer_disconnected_timeout: peer_disconnected_timeout,
+             peerless_purge_timeout: peerless_purge_timeout
            ) do
       client = Fishjam.Client.update_address(client, fishjam_address)
 
