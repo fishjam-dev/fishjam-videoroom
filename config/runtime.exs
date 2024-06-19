@@ -70,7 +70,7 @@ if config_env() == :prod do
   config :videoroom,
     fishjam_addresses: fishjam_addresses,
     peer_disconnected_timeout:
-      String.to_integer(System.get_env("PEER_DISCONNECTED_TIMEOUT") || "30"),
+      String.to_integer(System.get_env("PEER_DISCONNECTED_TIMEOUT") || "120"),
     peerless_purge_timeout: String.to_integer(System.get_env("PEERLESS_PURGE_TIMEOUT") || "60")
 
   # ## SSL Support

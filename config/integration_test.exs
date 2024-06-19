@@ -6,5 +6,5 @@ config :fishjam_server_sdk,
 
 config :videoroom,
   fishjam_addresses: ["fishjam:5002"],
-  peer_disconnected_timeout: 120,
-  peerless_purge_timeout: 10
+  peer_disconnected_timeout: 1,
+  peerless_purge_timeout: 3
