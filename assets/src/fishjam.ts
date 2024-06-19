@@ -40,7 +40,7 @@ export const {
   reconnect: {
     initialDelay: 1000, // ms
     delay: 1000, // ms
-    maxAttempts: 1,
+    maxAttempts: 1000,
   }
 }, { storage: true });
 

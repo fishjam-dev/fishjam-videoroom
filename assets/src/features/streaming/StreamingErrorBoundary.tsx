@@ -5,8 +5,10 @@ import { PeerMetadata, TrackMetadata, useClient } from "../../fishjam";
 import useEffectOnChange from "../shared/hooks/useEffectOnChange";
 import { ClientEvents } from "@fishjam-dev/react-client";
 
+const RECONNECTING_TOAST_ID = "RECONNECTING";
+
 export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
-  const { addToast } = useToast();
+  const { addToast, removeToast } = useToast();
 
   // todo remove state, refactor to function invocation
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>();
@@ -21,32 +23,92 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
     [setErrorMessage]
   );
 
+  const displayInfo = useCallback(
+    (text: string, id?: string) => {
+      addToast({
+        id: id || crypto.randomUUID(),
+        message: text,
+        timeout: 5000,
+        type: "information"
+      });
+    },
+    []
+  );
+
   useEffect(() => {
     if (!client) return;
+
+    const onReconnectionStarted: ClientEvents<PeerMetadata, TrackMetadata>["reconnectionStarted"] = () => {
+      console.log("%c" + "reconnectionStarted", "color:green");
+
+      addToast({
+        id: RECONNECTING_TOAST_ID,
+        message: "Reconnecting",
+        timeout: "INFINITY",
+        type: "information"
+      });
+    };
+
+    const onReconnected: ClientEvents<PeerMetadata, TrackMetadata>["reconnected"] = () => {
+      console.log("%cReconnected", "color:green");
+      removeToast(RECONNECTING_TOAST_ID);
+
+      setTimeout(() => {
+        displayInfo("Reconnected");
+      }, 2000);
+    };
+
+    const onReconnectionFailed: ClientEvents<PeerMetadata, TrackMetadata>["reconnectionFailed"] = () => {
+      console.log("%cReconnectionFailed", "color:red");
+      removeToast(RECONNECTING_TOAST_ID);
+
+      setTimeout(() => {
+        handleError(`Reconnection failed`);
+      }, 2000);
+    };
 
     const onSocketError: ClientEvents<PeerMetadata, TrackMetadata>["socketError"] = (error: Event) => {
       console.warn(error);
       handleError(`Socket error occurred.`, "onSocketError");
     };
 
-    const onConnectionError: ClientEvents<PeerMetadata, TrackMetadata>["connectionError"] = (error) => {
-      console.warn({ error, type: error?.event?.type });
-      handleError(`Connection error occurred. ${error?.message ?? ""}`);
+    const onConnectionError: ClientEvents<PeerMetadata, TrackMetadata>["connectionError"] = (error, client) => {
+      if (client.isReconnecting()) {
+        console.log("%c" + "During reconnection: connectionError %o", "color:gray", {
+          error,
+          iceConnectionState: error?.event?.target?.["iceConnectionState"]
+        });
+      } else {
+        console.warn({ error, state: error?.event?.target?.["iceConnectionState"] });
+        handleError(`Connection error occurred. ${error?.message ?? ""}`);
+      }
     };
 
     const onJoinError: ClientEvents<PeerMetadata, TrackMetadata>["joinError"] = (event) => {
-      console.log(event)
+      console.log(event);
       handleError(`Failed to join the room`);
     };
+
     const onAuthError: ClientEvents<PeerMetadata, TrackMetadata>["authError"] = (reason) => {
-      console.warn(reason);
-      handleError(`Socket error occurred.`, "onAuthError");
+      if (client.isReconnecting()) {
+        console.log("%c" + "During reconnection: authError: " + reason, "color:gray");
+      } else {
+        handleError(`Socket error occurred.`, "onAuthError");
+      }
     };
 
     const onSocketClose: ClientEvents<PeerMetadata, TrackMetadata>["socketClose"] = (event) => {
-      console.warn(event);
-      handleError(`Signaling socket closed.`, "onSocketClose");
+      if (client.isReconnecting()) {
+        console.log("%c" + "During reconnection: Signaling socket closed", "color:gray");
+      } else {
+        console.warn(event);
+        handleError(`Signaling socket closed.`, "onSocketClose");
+      }
     };
+
+    client.on("reconnectionStarted", onReconnectionStarted);
+    client.on("reconnected", onReconnected);
+    client.on("reconnectionFailed", onReconnectionFailed);
 
     client.on("socketError", onSocketError);
     client.on("connectionError", onConnectionError);
@@ -55,6 +117,10 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
     client.on("socketClose", onSocketClose);
 
     return () => {
+      client.off("reconnectionStarted", onReconnectionStarted);
+      client.off("reconnected", onReconnected);
+      client.off("reconnectionFailed", onReconnectionFailed);
+
       client.off("socketError", onSocketError);
       client.off("connectionError", onConnectionError);
       client.off("joinError", onJoinError);

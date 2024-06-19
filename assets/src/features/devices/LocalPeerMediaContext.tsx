@@ -4,7 +4,14 @@ import {
   SCREENSHARING_TRACK_CONSTRAINTS,
   VIDEO_TRACK_CONSTRAINTS
 } from "../../pages/room/consts";
-import { PeerMetadata, TrackMetadata, useCamera, useClient, useMicrophone, useSetupMedia } from "../../fishjam";
+import {
+  PeerMetadata,
+  TrackMetadata,
+  useCamera,
+  useClient,
+  useMicrophone,
+  useSetupMedia
+} from "../../fishjam";
 import { ClientEvents, CameraAPI, SimulcastConfig } from "@fishjam-dev/react-client";
 import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
@@ -79,7 +86,11 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   const blurRef = useRef<boolean>(false);
 
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [stream, setStream2] = useState<MediaStream | null>(null);
+  const setStream: typeof setStream2 = useCallback((stream) => {
+    // console.trace();
+    setStream2(stream);
+  }, [setStream2]);
   const streamRef = useRef<MediaStream | null>(null);
   const metadataActiveRef = useRef<boolean>(true);
 
@@ -181,6 +192,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     };
 
     const joinedHandler: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = async () => {
+      // console.log("joinedHandler");
       const stream = client.devices.camera.stream;
       const track = client.devices.camera.track;
 
@@ -202,6 +214,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     };
 
     const deviceReady: ClientEvents<PeerMetadata, TrackMetadata>["deviceReady"] = async (event, client) => {
+      // console.log("deviceReady");
+
       const cameraId = client.media?.video?.media?.deviceInfo?.deviceId;
       if (event.trackType === "video" && event.mediaDeviceType === "userMedia" && cameraId) {
         lastCameraIdRef.current = cameraId;
@@ -216,6 +230,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     };
 
     const devicesReady: ClientEvents<PeerMetadata, TrackMetadata>["devicesReady"] = async (event, client) => {
+      // console.log("devicesReady");
+
       const cameraId = client?.media?.video?.media?.deviceInfo?.deviceId || null;
 
       if (cameraId) {
@@ -230,6 +246,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     };
 
     const deviceStopped: ClientEvents<PeerMetadata, TrackMetadata>["deviceStopped"] = async (event, client) => {
+      // console.log("deviceStopped");
+
       if (client.status !== "joined" && event.trackType === "video" && event.mediaDeviceType === "userMedia") {
         setStream(null);
         setTrack(null);
@@ -242,12 +260,16 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       }
     };
 
-    const disconnected: ClientEvents<PeerMetadata, TrackMetadata>["disconnected"] = async (client) => {
+    const disconnected: ClientEvents<PeerMetadata, TrackMetadata>["disconnected"] = async (clientApi) => {
+      // console.log("disconnected");
+
       remoteTrackIdRef.current = null;
 
-      if (client.devices.microphone.stream) client.devices.microphone.stop();
-      if (client.devices.camera.stream) client.devices.camera.stop();
-      if (client.devices.screenShare.stream) client.devices.screenShare.stop();
+      if (!client.isReconnecting()) {
+        if (clientApi.devices.microphone.stream) clientApi.devices.microphone.stop();
+        if (clientApi.devices.camera.stream) clientApi.devices.camera.stop();
+        if (clientApi.devices.screenShare.stream) clientApi.devices.screenShare.stop();
+      }
     };
 
 
@@ -298,6 +320,10 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     stop: video.stop,
     mediaStatus: video.mediaStatus
   }), [stream, track]);
+
+  // useEffect(() => {
+  //   console.log({ newVideo });
+  // }, [newVideo]);
 
   const setDevice = useCallback(async (cameraId: string | null, microphoneId: string | null, blur: boolean) => {
     if (microphoneId && microphoneIntentionRef.current) {

@@ -10,6 +10,7 @@ import UnpinnedTilesSection from "./components/StreamPlayer/UnpinnedTilesSection
 import PinnedTilesSection from "./components/StreamPlayer/PinnedTilesSection";
 import useTilePinning from "./hooks/useTilePinning";
 import { toLocalTrackSelector, toRemotePeerSelector, TrackType, useSelector } from "../../fishjam";
+import { useLocalPeer } from "../../features/devices/LocalPeerMediaContext.tsx";
 
 type Props = {
   showSimulcast: boolean;
@@ -36,7 +37,7 @@ const mapRemotePeersToMediaPlayerConfig = (peers: RemotePeer[]): PeerTileConfig[
     const audioTrack: TrackWithId | null = getTrack(peer.tracks, "audio");
 
     return {
-      mediaPlayerId: videoTrack?.remoteTrackId || peer.id,
+      mediaPlayerId: peer.id,
       typeName: "remote",
       peerId: peer.id,
       displayName: peer.displayName || "Unknown",
@@ -108,17 +109,30 @@ export const VideochatSection: FC<Props> = ({ showSimulcast, unpinnedTilesHorizo
     initials: computeInitials(state?.local?.metadata?.name || "")
   }));
 
-  const localUser: PeerTileConfig = {
+  const localPeer = useLocalPeer();
+
+  const localVideoWithId: TrackWithId = useMemo(() =>
+    ({
+      stream: localPeer?.video?.stream ?? undefined,
+      track: localPeer?.video?.track ?? undefined,
+      isSpeaking: false,
+      enabled: localPeer.video.enabled,
+      encodingQuality: null,
+      remoteTrackId: null,
+      metadata: null
+    }), [localPeer]);
+
+  const localUser: PeerTileConfig = useMemo(() => ({
     typeName: "local",
     peerId,
     displayName: LOCAL_PEER_NAME,
     initials,
-    video: video,
+    video: video ?? localVideoWithId,
     audio: audio,
     streamSource: "local",
     mediaPlayerId: LOCAL_VIDEO_ID,
     isSpeaking: false
-  };
+  }), [peerId, initials, video, localVideoWithId, audio]);
 
   const peers: RemotePeer[] = useSelector((state) => toRemotePeerSelector(state));
   const screenSharingStreams = prepareScreenSharingStreams(peers, screenSharing);

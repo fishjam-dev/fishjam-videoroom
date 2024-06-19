@@ -59,7 +59,7 @@ export const getSignalingAddress = (serverAddress: string) => {
   return {
     host: serverAddress.toString(),
     path: "/socket/peer/websocket",
-    protocol: isSecure ? "wss" : "ws"
+    protocol: "wss"
   }
 }
 
