@@ -4,15 +4,22 @@ import {
   SCREENSHARING_TRACK_CONSTRAINTS,
   VIDEO_TRACK_CONSTRAINTS
 } from "../../pages/room/consts";
-import { PeerMetadata, TrackMetadata, useCamera, useClient, useMicrophone, useSetupMedia } from "../../fishjam";
-import { ClientEvents, UseCameraResult, SimulcastConfig } from "@fishjam-dev/react-client";
+import {
+  PeerMetadata,
+  TrackMetadata,
+  useCamera,
+  useClient,
+  useMicrophone,
+  useSetupMedia
+} from "../../fishjam";
+import { ClientEvents, CameraAPI, SimulcastConfig } from "@fishjam-dev/react-client";
 import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
 import { useUser } from "../../contexts/UserContext.tsx";
 
 export type LocalPeerContext = {
-  video: UseCameraResult<TrackMetadata>;
+  video: CameraAPI<TrackMetadata>;
   init: () => void;
   blur: boolean;
   setBlur: (status: boolean, restart: boolean) => void;
@@ -67,6 +74,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   });
 
   const video = useCamera();
+  const microphone = useMicrophone();
 
   const [blur, setBlur] = useState(false);
   const processor = useRef<BlurProcessor | null>(null);
@@ -127,6 +135,9 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         .some((track) => track?.metadata?.type === "camera");
 
       const newTrack = trackRef.current;
+
+      const newMetadata = { active: metadataActive, type: "camera", displayName } as const;
+
       if (!lastCameraTrack && streamRef.current && newTrack) {
         const mediaStream = new MediaStream();
         mediaStream.addTrack(newTrack);
@@ -140,8 +151,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
         remoteTrackIdRef.current = await client.addTrack(
           newTrack,
-          mediaStream,
-          { active: metadataActive, type: "camera", displayName },
+          newMetadata,
           simulcastConfig,
           selectBandwidthLimit("camera", simulcastEnabled)
         );
@@ -152,7 +162,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
         // todo
         //  When you replaceTrack, this does not affect the stream, so the local peer doesn't know that something has changed.
         //  add localTrackReplaced event
-        const newMetadata: TrackMetadata = { active: metadataActive, type: "camera", displayName };
         await client.replaceTrack(remoteTrackIdRef.current, trackRef.current, newMetadata);
       } else if (remoteTrackIdRef.current && !stream) {
         await client.removeTrack(remoteTrackIdRef.current);
@@ -240,12 +249,14 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       }
     };
 
-    const disconnected: ClientEvents<PeerMetadata, TrackMetadata>["disconnected"] = async (client) => {
+    const disconnected: ClientEvents<PeerMetadata, TrackMetadata>["disconnected"] = async (clientApi) => {
       remoteTrackIdRef.current = null;
 
-      if (client.devices.microphone.stream) client.devices.microphone.stop();
-      if (client.devices.camera.stream) client.devices.camera.stop();
-      if (client.devices.screenShare.stream) client.devices.screenShare.stop();
+      if (!client.isReconnecting()) {
+        if (clientApi.devices.microphone.stream) clientApi.devices.microphone.stop();
+        if (clientApi.devices.camera.stream) clientApi.devices.camera.stop();
+        if (clientApi.devices.screenShare.stream) clientApi.devices.screenShare.stop();
+      }
     };
 
 
@@ -276,12 +287,15 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
 
   const noop: () => Promise<any> = useCallback((..._args) => Promise.resolve(), []);
 
-  const newVideo: UseCameraResult<TrackMetadata> = useMemo(() => ({
+  const newVideo: CameraAPI<TrackMetadata> = useMemo(() => ({
     stream: stream || null,
     track: track || null,
     addTrack: noop,
     removeTrack: noop,
     replaceTrack: noop,
+    updateTrackMetadata: noop,
+    muteTrack: noop,
+    unmuteTrack: noop,
     broadcast: video.broadcast,
     deviceInfo: video.deviceInfo,
     devices: video.devices,
@@ -294,8 +308,6 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     stop: video.stop,
     mediaStatus: video.mediaStatus
   }), [stream, track]);
-
-  const microphone = useMicrophone();
 
   const setDevice = useCallback(async (cameraId: string | null, microphoneId: string | null, blur: boolean) => {
     if (microphoneId && microphoneIntentionRef.current) {
