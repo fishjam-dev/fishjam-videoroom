@@ -58,7 +58,7 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
       }, 2000);
     };
 
-    const onReconnectionFailed: ClientEvents<PeerMetadata, TrackMetadata>["reconnectionFailed"] = () => {
+    const onReconnectionRetriesLimitReached: ClientEvents<PeerMetadata, TrackMetadata>["reconnectionRetriesLimitReached"] = () => {
       console.log("%cReconnectionFailed", "color:red");
       removeToast(RECONNECTING_TOAST_ID);
 
@@ -108,7 +108,7 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
 
     client.on("reconnectionStarted", onReconnectionStarted);
     client.on("reconnected", onReconnected);
-    client.on("reconnectionFailed", onReconnectionFailed);
+    client.on("reconnectionRetriesLimitReached", onReconnectionRetriesLimitReached);
 
     client.on("socketError", onSocketError);
     client.on("connectionError", onConnectionError);
@@ -119,7 +119,7 @@ export const StreamingErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
     return () => {
       client.off("reconnectionStarted", onReconnectionStarted);
       client.off("reconnected", onReconnected);
-      client.off("reconnectionFailed", onReconnectionFailed);
+      client.off("reconnectionRetriesLimitReached", onReconnectionRetriesLimitReached);
 
       client.off("socketError", onSocketError);
       client.off("connectionError", onConnectionError);
