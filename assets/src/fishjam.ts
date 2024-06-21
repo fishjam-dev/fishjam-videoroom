@@ -38,9 +38,10 @@ export const {
   peerMetadataParser: (obj) => peerMetadataSchema.parse(obj),
   trackMetadataParser: (obj) => trackMetadataSchema.parse(obj),
   reconnect: {
-    initialDelay: 1000, // ms
-    delay: 1000, // ms
+    initialDelay: 500, // ms
+    delay: 500, // ms
     maxAttempts: 1000,
+    addTracksOnReconnect: true
   }
 }, { storage: true });
 
