@@ -22,7 +22,7 @@ import {
   useMicrophone,
   useScreenShare
 } from "../../../fishjam.ts";
-import { UseCameraResult, UseMicrophoneResult, UseScreenShareResult, Client } from "@fishjam-dev/react-client";
+import { CameraAPI, MicrophoneAPI, ScreenShareAPI, Client } from "@fishjam-dev/react-client";
 import { LocalPeerContext, useLocalPeer } from "../../../features/devices/LocalPeerMediaContext.tsx";
 import { useUser } from "../../../contexts/UserContext.tsx";
 
@@ -40,9 +40,9 @@ const getAutomaticControls = (
   isSidebarOpen: boolean,
   openSidebar: () => void,
   isMobileViewport: boolean,
-  microphone: UseMicrophoneResult<TrackMetadata>,
-  screenShare: UseScreenShareResult<TrackMetadata>,
-  camera: UseCameraResult<TrackMetadata>,
+  microphone: MicrophoneAPI<TrackMetadata>,
+  screenShare: ScreenShareAPI<TrackMetadata>,
+  camera: CameraAPI<TrackMetadata>,
   localPeerContext: LocalPeerContext
 ): ControlButton[] => [
   camera.stream
@@ -130,9 +130,9 @@ const getAutomaticControls = (
 // todo fix manual mode
 const getManualControls = (
   navigate: NavigateFunction,
-  microphone: UseMicrophoneResult<TrackMetadata>,
-  screenShare: UseScreenShareResult<TrackMetadata>,
-  camera: UseCameraResult<TrackMetadata>,
+  microphone: MicrophoneAPI<TrackMetadata>,
+  screenShare: ScreenShareAPI<TrackMetadata>,
+  camera: CameraAPI<TrackMetadata>,
   client: Client<PeerMetadata, TrackMetadata>,
   displayName: string,
   roomId?: string
@@ -402,9 +402,9 @@ const MediaControlButtons: FC<MediaControlButtonsProps> =
 
     const navigate = useNavigate();
 
-    const camera: UseCameraResult<TrackMetadata> = useCamera();
-    const microphone: UseMicrophoneResult<TrackMetadata> = useMicrophone();
-    const screenShare: UseScreenShareResult<TrackMetadata> = useScreenShare();
+    const camera: CameraAPI<TrackMetadata> = useCamera();
+    const microphone: MicrophoneAPI<TrackMetadata> = useMicrophone();
+    const screenShare: ScreenShareAPI<TrackMetadata> = useScreenShare();
     const client = useClient();
 
     const localPeerContext = useLocalPeer();
