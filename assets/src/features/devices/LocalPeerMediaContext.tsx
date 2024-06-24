@@ -362,6 +362,12 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     }
   }, [toggleMicrophone, toggleCamera]);
 
+  useEffect(() => {
+    window["reconnect"] = () => {
+      client["tsClient"]["reconnectManager"].reconnect()
+    }
+  });
+
   return (
     <LocalPeerMediaContext.Provider
       value={{
