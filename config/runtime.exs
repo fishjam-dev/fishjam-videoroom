@@ -38,7 +38,8 @@ if config_env() == :prod do
         """)
 
   config :videoroom,
-    fishjam_address: (System.get_env("BE_JF_ADDRESS") || raise "Environment variable BE_JF_ADDRESS is missing."),
+    fishjam_address:
+      System.get_env("BE_JF_ADDRESS") || raise("Environment variable BE_JF_ADDRESS is missing."),
     peer_disconnected_timeout:
       String.to_integer(System.get_env("PEER_DISCONNECTED_TIMEOUT") || "120"),
     peerless_purge_timeout: String.to_integer(System.get_env("PEERLESS_PURGE_TIMEOUT") || "60")

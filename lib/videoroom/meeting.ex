@@ -112,7 +112,6 @@ defmodule Videoroom.Meeting do
              peer_disconnected_timeout: peer_disconnected_timeout,
              peerless_purge_timeout: peerless_purge_timeout
            ) do
-
       Logger.info("Created meeting room id: #{room.id}")
 
       {:ok,
@@ -156,16 +155,12 @@ defmodule Videoroom.Meeting do
         {:reply, {:ok, token}, state}
 
       {:error, ^text} ->
-        Logger.error(
-          "Failed to add peer, because of room #{state.room_id} does not exist"
-        )
+        Logger.error("Failed to add peer, because of room #{state.room_id} does not exist")
 
         {:stop, :room_not_exist, {:error, "Failed to add peer"}, state}
 
       error ->
-        Logger.error(
-          "Failed to add peer, because of error: #{inspect(error)}"
-        )
+        Logger.error("Failed to add peer, because of error: #{inspect(error)}")
 
         {:reply, {:error, "Failed to add peer"}, state}
     end
