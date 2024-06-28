@@ -69,7 +69,7 @@ services:
       BE_PORT: 5004
       BE_HOST: ${BE_HOST:-$DOMAIN}
       BE_PHX_SERVER: "true"
-      BE_JF_ADDRESSES: ${BE_JF_ADDRESSES:-fishjam1:5002 fishjam2:5003}
+      BE_JF_ADDRESS: ${BE_JF_ADDRESS:-fishjam1:5002}
       BE_JF_SECURE_CONNECTION: ${BE_JF_SECURE_CONNECTION:-false}
       BE_JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN:-development}
     restart: unless-stopped

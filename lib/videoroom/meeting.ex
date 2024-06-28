@@ -18,8 +18,7 @@ defmodule Videoroom.Meeting do
     @enforce_keys [
       :name,
       :client,
-      :room_id,
-      :fishjam_address
+      :room_id
     ]
 
     defstruct @enforce_keys
@@ -98,21 +97,21 @@ defmodule Videoroom.Meeting do
   # Callbacks
 
   @impl true
-  def init(%{name: name, fishjam_address: fishjam_address}) do
+  def init(%{name: name}) do
     Logger.metadata(room_name: name)
+    fishjam_address = Application.fetch_env!(:videoroom, :fishjam_address)
 
     client = Fishjam.Client.new(server_address: fishjam_address)
 
     peer_disconnected_timeout = Application.fetch_env!(:videoroom, :peer_disconnected_timeout)
     peerless_purge_timeout = Application.fetch_env!(:videoroom, :peerless_purge_timeout)
 
-    with {:ok, room, fishjam_address} <-
+    with {:ok, room} <-
            create_new_room(client, name,
              video_codec: :h264,
              peer_disconnected_timeout: peer_disconnected_timeout,
              peerless_purge_timeout: peerless_purge_timeout
            ) do
-      client = Fishjam.Client.update_address(client, fishjam_address)
 
       Logger.info("Created meeting room id: #{room.id}")
 
@@ -120,8 +119,7 @@ defmodule Videoroom.Meeting do
        %State{
          client: client,
          name: name,
-         room_id: room.id,
-         fishjam_address: fishjam_address
+         room_id: room.id
        }}
     else
       {:error, reason} ->
@@ -131,10 +129,9 @@ defmodule Videoroom.Meeting do
   end
 
   defp create_new_room(client, name, opts) do
-    with {:ok, room, fishjam_address} <- Room.create(client, opts),
-         client <- Fishjam.Client.update_address(client, fishjam_address),
+    with {:ok, room, _fishjam_address} <- Room.create(client, opts),
          :ok <- add_room_to_registry(client, name, room) do
-      {:ok, room, fishjam_address}
+      {:ok, room}
     end
   end
 
@@ -156,18 +153,18 @@ defmodule Videoroom.Meeting do
       {:ok, %{peer: peer, token: token}} ->
         Logger.info("Added peer #{peer.id}")
 
-        {:reply, {:ok, token, state.fishjam_address}, state}
+        {:reply, {:ok, token}, state}
 
       {:error, ^text} ->
         Logger.error(
-          "Failed to add peer, because of room #{state.room_id} does not exist on fishjam: #{state.fishjam_address}"
+          "Failed to add peer, because of room #{state.room_id} does not exist"
         )
 
         {:stop, :room_not_exist, {:error, "Failed to add peer"}, state}
 
       error ->
         Logger.error(
-          "Failed to add peer, because of error: #{inspect(error)} on fishjam: #{state.fishjam_address}"
+          "Failed to add peer, because of error: #{inspect(error)}"
         )
 
         {:reply, {:error, "Failed to add peer"}, state}

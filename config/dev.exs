@@ -43,16 +43,12 @@ config :fishjam_server_sdk,
 # configured to run both http and https servers on
 # different ports.
 
-fishjam_addresses = System.get_env("BE_JF_ADDRESSES", "localhost:5002 localhost:5003")
-
-fishjam_addresses = String.split(fishjam_addresses, " ")
-
 # Enable dev routes for dashboard and mailbox
 config :videoroom,
   dev_routes: true,
   peer_disconnected_timeout: 60,
   peerless_purge_timeout: 120,
-  fishjam_addresses: fishjam_addresses
+  fishjam_address: "localhost:5002"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
