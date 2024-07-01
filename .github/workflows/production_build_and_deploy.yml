@@ -33,7 +33,7 @@ jobs:
           JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN_CLOUD_PRODUCTION}}
           BE_HOST=${{env.BE_HOST}}
           BE_JF_SECURE_CONNECTION=true
-          BE_JF_ADDRESS=${{vars.JF1_HOST_CLOUD_PRODUCTION}}" > .env
+          BE_JF_ADDRESS=${{vars.JF_HOST_CLOUD_PRODUCTION}}" > .env
 
       - name: Remove old containers on first host
         uses: JimCronqvist/action-ssh@master

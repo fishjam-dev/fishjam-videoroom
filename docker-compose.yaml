@@ -17,7 +17,7 @@ services:
     container_name: fishjam1
     environment:
       <<: *fishjam-environment
-      JF_HOST: "${JF1_HOST:-${JF1_IP:-$EXTERNAL_IP}:5002}"
+      JF_HOST: "localhost:5002}"
       JF_PORT: 5002
       JF_DIST_NODE_NAME: app@fishjam1
       JF_WEBRTC_TURN_PORT_RANGE: "50000-50100"
@@ -33,7 +33,7 @@ services:
     container_name: fishjam2
     environment:
       <<: *fishjam-environment
-      JF_HOST: "${JF2_HOST:-${JF2_IP:-$EXTERNAL_IP}:5003}"
+      JF_HOST: "localhost:5003}"
       JF_PORT: 5003
       JF_DIST_NODE_NAME: app@fishjam2
       JF_WEBRTC_TURN_PORT_RANGE: "50101-50200"

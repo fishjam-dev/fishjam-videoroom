@@ -65,13 +65,9 @@ All environment variables used in our deployment are presented below:
 
 ```sh
 DOMAIN=<FRONTEND_DOMAIN>
-JF1_IP=<NODE1_IP> # IP address of first node on which fishjam will be run
-JF2_IP=<NODE2_IP> # IP address of second node on which fishjam will be run
 JF_SERVER_API_TOKEN=<API_TOKEN> #The same API token is used for all fishjams
-JF1_HOST=<DOMAIN_FISHJAM1> OR <JF1_IP>:<FISHJAM1_PORT> # Value passed to fishjam and returns by it when creating a room on this speicific fishjam
-JF2_HOST=<DOMAIN_FISHJAM2> OR <JF2_IP>:<FISHJAM2_PORT>
-BE_JF_ADDRESS=<JF1_HOST> #Used by backend to create a notifier to one of fishjams
-PROMETHEUS_TARGETS=<JF1_IP>:9568,<JF2_IP>:9568 #Addresses on which prometheus will query for data
+BE_JF_ADDRESS=<DOMAIN_FISHJAM1> OR <FISHJAM_IP>:<FISHJAM_PORT>  #Used by backend to create a notifier and to communicate with fishjam
+PROMETHEUS_TARGETS=<FISHJAM_IP>:9568 #Addresses on which prometheus will query for data
 BE_HOST=<BACKEND_DOMAIN>
 GF_SECURITY_ADMIN_PASSWORD=<GRAFANA_PASSWORD>
 GF_SECURITY_ADMIN_USER=<GRAFANA_LOGIN>

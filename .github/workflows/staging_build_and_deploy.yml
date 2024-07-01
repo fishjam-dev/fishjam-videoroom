@@ -27,13 +27,13 @@ jobs:
       - name: Prepare .env file for the deployment
         id: variables_population
         run: |
-          echo "DOMAIN=${{env.DOMAIN}} 
+          echo "DOMAIN=${{env.DOMAIN}}
           FISHJAM_ROOM_VERSION=${{ steps.versions.outputs.fishjam_room }}
           FISHJAM_VERSION=${{ steps.versions.outputs.fishjam }}
           JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN_CLOUD_STAGING}}
           BE_HOST=${{env.BE_HOST}}
           BE_JF_SECURE_CONNECTION=true
-          BE_JF_ADDRESS=${{vars.JF1_HOST_CLOUD_STAGING}}" > .env
+          BE_JF_ADDRESS=${{vars.JF_HOST_CLOUD_STAGING}}" > .env
 
       - name: Remove old containers on first host
         uses: JimCronqvist/action-ssh@master
@@ -41,7 +41,7 @@ jobs:
           hosts: ${{ secrets.STAGING_HOST }}
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
-            docker ps -aq | xargs -r docker stop | xargs -r docker rm 
+            docker ps -aq | xargs -r docker stop | xargs -r docker rm
 
       - name: Deploy docker compose to a pre-configured server on first host
         uses: TapTap21/docker-remote-deployment-action@v1.1
