@@ -171,6 +171,33 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   }, [setStream, setTrack, simulcastEnabled, displayName]);
 
   useEffect(() => {
+    const localTrackUnmuted: ClientEvents<PeerMetadata, TrackMetadata>["localTrackMuted"] = async (event, clientApi) => {
+      const prevMetadata = client.local?.tracks?.[event.trackId].metadata;
+
+      if (clientApi.status === "joined" && prevMetadata) {
+        client.updateTrackMetadata(event.trackId, { ...prevMetadata, active: true });
+      }
+    };
+
+    const localTrackMuted: ClientEvents<PeerMetadata, TrackMetadata>["localTrackMuted"] = async (event, clientApi) => {
+      const prevMetadata = client.local?.tracks?.[event.trackId].metadata;
+
+      if (clientApi.status === "joined" && prevMetadata) {
+        client.updateTrackMetadata(event.trackId, { ...prevMetadata, active: false });
+      }
+    };
+
+    client.on("localTrackMuted", localTrackMuted);
+    client.on("localTrackUnmuted", localTrackUnmuted);
+
+    return () => {
+      client.removeListener("localTrackMuted", localTrackMuted);
+      client.removeListener("localTrackUnmuted", localTrackUnmuted);
+    };
+  }, [simulcast.status]);
+
+
+  useEffect(() => {
     const managerInitialized: ClientEvents<PeerMetadata, TrackMetadata>["managerInitialized"] = (event) => {
       managerInitializedRef.current = true;
 
