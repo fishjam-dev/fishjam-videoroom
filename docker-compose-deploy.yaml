@@ -27,7 +27,7 @@ services:
       BE_PHX_SERVER: "true"
       BE_JF_SECURE_CONNECTION: ${BE_JF_SECURE_CONNECTION:-false}
       BE_JF_SERVER_API_TOKEN: ${JF_SERVER_API_TOKEN}
-      BE_JF_ADDRESSES: ${BE_JF_ADDRESSES:-$JF1_IP:$JF_PORT $JF2_IP:$JF_PORT}
+      BE_JF_ADDRESS: ${BE_JF_ADDRESS}
     restart: unless-stopped
     ports:
       - "5004:5004"

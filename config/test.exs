@@ -14,7 +14,7 @@ config :fishjam_server_sdk,
 config :videoroom,
   divo: "docker-compose-dev.yaml",
   divo_wait: [dwell: 1500, max_tries: 50],
-  fishjam_addresses: ["localhost:5002"],
+  fishjam_address: "localhost:5002",
   peer_disconnected_timeout: 1,
   peerless_purge_timeout: 3
 

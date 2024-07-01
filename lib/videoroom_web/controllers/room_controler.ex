@@ -48,8 +48,10 @@ defmodule VideoroomWeb.RoomController do
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"room_name" => name}) do
+    fishjam_address = Application.fetch_env!(:videoroom, :fishjam_address)
+
     case RoomService.add_peer(name) do
-      {:ok, token, fishjam_address} ->
+      {:ok, token} ->
         conn
         |> render("show.json", token: token, fishjam_address: fishjam_address)
 

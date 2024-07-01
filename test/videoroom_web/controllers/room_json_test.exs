@@ -146,7 +146,7 @@ defmodule VideoroomWeb.RoomJsonTest do
 
       state = :sys.get_state(room_service_pid)
 
-      {_fishjam_address, notifier} = state.notifier
+      notifier = state.notifier
 
       _ws_caller = :sys.get_state(notifier)[:caller_pid]
 

@@ -6,7 +6,7 @@ services:
     command: sh -c "cd app/ && apk add git && mix local.hex --force && mix local.rebar --force && mix deps.get && mix test --warnings-as-errors"
     environment:
       MIX_ENV: integration_test
-      BE_JF_ADDRESSES: fishjam:5002
+      BE_JF_ADDRESS: fishjam:5002
       BE_JF_SECURE_CONNECTION: false
 
     volumes:

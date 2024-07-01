@@ -31,11 +31,11 @@ When running the build version of the Phoenix app, you must specify the addresse
 As well as the authentication token via the environment variables:
 
 ```sh
-BE_JF_ADDRESSES=<IP_ADDRESS1>:<PORT1> OR <DOMAIN1> <IP_ADDRESS2>:<PORT2> OR <DOMAIN2> #Example of using two fishjams: `127.0.0.1:5002 room.fishjam.ovh`, if not provided in dev environment `localhost:5002 localhost:5003` is used.
+BE_JF_ADDRESS=<IP_ADDRESS>:<PORT1> OR <DOMAIN1> #Example `127.0.0.1:5002 OR room.fishjam.ovh`, if not provided in dev environment `localhost:5002` is used.
 BE_JF_SERVER_API_TOKEN=<TOKEN> #This must be the same token that was setup in fishjam. In `docker-compose-dev.yaml` we setup `development` and this variable is used by default in `dev` environment
 ```
 
-Optionally, in production, these variables can be set: 
+Optionally, in production, these variables can be set:
 * `BE_PEER_JOIN_TIMEOUT` - can be used to limit the period in which a new peer must join the meeting,
 * `BE_JF_SECURE_CONNECTION` - enforces connecting the backend to fishjam through `wss` protocol,
 * `BE_HOST` - address of backend
@@ -57,21 +57,17 @@ You can copy the `.env.example` file to `.env` and adjust it to your needs.
 ## Deployment with load-balancing
 
 `docker-compose.yaml` allows to run a fishjam videoroom with multiple fishjams but all of that runs on the same machine.
-For properly using load-balancing two machines will be needed and `docker-compose-deploy.yaml` will be used. 
+For properly using load-balancing two machines will be needed and `docker-compose-deploy.yaml` will be used.
 You can see our deployment workflow  [here](.github/workflows/test_build_and_deploy.yml).
-This deployment is pretty simple. 
+This deployment is pretty simple.
 All containers besides `fishjam2` are started on node1 and `fishjam2` is started on node2.
 All environment variables used in our deployment are presented below:
 
 ```sh
 DOMAIN=<FRONTEND_DOMAIN>
-JF1_IP=<NODE1_IP> # IP address of first node on which fishjam will be run
-JF2_IP=<NODE2_IP> # IP address of second node on which fishjam will be run
 JF_SERVER_API_TOKEN=<API_TOKEN> #The same API token is used for all fishjams
-JF1_HOST=<DOMAIN_FISHJAM1> OR <JF1_IP>:<FISHJAM1_PORT> # Value passed to fishjam and returns by it when creating a room on this speicific fishjam
-JF2_HOST=<DOMAIN_FISHJAM2> OR <JF2_IP>:<FISHJAM2_PORT>
-BE_JF_ADDRESSES=<JF1_HOST> <JF2_HOST> #Used by backend to create a notifier to one of fishjams
-PROMETHEUS_TARGETS=<JF1_IP>:9568,<JF2_IP>:9568 #Addresses on which prometheus will query for data
+BE_JF_ADDRESS=<DOMAIN_FISHJAM1> OR <FISHJAM_IP>:<FISHJAM_PORT>  #Used by backend to create a notifier and to communicate with fishjam
+PROMETHEUS_TARGETS=<FISHJAM_IP>:9568 #Addresses on which prometheus will query for data
 BE_HOST=<BACKEND_DOMAIN>
 GF_SECURITY_ADMIN_PASSWORD=<GRAFANA_PASSWORD>
 GF_SECURITY_ADMIN_USER=<GRAFANA_LOGIN>

@@ -9,15 +9,13 @@ defmodule Videoroom.RoomService do
   alias Videoroom.Meeting
   alias Videoroom.RoomRegistry
 
-  @type fishjam_address :: String.t()
-
   @spec start_link(any) :: GenServer.on_start()
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   @spec add_peer(Meeting.name()) ::
-          {:ok, Fishjam.Room.peer_token(), fishjam_address()} | {:error, binary()}
+          {:ok, Fishjam.Room.peer_token()} | {:error, binary()}
   def add_peer(meeting_name) do
     GenServer.call(__MODULE__, {:add_peer, meeting_name})
   end
@@ -44,11 +42,9 @@ defmodule Videoroom.RoomService do
 
   @impl true
   def handle_call({:add_peer, room_name}, _from, state) do
-    {fishjam_address, _pid} = state.notifier
-
     case DynamicSupervisor.start_child(
            state.supervisor,
-           {Videoroom.Meeting, %{name: room_name, fishjam_address: fishjam_address}}
+           {Videoroom.Meeting, %{name: room_name}}
          ) do
       {:error, {:already_started, _}} ->
         Logger.debug("Room with name #{room_name} is already started")
@@ -99,29 +95,22 @@ defmodule Videoroom.RoomService do
     {:noreply, state}
   end
 
-  defp start_notifier() do
-    notifier =
-      :videoroom
-      |> Application.fetch_env!(:fishjam_addresses)
-      |> Enum.reduce_while(nil, fn fishjam_address, nil ->
-        case WSNotifier.start(server_address: fishjam_address) do
-          {:ok, notifier} ->
-            Logger.info("Successfully connected to #{fishjam_address}")
-            WSNotifier.subscribe_server_notifications(notifier)
-            Process.monitor(notifier)
-            {:halt, {fishjam_address, notifier}}
+  defp start_notifier do
+    fishjam_address = Application.fetch_env!(:videoroom, :fishjam_address)
 
-          {:error, reason} ->
-            Logger.warning("Unable to connect to #{fishjam_address}, reason: #{inspect(reason)}")
+    case WSNotifier.start(server_address: fishjam_address) do
+      {:ok, notifier} ->
+        Logger.info("Successfully connected to #{fishjam_address}")
 
-            {:cont, nil}
-        end
-      end)
+        WSNotifier.subscribe_server_notifications(notifier)
+        Process.monitor(notifier)
 
-    if notifier == nil do
-      raise("Unable to connect to any fishjam")
-    else
-      notifier
+        notifier
+
+      {:error, reason} ->
+        Logger.warning("Unable to connect to #{fishjam_address}, reason: #{inspect(reason)}")
+
+        raise "Unable to connect to any fishjam"
     end
   end
 end
