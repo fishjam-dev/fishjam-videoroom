@@ -24,7 +24,7 @@
         {
             "datasource": {
                 "type": "loki",
-                "uid": "adqg4ja4gzthce"
+                "uid": "loki"
             },
             "fieldConfig": {
                 "defaults": {
@@ -99,7 +99,7 @@
         {
             "datasource": {
                 "type": "loki",
-                "uid": "adqg4ja4gzthce"
+                "uid": "loki"
             },
             "gridPos": {
                 "h": 11,
@@ -136,7 +136,7 @@
         {
             "datasource": {
                 "type": "loki",
-                "uid": "adqg4ja4gzthce"
+                "uid": "loki"
             },
             "gridPos": {
                 "h": 11,
@@ -184,6 +184,6 @@
     "timezone": "browser",
     "title": "Faro dashboard",
     "uid": "bdqj360hcg2dcb",
-    "version": 5,
+    "version": 2,
     "weekStart": ""
 }
