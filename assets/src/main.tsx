@@ -3,6 +3,9 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import {
+  // InternalLoggerLevel,
+  // LogLevel,
+  // allLogLevels,
   getWebInstrumentations,
   initializeFaro,
 } from '@grafana/faro-web-sdk';
@@ -15,9 +18,11 @@ const faro = initializeFaro({
   },
   instrumentations: [
     ...getWebInstrumentations({
-      captureConsole: true,
+      captureConsole: false,
+      // captureConsoleDisabledLevels: allLogLevels
     }),
-  ]
+  ],
+  // internalLoggerLevel: InternalLoggerLevel.OFF
 });
 
 faro.api.pushLog(["Example logs"])
