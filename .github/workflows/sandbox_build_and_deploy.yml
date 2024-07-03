@@ -25,11 +25,18 @@ jobs:
           fishjam_room=${GITHUB_SHA:0:7}
           fishjam=$(cat .fishjam-version)
           EOF
+          
+      - name: Update docker images
+        run: |
+         docker compose -f docker-compose-deploy.yaml pull 
 
       - name: Prepare .env file for the deployment
         id: variables_population
         run: |
           echo "DOMAIN=${{env.DOMAIN}} 
+          ALLOY_CONFIG_FILE=config.alloy
+          ALLOY_CONFIG_PATH=/etc/alloy
+          ALLOY_CONFIG_PATH_LOCAL=./infra/alloy/config
           FISHJAM_ROOM_VERSION=${{ steps.versions.outputs.fishjam_room }}
           FISHJAM_VERSION=${{ steps.versions.outputs.fishjam }}
           JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN_CLOUD_SANDBOX}}
@@ -44,6 +51,8 @@ jobs:
           privateKey: ${{ secrets.SSH_PRIV_KEY }}
           command: |
             docker ps -aq | xargs -r docker stop | xargs -r docker rm 
+            
+    
 
       - name: Deploy docker compose to a pre-configured server on first host
         uses: TapTap21/docker-remote-deployment-action@v1.1
@@ -52,4 +61,4 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
-          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build frontend backend
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build 

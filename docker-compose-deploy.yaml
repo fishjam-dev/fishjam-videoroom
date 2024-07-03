@@ -32,3 +32,45 @@ services:
     ports:
       - "5004:5004"
 
+  grafana:
+    build:
+      context: ./infra/grafana/
+      dockerfile: Dockerfile
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+  loki:
+    build:
+      context: ./infra/loki/
+      dockerfile: Dockerfile
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-data:/loki
+
+  grafana-alloy:
+    build:
+      context: ./infra/alloy/
+      dockerfile: Dockerfile
+    env_file:
+      - './.env.example'
+    entrypoint:
+      - '/bin/alloy'
+      - 'run'
+      - '--server.http.listen-addr=0.0.0.0:12345'
+      - '--config.extra-args="-config.expand-env"'
+      - '${ALLOY_CONFIG_PATH}/${ALLOY_CONFIG_FILE}'
+    environment:
+      AGENT_PORT_APP_RECEIVER: 8027
+
+volumes:
+  grafana-storage:
+  loki-data:
