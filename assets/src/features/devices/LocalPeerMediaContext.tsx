@@ -17,6 +17,7 @@ import { BlurProcessor } from "./BlurProcessor";
 import { selectBandwidthLimit } from "../../pages/room/bandwidth.tsx";
 import { useDeveloperInfo } from "../../contexts/DeveloperInfoContext.tsx";
 import { useUser } from "../../contexts/UserContext.tsx";
+import { faro } from '@grafana/faro-web-sdk';
 
 export type LocalPeerContext = {
   video: CameraAPI<TrackMetadata>;
@@ -171,6 +172,7 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
   }, [setStream, setTrack, simulcastEnabled, displayName]);
 
   useEffect(() => {
+    let startReconnectionTimestamp: number;
     const localTrackUnmuted: ClientEvents<PeerMetadata, TrackMetadata>["localTrackMuted"] = async (event, clientApi) => {
       const prevMetadata = client.local?.tracks?.[event.trackId].metadata;
 
@@ -187,17 +189,8 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       }
     };
 
-    client.on("localTrackMuted", localTrackMuted);
-    client.on("localTrackUnmuted", localTrackUnmuted);
-
-    return () => {
-      client.removeListener("localTrackMuted", localTrackMuted);
-      client.removeListener("localTrackUnmuted", localTrackUnmuted);
-    };
-  }, [simulcast.status]);
 
 
-  useEffect(() => {
     const managerInitialized: ClientEvents<PeerMetadata, TrackMetadata>["managerInitialized"] = (event) => {
       managerInitializedRef.current = true;
 
@@ -214,9 +207,10 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       }
     };
 
-    const joinedHandler: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = async () => {
+    const joinedHandler: ClientEvents<PeerMetadata, TrackMetadata>["joined"] = async (peer) => {
       const stream = client.devices.camera.stream;
       const track = client.devices.camera.track;
+      faro.api.pushLog([`Peer joined ${peer.peerId}`])
 
       if (cameraIntentionRef.current && !remoteTrackIdRef.current && stream && track) {
         await changeMediaStream(stream, track, blurRef.current, metadataActiveRef.current);
@@ -279,13 +273,31 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     const disconnected: ClientEvents<PeerMetadata, TrackMetadata>["disconnected"] = async (clientApi) => {
       remoteTrackIdRef.current = null;
 
+
       if (!client.isReconnecting()) {
+        faro.api.pushLog([`Peer disconnected`])
         if (clientApi.devices.microphone.stream) clientApi.devices.microphone.stop();
         if (clientApi.devices.camera.stream) clientApi.devices.camera.stop();
         if (clientApi.devices.screenShare.stream) clientApi.devices.screenShare.stop();
       }
     };
 
+    const reconnectionStarted: ClientEvents<PeerMetadata, TrackMetadata>["reconnectionStarted"] = async (_client) => {
+      startReconnectionTimestamp = Date.now()
+    }
+
+    const reconnected: ClientEvents<PeerMetadata, TrackMetadata>["reconnected"] = async (client) => {
+      const reconnectionDuration = Date.now() - startReconnectionTimestamp
+      faro.api.pushLog([`Reconnection of client ${client.local?.id} finished after ${reconnectionDuration} ms`])
+    }
+
+    const socketClose: ClientEvents<PeerMetadata, TrackMetadata>["socketClose"] = async (event, client) => {
+      faro.api.pushLog([`Client ${client.local?.id} close socket with reason: ${event.reason}`])
+    }
+
+    const socketError: ClientEvents<PeerMetadata, TrackMetadata>["socketError"] = async (event, client) => {
+      faro.api.pushLog([`Client ${client.local?.id} close socket with error reason: ${event}`])
+    }
 
     client.on("joined", joinedHandler);
     client.on("managerInitialized", managerInitialized);
@@ -293,6 +305,14 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
     client.on("devicesReady", devicesReady);
     client.on("deviceStopped", deviceStopped);
     client.on("disconnected", disconnected);
+    client.on("reconnectionStarted", reconnectionStarted);
+    client.on("reconnected", reconnected);
+    client.on("socketClose", socketClose);
+    client.on("socketError", socketError);
+    client.on("localTrackMuted", localTrackMuted);
+    client.on("localTrackUnmuted", localTrackUnmuted);
+
+
 
     return () => {
       client.removeListener("joined", joinedHandler);
@@ -301,6 +321,12 @@ export const LocalPeerMediaProvider = ({ children }: Props) => {
       client.removeListener("devicesReady", devicesReady);
       client.removeListener("deviceStopped", deviceStopped);
       client.removeListener("disconnected", disconnected);
+      client.removeListener("reconnectionStarted", reconnectionStarted);
+      client.removeListener("reconnected", reconnected);
+      client.removeListener("socketClose", socketClose);
+      client.removeListener("socketError", socketError);
+      client.removeListener("localTrackMuted", localTrackMuted);
+      client.removeListener("localTrackUnmuted", localTrackUnmuted);
 
     };
   }, [simulcast.status]);

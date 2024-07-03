@@ -3,14 +3,11 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import {
-  // InternalLoggerLevel,
-  // LogLevel,
-  // allLogLevels,
   getWebInstrumentations,
   initializeFaro,
 } from '@grafana/faro-web-sdk';
 
-const faro = initializeFaro({
+initializeFaro({
   url: 'http://localhost:8027/collect',
   app: {
     name: 'Your App Name',
@@ -19,30 +16,12 @@ const faro = initializeFaro({
   instrumentations: [
     ...getWebInstrumentations({
       captureConsole: false,
-      // captureConsoleDisabledLevels: allLogLevels
     }),
   ],
-  // internalLoggerLevel: InternalLoggerLevel.OFF
+  beforeSend: (item) => {
+    return item
+  }
 });
-
-faro.api.pushLog(["Example logs"])
-
-faro.api.pushMeasurement({
-  type: "test_measurement",
-  values: {
-    random_number: 120,
-    random_float: 0.5
-  }
-},
-  {
-    context: {
-      hello: 'world'
-    }
-  }
-)
-
-faro.api.pushEvent('Example event')
-
 
 
 
