@@ -609,26 +609,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=workspace-yarn":
+"@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=fix-error-on-muted-track-renegotiation":
   version: 0.4.0
-  resolution: "@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Freact-client&commit=982e240c11d2cc8a2b1df7f0664270b4860748f2"
+  resolution: "@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Freact-client&commit=6426fe0708f403cd8f835d2650eb6e0716d1159c"
   dependencies:
     "@fishjam-dev/ts-client": "npm:0.5.0"
     events: "npm:3.3.0"
     lodash.isequal: "npm:4.5.0"
-  checksum: 10c0/4ec04c9caa52458c20ca76aa163525e73c0a36f363d4a86f0fd5170206d03296388b2ba0d1c79c492fb1c6ef4608156c136e67f58d30dcdd8210b1edcea17b3e
+  checksum: 10c0/93f5621e3f98c74e36a7cebbcda4cdd53b0ef4a228c050b413727814f18f3c1c443602793a666ea6a7b626ff548f6de81c31fb312295ccbdb4882a69d585782e
   languageName: node
   linkType: hard
 
-"@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=workspace-yarn":
+"@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=fix-error-on-muted-track-renegotiation":
   version: 0.5.0
-  resolution: "@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Fts-client&commit=982e240c11d2cc8a2b1df7f0664270b4860748f2"
+  resolution: "@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Fts-client&commit=6426fe0708f403cd8f835d2650eb6e0716d1159c"
   dependencies:
     events: "npm:^3.3.0"
     protobufjs: "npm:^7.3.0"
     typed-emitter: "npm:^2.1.0"
     uuid: "npm:^9.0.1"
-  checksum: 10c0/c6008badec8baa4a1c68d1a22b164b765129716459f1207e901aa85abaae2ff210d6fcd4497a79ef541dc3003c46d25e6324c54aeebf143a54828401dbca0549
+  checksum: 10c0/42eaadfe8a82a9353df8c4975160d9f7d52f7272d6980947ca7d4808e346b6ae0260e929e06c52d3beacda5d12d78ced7e1a362c38a7cf8a8e835afab8a6ab72
   languageName: node
   linkType: hard
 
@@ -1268,11 +1268,11 @@ __metadata:
   linkType: hard
 
 "acorn@npm:^8.9.0":
-  version: 8.12.0
-  resolution: "acorn@npm:8.12.0"
+  version: 8.12.1
+  resolution: "acorn@npm:8.12.1"
   bin:
     acorn: bin/acorn
-  checksum: 10c0/a19f9dead009d3b430fa3c253710b47778cdaace15b316de6de93a68c355507bc1072a9956372b6c990cbeeb167d4a929249d0faeb8ae4bb6911d68d53299549
+  checksum: 10c0/51fb26cd678f914e13287e886da2d7021f8c2bc0ccc95e03d3e0447ee278dd3b40b9c57dc222acd5881adcf26f3edc40901a4953403232129e3876793cd17386
   languageName: node
   linkType: hard
 
@@ -1531,9 +1531,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001599, caniuse-lite@npm:^1.0.30001629":
-  version: 1.0.30001639
-  resolution: "caniuse-lite@npm:1.0.30001639"
-  checksum: 10c0/3f56ce3d516a4fba959ad10ed6ecb15c6329233fc01f9f2714234a2ca91f408296d708a366ece510ca6566f71cb80d20d4c019441a1451ac1456e0128c8de78a
+  version: 1.0.30001640
+  resolution: "caniuse-lite@npm:1.0.30001640"
+  checksum: 10c0/d87fce999e52c354029893a23887d2e48ac297e3af55bd14161fcafdd711f97bdb2649c79d2d3049e628603cb59bc4257ca2961644b0b8d206e7b7dd126d37ea
   languageName: node
   linkType: hard
 
@@ -2225,7 +2225,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "fishjam-videoroom@workspace:."
   dependencies:
-    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=workspace-yarn"
+    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=fix-error-on-muted-track-renegotiation"
     "@mediapipe/tasks-vision": "npm:^0.10.12"
     "@types/ramda": "npm:^0.29.11"
     "@types/react": "npm:^18.2.67"
@@ -3429,7 +3429,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.23, postcss@npm:^8.4.37, postcss@npm:^8.4.38":
+"postcss@npm:^8.4.23, postcss@npm:^8.4.37, postcss@npm:^8.4.39":
   version: 8.4.39
   resolution: "postcss@npm:8.4.39"
   dependencies:
@@ -4325,8 +4325,8 @@ __metadata:
   linkType: hard
 
 "update-browserslist-db@npm:^1.0.16":
-  version: 1.0.16
-  resolution: "update-browserslist-db@npm:1.0.16"
+  version: 1.1.0
+  resolution: "update-browserslist-db@npm:1.1.0"
   dependencies:
     escalade: "npm:^3.1.2"
     picocolors: "npm:^1.0.1"
@@ -4334,7 +4334,7 @@ __metadata:
     browserslist: ">= 4.21.0"
   bin:
     update-browserslist-db: cli.js
-  checksum: 10c0/5995399fc202adbb51567e4810e146cdf7af630a92cc969365a099150cb00597e425cc14987ca7080b09a4d0cfd2a3de53fbe72eebff171aed7f9bb81f9bf405
+  checksum: 10c0/a7452de47785842736fb71547651c5bbe5b4dc1e3722ccf48a704b7b34e4dcf633991eaa8e4a6a517ffb738b3252eede3773bef673ef9021baa26b056d63a5b9
   languageName: node
   linkType: hard
 
@@ -4426,12 +4426,12 @@ __metadata:
   linkType: hard
 
 "vite@npm:^5.1.6":
-  version: 5.3.2
-  resolution: "vite@npm:5.3.2"
+  version: 5.3.3
+  resolution: "vite@npm:5.3.3"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
-    postcss: "npm:^8.4.38"
+    postcss: "npm:^8.4.39"
     rollup: "npm:^4.13.0"
   peerDependencies:
     "@types/node": ^18.0.0 || >=20.0.0
@@ -4461,7 +4461,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/3ed576d18c6c008ae92be68f9c79bf7556dae10978a3e8b4c4b42199424755e5c99836e6d4f81fb8b533b957d7f4e351abc60b8a93f4c4b5eb9890b5b6450926
+  checksum: 10c0/a796872e1d11875d994615cd00da185c80eeb7753034d35c096050bf3c269c02004070cf623c5fe2a4a90ea2f12488e6f9d13933ec810f117f1b931e1b5e3385
   languageName: node
   linkType: hard
 
