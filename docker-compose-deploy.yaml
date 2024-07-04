@@ -70,7 +70,6 @@ services:
       - '${ALLOY_CONFIG_PATH}/${ALLOY_CONFIG_FILE}'
     ports:
       - '12345:12345'
-      - '8027:8027'
 
 volumes:
   grafana-storage:

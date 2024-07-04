@@ -114,9 +114,10 @@ services:
       - '--server.http.listen-addr=0.0.0.0:12345'
       - '--config.extra-args="-config.expand-env"'
       - '${ALLOY_CONFIG_PATH}/${ALLOY_CONFIG_FILE}'
+    expose:
+      - "8027"
     ports:
       - '${AGENT_PORT}:${AGENT_PORT}'
-      - '${AGENT_PORT_APP_RECEIVER}:${AGENT_PORT_APP_RECEIVER}'
 
 volumes:
   grafana-storage:
