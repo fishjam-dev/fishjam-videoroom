@@ -11,13 +11,14 @@ import {
 
 initializeFaro({
   url: `${window.location.origin}/collect`,
+  apiKey: import.meta.env.VITE_ALLOY_API_KEY,
   app: {
     name: 'Your App Name',
     version: '1.0.0',
   },
   instrumentations: [
     ...getWebInstrumentations({
-      captureConsole: false,
+      captureConsole: true,
     }),
   ],
   beforeSend: (item) => {

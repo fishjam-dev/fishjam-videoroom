@@ -51,6 +51,7 @@ services:
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
         FISHJAM_VERSION: ${FISHJAM_VERSION:-0.3.0}
         FISHJAM_ROOM_VERSION: ${FISHJAM_ROOM_VERSION:-build}
+        ALLOY_API_KEY: ${ALLOY_API_KEY}
     container_name: frontend
     restart: unless-stopped
     depends_on:

@@ -2,6 +2,7 @@ faro.receiver "default" {
     server {
       listen_address           = "0.0.0.0"
       listen_port              = env("AGENT_PORT_APP_RECEIVER")
+      api_key                  = env("ALLOY_API_KEY")
       cors_allowed_origins     = ["*"]
       max_allowed_payload_size = "10MiB"
 
