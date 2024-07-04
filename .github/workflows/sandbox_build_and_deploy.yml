@@ -26,10 +26,6 @@ jobs:
           fishjam=$(cat .fishjam-version)
           EOF
           
-      - name: Update docker images
-        run: |
-         docker compose -f docker-compose-deploy.yaml pull 
-
       - name: Prepare .env file for the deployment
         id: variables_population
         run: |
@@ -54,8 +50,6 @@ jobs:
           command: |
             docker ps -aq | xargs -r docker stop | xargs -r docker rm 
             
-    
-
       - name: Deploy docker compose to a pre-configured server on first host
         uses: TapTap21/docker-remote-deployment-action@v1.1
         with:
