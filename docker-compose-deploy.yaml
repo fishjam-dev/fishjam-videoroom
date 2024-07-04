@@ -6,6 +6,7 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
+        ALLOY_HOST: ${ALLOY_HOST}
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
         FISHJAM_ROOM_VERSION: ${FISHJAM_ROOM_VERSION}
         FISHJAM_VERSION: ${FISHJAM_VERSION}
@@ -50,8 +51,6 @@ services:
       context: ./infra/loki/
       dockerfile: Dockerfile
     container_name: loki
-    ports:
-      - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - loki-data:/loki
@@ -60,6 +59,7 @@ services:
     build:
       context: ./infra/alloy/
       dockerfile: Dockerfile
+    container_name: alloy
     env_file:
       - './.env.example'
     entrypoint:
@@ -68,8 +68,9 @@ services:
       - '--server.http.listen-addr=0.0.0.0:12345'
       - '--config.extra-args="-config.expand-env"'
       - '${ALLOY_CONFIG_PATH}/${ALLOY_CONFIG_FILE}'
-    environment:
-      AGENT_PORT_APP_RECEIVER: 8027
+    ports:
+      - '12345:12345'
+      - '8027:8027'
 
 volumes:
   grafana-storage:

@@ -7,8 +7,10 @@ import {
   initializeFaro,
 } from '@grafana/faro-web-sdk';
 
+const alloy_host = import.meta.env.VITE_ALLOY_HOST || "localhost"
+console.log(alloy_host)
 initializeFaro({
-  url: 'http://localhost:8027/collect',
+  url: `http://${alloy_host}:8027/collect`,
   app: {
     name: 'Your App Name',
     version: '1.0.0',

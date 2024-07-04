@@ -80,31 +80,34 @@ services:
       - "5004:5004"
 
   grafana:
-    image: grafana/grafana:latest
+    build:
+      context: ./infra/grafana/
+      dockerfile: Dockerfile
+    container_name: grafana
     ports:
       - "3000:3000"
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     volumes:
-      - ./infra/grafana/provisioning:/etc/grafana/provisioning
       - grafana-storage:/var/lib/grafana
 
   loki:
-    image: grafana/loki:latest
-    ports:
-      - "3100:3100"
+    build:
+      context: ./infra/loki/
+      dockerfile: Dockerfile
+    container_name: loki
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./infra/loki/loki-config.yaml:/etc/loki/local-config.yaml
-      - loki-data:/loki # Mount a volume for the WAL directory
+      - loki-data:/loki
 
   grafana-alloy:
+    build:
+      context: ./infra/alloy/
+      dockerfile: Dockerfile
+    container_name: alloy
     env_file:
-      - './.env'
-    image: grafana/alloy:latest
-    volumes:
-      - ./infra/alloy/config.alloy:/etc/alloy/config.alloy
+      - './.env.example'
     entrypoint:
       - '/bin/alloy'
       - 'run'
