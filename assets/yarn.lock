@@ -609,26 +609,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=fix-error-on-muted-track-renegotiation":
+"@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=main":
   version: 0.4.0
-  resolution: "@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Freact-client&commit=6426fe0708f403cd8f835d2650eb6e0716d1159c"
+  resolution: "@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Freact-client&commit=6fbc6744ac1a3fac25fc4222ebcc6393a60174d6"
   dependencies:
     "@fishjam-dev/ts-client": "npm:0.5.0"
     events: "npm:3.3.0"
     lodash.isequal: "npm:4.5.0"
-  checksum: 10c0/93f5621e3f98c74e36a7cebbcda4cdd53b0ef4a228c050b413727814f18f3c1c443602793a666ea6a7b626ff548f6de81c31fb312295ccbdb4882a69d585782e
+  checksum: 10c0/d5e7f6a2b4b2ea511a513de9cfa65504951a0676181dffb4f1c721edb4f9e6310d39cffcb737799bd7953e7c97313e23e823162145eae34365791a8c8195fb26
   languageName: node
   linkType: hard
 
-"@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=fix-error-on-muted-track-renegotiation":
+"@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=main":
   version: 0.5.0
-  resolution: "@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Fts-client&commit=6426fe0708f403cd8f835d2650eb6e0716d1159c"
+  resolution: "@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Fts-client&commit=6fbc6744ac1a3fac25fc4222ebcc6393a60174d6"
   dependencies:
     events: "npm:^3.3.0"
     protobufjs: "npm:^7.3.0"
     typed-emitter: "npm:^2.1.0"
-    uuid: "npm:^9.0.1"
-  checksum: 10c0/42eaadfe8a82a9353df8c4975160d9f7d52f7272d6980947ca7d4808e346b6ae0260e929e06c52d3beacda5d12d78ced7e1a362c38a7cf8a8e835afab8a6ab72
+    uuid: "npm:^10.0.0"
+  checksum: 10c0/17157b5c0a2b4ef885387ca26abff7e1b551298520adb65e61e993e511fd3fbd915cb309370c29b707a06ad81c45d147f10bae89a8dbd45fc5fdcfe49ced59fc
   languageName: node
   linkType: hard
 
@@ -875,10 +875,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.17.0":
-  version: 1.17.0
-  resolution: "@remix-run/router@npm:1.17.0"
-  checksum: 10c0/6f39cb81c5dec3d3cb901cfc05ef1c745d23192def7d83e6d1a53c43cbb5d7ff488055fd1418ac72f904ff41b3d3ca339d223677994150f276c648123ce166f7
+"@remix-run/router@npm:1.17.1":
+  version: 1.17.1
+  resolution: "@remix-run/router@npm:1.17.1"
+  checksum: 10c0/bee1631feb03975b64e1c7b574da432a05095dda2ff0f164c737e4952841a58d7b9861de87bd13a977fd970c74dcf8c558fc2d26c6ec01a9ae9041b1b4430869
   languageName: node
   linkType: hard
 
@@ -2225,7 +2225,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "fishjam-videoroom@workspace:."
   dependencies:
-    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=fix-error-on-muted-track-renegotiation"
+    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=main"
     "@mediapipe/tasks-vision": "npm:^0.10.12"
     "@types/ramda": "npm:^0.29.11"
     "@types/react": "npm:^18.2.67"
@@ -2322,8 +2322,8 @@ __metadata:
   linkType: hard
 
 "framer-motion@npm:^11.0.15":
-  version: 11.2.12
-  resolution: "framer-motion@npm:11.2.12"
+  version: 11.2.13
+  resolution: "framer-motion@npm:11.2.13"
   dependencies:
     tslib: "npm:^2.4.0"
   peerDependencies:
@@ -2337,7 +2337,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 10c0/a0f4460d2f135742389cf616968314fabee75ad9740fcb62a1c414deee8ade12ac19f4df3e399b819ce2337b9e76fe5a5363787decc60375477f5d23304f73f4
+  checksum: 10c0/f3f232e7208727145443b59b909841b37649409910c2e49cdaebae760215bbca57820530ecbae015791b11dd5d7b944ee8f1a6982d511e2e9a187f76ef30a7fd
   languageName: node
   linkType: hard
 
@@ -3613,26 +3613,26 @@ __metadata:
   linkType: hard
 
 "react-router-dom@npm:^6.22.3":
-  version: 6.24.0
-  resolution: "react-router-dom@npm:6.24.0"
+  version: 6.24.1
+  resolution: "react-router-dom@npm:6.24.1"
   dependencies:
-    "@remix-run/router": "npm:1.17.0"
-    react-router: "npm:6.24.0"
+    "@remix-run/router": "npm:1.17.1"
+    react-router: "npm:6.24.1"
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: 10c0/2cb41120c1ff58fd1e187807214cf581e78e2845e5f411aa6a04f4748bd100431fd1ac5f8a45db281ea03d0d2354b66896b938c0b77adf7b343a6c1be52411de
+  checksum: 10c0/458c6c539304984c47b0ad8d5d5b1f8859cc0845e47591d530cb4fcb13498f70a89b42bc4daeea55d57cfa08408b453bcf601cabb2c987f554cdcac13805caa8
   languageName: node
   linkType: hard
 
-"react-router@npm:6.24.0":
-  version: 6.24.0
-  resolution: "react-router@npm:6.24.0"
+"react-router@npm:6.24.1":
+  version: 6.24.1
+  resolution: "react-router@npm:6.24.1"
   dependencies:
-    "@remix-run/router": "npm:1.17.0"
+    "@remix-run/router": "npm:1.17.1"
   peerDependencies:
     react: ">=16.8"
-  checksum: 10c0/ad9c924d16dc4f5c90dff588e9a69d37488d2ad537de1ddbdf3b68561658c6e3fd1b8b12d16d50f19177f6547748c54e948d477e921f9230799ac71acfec24cf
+  checksum: 10c0/f50c78ca52c5154ab933c17708125e8bf71ccf2072993a80302526a0a23db9ceac6e36d5c891d62ccd16f13e60cd1b6533a2036523d1b09e0148ac49e34b2e83
   languageName: node
   linkType: hard
 
@@ -4363,6 +4363,15 @@ __metadata:
   version: 1.0.2
   resolution: "util-deprecate@npm:1.0.2"
   checksum: 10c0/41a5bdd214df2f6c3ecf8622745e4a366c4adced864bc3c833739791aeeeb1838119af7daed4ba36428114b5c67dcda034a79c882e97e43c03e66a4dd7389942
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "uuid@npm:10.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 10c0/eab18c27fe4ab9fb9709a5d5f40119b45f2ec8314f8d4cf12ce27e4c6f4ffa4a6321dc7db6c515068fa373c075b49691ba969f0010bf37f44c37ca40cd6bf7fe
   languageName: node
   linkType: hard
 
