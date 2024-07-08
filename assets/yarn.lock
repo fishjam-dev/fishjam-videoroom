@@ -609,26 +609,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=main":
+"@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=fix-install-from-branch":
   version: 0.4.0
-  resolution: "@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Freact-client&commit=6fbc6744ac1a3fac25fc4222ebcc6393a60174d6"
+  resolution: "@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Freact-client&commit=910fe5f36c019c02c8ede9cf7c7dd13ca0055693"
   dependencies:
     "@fishjam-dev/ts-client": "npm:0.5.0"
     events: "npm:3.3.0"
     lodash.isequal: "npm:4.5.0"
-  checksum: 10c0/d5e7f6a2b4b2ea511a513de9cfa65504951a0676181dffb4f1c721edb4f9e6310d39cffcb737799bd7953e7c97313e23e823162145eae34365791a8c8195fb26
+  checksum: 10c0/52d899be6ddfe547bfe9914a27e6391c974940c028c56d0c4607e6477e1bd67f014d43e28482eb18f16e2c0b0cee20af92f1f867dda65df7291c8be6ffac91d1
   languageName: node
   linkType: hard
 
-"@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=main":
+"@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=fix-install-from-branch":
   version: 0.5.0
-  resolution: "@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Fts-client&commit=6fbc6744ac1a3fac25fc4222ebcc6393a60174d6"
+  resolution: "@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Fts-client&commit=910fe5f36c019c02c8ede9cf7c7dd13ca0055693"
   dependencies:
     events: "npm:^3.3.0"
     protobufjs: "npm:^7.3.0"
     typed-emitter: "npm:^2.1.0"
     uuid: "npm:^10.0.0"
-  checksum: 10c0/17157b5c0a2b4ef885387ca26abff7e1b551298520adb65e61e993e511fd3fbd915cb309370c29b707a06ad81c45d147f10bae89a8dbd45fc5fdcfe49ced59fc
+  checksum: 10c0/2002134b312308b7af70cb33f23da0d01fbae0dc6f4658af1dad6db5eaadd988abf3b2be953e8b9804c0c5816d0cfc47c5cf6df6b805f6f16f5b0a3c50ae0219
   languageName: node
   linkType: hard
 
@@ -1166,11 +1166,11 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:>=13.7.0":
-  version: 20.14.9
-  resolution: "@types/node@npm:20.14.9"
+  version: 20.14.10
+  resolution: "@types/node@npm:20.14.10"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10c0/911ffa444dc032897f4a23ed580c67903bd38ea1c5ec99b1d00fa10b83537a3adddef8e1f29710cbdd8e556a61407ed008e06537d834e48caf449ce59f87d387
+  checksum: 10c0/0b06cff14365c2d0085dc16cc8cbea5c40ec09cfc1fea966be9eeecf35562760bfde8f88e86de6edfaf394501236e229d9c1084fad04fb4dec472ae245d8ae69
   languageName: node
   linkType: hard
 
@@ -1959,9 +1959,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.796":
-  version: 1.4.816
-  resolution: "electron-to-chromium@npm:1.4.816"
-  checksum: 10c0/1a84bc42234484cbc5e8b521de57fd3ab9984a2111d8605eab26b3525f382c0c7b83b45bf8b34e5fa4a730cd183fef5dffa4a0627754c7f4fb0aae9cb3c16b37
+  version: 1.4.818
+  resolution: "electron-to-chromium@npm:1.4.818"
+  checksum: 10c0/1838794032cd13994349bc7a6d16decdddd3d6e36c80cd09385c8d33fccc66f198dac168a9bc3fbde42af5b94008e1766ead6e64a70749116640a20e9859e4eb
   languageName: node
   linkType: hard
 
@@ -2348,7 +2348,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "fishjam-videoroom@workspace:."
   dependencies:
-    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=main"
+    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=fix-install-from-branch"
     "@grafana/faro-web-sdk": "npm:^1.8.1"
     "@mediapipe/tasks-vision": "npm:^0.10.12"
     "@types/ramda": "npm:^0.29.11"
@@ -2553,8 +2553,8 @@ __metadata:
   linkType: hard
 
 "glob@npm:^10.2.2, glob@npm:^10.3.10":
-  version: 10.4.2
-  resolution: "glob@npm:10.4.2"
+  version: 10.4.3
+  resolution: "glob@npm:10.4.3"
   dependencies:
     foreground-child: "npm:^3.1.0"
     jackspeak: "npm:^3.1.2"
@@ -2564,7 +2564,7 @@ __metadata:
     path-scurry: "npm:^1.11.1"
   bin:
     glob: dist/esm/bin.mjs
-  checksum: 10c0/2c7296695fa75a935f3ad17dc62e4e170a8bb8752cf64d328be8992dd6ad40777939003754e10e9741ff8fbe43aa52fba32d6930d0ffa0e3b74bc3fb5eebaa2f
+  checksum: 10c0/bea148e5dae96c17e2764f4764c72376a6ab7072b27a21e861ae4af6f97f3e810d79d67f64de52f63ce1d7fdb73b7306f61c65b48d0f61ca7c8647ce8acaf9a7
   languageName: node
   linkType: hard
 
@@ -2836,15 +2836,15 @@ __metadata:
   linkType: hard
 
 "jackspeak@npm:^3.1.2":
-  version: 3.4.0
-  resolution: "jackspeak@npm:3.4.0"
+  version: 3.4.1
+  resolution: "jackspeak@npm:3.4.1"
   dependencies:
     "@isaacs/cliui": "npm:^8.0.2"
     "@pkgjs/parseargs": "npm:^0.11.0"
   dependenciesMeta:
     "@pkgjs/parseargs":
       optional: true
-  checksum: 10c0/7e42d1ea411b4d57d43ea8a6afbca9224382804359cb72626d0fc45bb8db1de5ad0248283c3db45fe73e77210750d4fcc7c2b4fe5d24fda94aaa24d658295c5f
+  checksum: 10c0/4cba6fc728c5460328c9fcf42f1fa780c204f8456f123b04f4b4c996e1e2af2b28ff25876bcdc19b7639dd6eb6ff6dc4a613d27f67e62cd92c4dfe2123fdaa35
   languageName: node
   linkType: hard
 
@@ -3030,9 +3030,9 @@ __metadata:
   linkType: hard
 
 "lru-cache@npm:^10.0.1, lru-cache@npm:^10.2.0":
-  version: 10.3.0
-  resolution: "lru-cache@npm:10.3.0"
-  checksum: 10c0/02d57024d90672774d66e0b76328a8975483b782c68118078363be17b8e0efb4f2bee89d98ce87e72f42d68fe7cb4ad14b1205d43e4f9954f5c91e3be4eaceb8
+  version: 10.4.0
+  resolution: "lru-cache@npm:10.4.0"
+  checksum: 10c0/2ea052e95431b50d82ac5d657e0308fed3e58031ec6153a7e019c586fc1255521273b6b14b9598745c869556338d5f31d4059f648ea2475e88df49ea140d9e07
   languageName: node
   linkType: hard
 

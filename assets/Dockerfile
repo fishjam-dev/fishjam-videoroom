@@ -25,10 +25,11 @@ USER node
 
 COPY package*.json ./
 COPY .yarnrc.yml ./
+COPY yarn.lock ./
 
 # ==== BUILD =====
 # Install dependencies
-RUN yarn
+RUN yarn --immutable
 
 # Copy application files
 COPY . .
