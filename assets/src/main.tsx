@@ -13,7 +13,7 @@ initializeFaro({
   url: `${window.location.origin}/collect`,
   apiKey: import.meta.env.VITE_ALLOY_API_KEY,
   app: {
-    name: 'Your App Name',
+    name: 'Videoroom',
     version: '1.0.0',
   },
   instrumentations: [
