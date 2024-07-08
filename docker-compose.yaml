@@ -109,7 +109,7 @@ services:
     container_name: alloy
     environment:
       - ALLOY_API_KEY=${ALLOY_API_KEY}
-      - AGENT_PORT_APP_RECEIVER=${AGENT_PORT_APP_RECEIVER}
+      - AGENT_PORT_APP_RECEIVER=${AGENT_PORT_APP_RECEIVER:-8027}
     entrypoint:
       - '/bin/alloy'
       - 'run'
