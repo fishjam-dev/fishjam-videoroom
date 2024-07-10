@@ -140,6 +140,7 @@ defmodule Videoroom.Meeting do
     else
       Logger.warning("Inserting room with id #{room.id} to RoomRegistry failed")
       Room.delete(client, room.id)
+      RoomRegistry.delete(name)
       {:error, :registry_insert_failed}
     end
   end
