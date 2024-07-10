@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=fix-install-from-branch",
+    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=main",
     "@grafana/faro-web-sdk": "^1.8.1",
     "@mediapipe/tasks-vision": "^0.10.12",
     "axios": "^1.6.8",
@@ -35,10 +35,10 @@
     "zod": "^3.22.4"
   },
   "resolutions": {
-    "@fishjam-dev/ts-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=fix-install-from-branch"
+    "@fishjam-dev/ts-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=main"
   },
   "overrides": {
-    "@fishjam-dev/ts-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=fix-install-from-branch"
+    "@fishjam-dev/ts-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=main"
   },
   "devDependencies": {
     "@types/ramda": "^0.29.11",

@@ -609,20 +609,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=fix-install-from-branch":
+"@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=main":
   version: 0.4.0
-  resolution: "@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Freact-client&commit=910fe5f36c019c02c8ede9cf7c7dd13ca0055693"
+  resolution: "@fishjam-dev/react-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Freact-client&commit=bb7d74b283486cfe23d5a6ae8087da4bef6f62f9"
   dependencies:
     "@fishjam-dev/ts-client": "npm:0.5.0"
     events: "npm:3.3.0"
     lodash.isequal: "npm:4.5.0"
-  checksum: 10c0/52d899be6ddfe547bfe9914a27e6391c974940c028c56d0c4607e6477e1bd67f014d43e28482eb18f16e2c0b0cee20af92f1f867dda65df7291c8be6ffac91d1
+  checksum: 10c0/cfd6229e31e3c928b8abe74bd590b22a0bf9b932b42f13e514d18422a35dd898f7023d04cbc0ca1883d8eeac246092f15a76889517f454202cbbfc8ae7ecf989
   languageName: node
   linkType: hard
 
-"@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=fix-install-from-branch":
+"@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/ts-client&head=main":
   version: 0.5.0
-  resolution: "@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Fts-client&commit=910fe5f36c019c02c8ede9cf7c7dd13ca0055693"
+  resolution: "@fishjam-dev/ts-client@https://github.com/fishjam-cloud/web-client-sdk.git#workspace=%40fishjam-dev%2Fts-client&commit=bb7d74b283486cfe23d5a6ae8087da4bef6f62f9"
   dependencies:
     events: "npm:^3.3.0"
     protobufjs: "npm:^7.3.0"
@@ -2348,7 +2348,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "fishjam-videoroom@workspace:."
   dependencies:
-    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=fix-install-from-branch"
+    "@fishjam-dev/react-client": "https://github.com/fishjam-cloud/web-client-sdk.git#workspace=@fishjam-dev/react-client&head=main"
     "@grafana/faro-web-sdk": "npm:^1.8.1"
     "@mediapipe/tasks-vision": "npm:^0.10.12"
     "@types/ramda": "npm:^0.29.11"
