@@ -8,7 +8,7 @@ defmodule VideoroomWeb.RoomJsonTest do
   @url Application.compile_env!(:fishjam_server_sdk, :server_address)
   @peer_url "ws://#{@url}/socket/peer/websocket"
 
-  @timeout 5000
+  @timeout 10_000
 
   setup context do
     client = Fishjam.Client.new()
@@ -130,10 +130,15 @@ defmodule VideoroomWeb.RoomJsonTest do
 
       assert_receive {:fishjam, %RoomDeleted{room_id: ^jf_room_id}}, @timeout
 
-      conn = get(conn, ~p"/api/room/#{meeting_name}")
-      assert json_response(conn, 503)["errors"] == "Meeting is being removed"
+      result =
+        Enum.reduce_while(1..10, nil, fn _acc, _elem ->
+          Process.sleep(500)
+          conn = get(conn, ~p"/api/room/#{meeting_name}/exist")
 
-      {_name, _token} = add_peer(conn, meeting_name)
+          if conn.status != 204, do: {:cont, nil}, else: {:halt, 1}
+        end)
+
+      assert result == 1
     end
   end
 

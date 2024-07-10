@@ -6,6 +6,7 @@ services:
       context: ./assets
       dockerfile: ./Dockerfile
       args:
+        ALLOY_API_KEY: ${ALLOY_API_KEY}
         FE_BE_HOST: ${BE_HOST:-$DOMAIN:5004}
         FISHJAM_ROOM_VERSION: ${FISHJAM_ROOM_VERSION}
         FISHJAM_VERSION: ${FISHJAM_VERSION}
@@ -14,7 +15,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "5005:5005"
+      - "127.0.0.1:5005:5005"
 
   backend:
     build:
@@ -30,5 +31,43 @@ services:
       BE_JF_ADDRESS: ${BE_JF_ADDRESS}
     restart: unless-stopped
     ports:
-      - "5004:5004"
+      - "127.0.0.1:5004:5004"
 
+  grafana:
+    build:
+      context: ./infra/grafana/
+      dockerfile: Dockerfile
+    container_name: grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GF_SECURITY_ADMIN_PASSWORD}"
+      GF_SECURITY_ADMIN_USER: "${GF_SECURITY_ADMIN_USER}"
+      GF_SERVER_ROOT_URL: "http://${DOMAIN}/grafana"
+
+  loki:
+    build:
+      context: ./infra/loki/
+      dockerfile: Dockerfile
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-data:/loki
+
+  grafana-alloy:
+    build:
+      context: ./infra/alloy/
+      dockerfile: Dockerfile
+    container_name: alloy
+    environment:
+      - ALLOY_API_KEY=${ALLOY_API_KEY}
+      - AGENT_PORT_APP_RECEIVER=${AGENT_PORT_APP_RECEIVER:-8027}
+    entrypoint:
+      - '/bin/alloy'
+      - 'run'
+      - '--server.http.listen-addr=127.0.0.1:12345'
+      - '--config.extra-args="-config.expand-env"'
+      - '${ALLOY_CONFIG_PATH:-/etc/alloy}/${ALLOY_CONFIG_FILE:-config.alloy}'
+
+volumes:
+  loki-data:

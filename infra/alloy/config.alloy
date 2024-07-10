@@ -1,0 +1,34 @@
+faro.receiver "default" {
+    server {
+      listen_address           = "0.0.0.0"
+      listen_port              = env("AGENT_PORT_APP_RECEIVER")
+      api_key                  = env("ALLOY_API_KEY")
+      cors_allowed_origins     = ["*"]
+      max_allowed_payload_size = "10MiB"
+
+      rate_limiting {
+        rate = 50
+      }
+    }
+    
+
+  extra_log_labels = {
+		app  = "videoroom",
+		kind = "",
+	}
+
+    sourcemaps {
+    }
+
+    output {
+        logs   = [loki.write.default.receiver]
+        traces = []
+    }
+}
+
+loki.write "default" {
+    endpoint {
+        url = "http://loki:3100/loki/api/v1/push"
+    }
+}
+

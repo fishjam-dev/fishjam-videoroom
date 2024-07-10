@@ -28,6 +28,9 @@ jobs:
         id: variables_population
         run: |
           echo "DOMAIN=${{env.DOMAIN}}
+          GF_SECURITY_ADMIN_PASSWORD=${{secrets.GF_SECURITY_ADMIN_PASSWORD}}
+          GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}} 
+          ALLOY_API_KEY=${{secrets.ALLOY_API_KEY}}
           FISHJAM_ROOM_VERSION=${{ steps.versions.outputs.fishjam_room }}
           FISHJAM_VERSION=${{ steps.versions.outputs.fishjam }}
           JF_SERVER_API_TOKEN=${{secrets.SERVER_API_TOKEN_CLOUD_STAGING}}
@@ -50,4 +53,4 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIV_KEY }}
           ssh_public_key: ${{ secrets.SSH_PUB_KEY }}
           stack_file_name: ${{ env.COMPOSE_FILE_NAME }}
-          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build frontend backend
+          args: -p ${{ env.PROJECT }} --env-file .env up -d --remove-orphans --build 

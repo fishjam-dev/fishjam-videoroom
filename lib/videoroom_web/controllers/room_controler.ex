@@ -6,7 +6,7 @@ defmodule VideoroomWeb.RoomController do
   alias Videoroom.ApiSpec.Error
   alias VideoroomWeb.ApiSpec.Token
 
-  alias Videoroom.RoomService
+  alias Videoroom.{RoomRegistry, RoomService}
 
   tags [:room]
 
@@ -29,6 +29,28 @@ defmodule VideoroomWeb.RoomController do
     responses: [
       ok: {"Room response", "application/json", Token},
       service_unavailable: {"Error", "application/json", Error}
+    ]
+  )
+
+  operation(:exist,
+    summary: "Check if room exists",
+    description: "Check if room with this name still exist",
+    operationId: "RoomController.Head",
+    parameters: [
+      room_name: [
+        in: :path,
+        description: "Room name",
+        type: :string
+      ]
+    ],
+    request_body: {
+      "Room params",
+      "application/json",
+      %Schema{}
+    },
+    responses: [
+      no_content: "Room does not exist",
+      ok: "Room exsits"
     ]
   )
 
@@ -60,6 +82,22 @@ defmodule VideoroomWeb.RoomController do
         |> put_resp_content_type("application/json")
         |> put_status(503)
         |> json(%{errors: reason})
+    end
+  end
+
+  @spec room_exists(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def room_exists(conn, %{"room_name" => name}) do
+    Registry.lookup(Videoroom.Registry, name)
+
+    case {RoomRegistry.lookup_meeting(name), Registry.lookup(Videoroom.Registry, name)} do
+      {{:error, :unregistered}, _registry} ->
+        send_resp(conn, 204, "Room doesn't exist")
+
+      {_status, []} ->
+        send_resp(conn, 204, "Room doesn't exist")
+
+      {{:ok, _id}, [{_pid, _value}]} ->
+        send_resp(conn, 200, "Room exists")
     end
   end
 

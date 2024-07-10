@@ -9,6 +9,7 @@ defmodule VideoroomWeb.Router do
     pipe_through :api
 
     get "/room/:room_name", RoomController, :show
+    get "/room/:room_name/exist", RoomController, :room_exists
     post "/room/:room_name/start_recording", RoomController, :start_recording
   end
 

@@ -5,11 +5,13 @@ RUN corepack enable
 WORKDIR '/app'
 
 ARG FE_BE_HOST
+ARG ALLOY_API_KEY
 ARG FISHJAM_ROOM_VERSION
 ARG FISHJAM_VERSION
 ENV VITE_BE_HOST=$FE_BE_HOST
 ENV VITE_FISHJAM_ROOM_VERSION=$FISHJAM_ROOM_VERSION
 ENV VITE_FISHJAM_VERSION=$FISHJAM_VERSION
+ENV VITE_ALLOY_API_KEY=$ALLOY_API_KEY
 
 # Install nodejs and npm
 RUN apk add --no-cache git
@@ -23,10 +25,11 @@ USER node
 
 COPY package*.json ./
 COPY .yarnrc.yml ./
+COPY yarn.lock ./
 
 # ==== BUILD =====
 # Install dependencies
-RUN yarn
+RUN yarn --immutable
 
 # Copy application files
 COPY . .

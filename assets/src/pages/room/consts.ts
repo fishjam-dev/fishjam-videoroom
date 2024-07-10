@@ -45,7 +45,7 @@ export const BACKEND_URL = isDevEnv ?
   new URL(window.location.origin) :
   new URL(`${protocol}://${import.meta.env.VITE_BE_HOST}`)
 
-  // @ts-ignore
+// @ts-ignore
 export const FISHJAM_VERSION = import.meta.env.VITE_FISHJAM_VERSION
 // @ts-ignore
 export const FISHJAM_ROOM_VERSION = import.meta.env.VITE_FISHJAM_ROOM_VERSION
