@@ -44,7 +44,6 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: "${GF_SECURITY_ADMIN_PASSWORD}"
       GF_SECURITY_ADMIN_USER: "${GF_SECURITY_ADMIN_USER}"
       GF_SERVER_ROOT_URL: "http://${DOMAIN}/grafana"
-      # GF_SERVER_SERVE_FROM_SUB_PATH: "true"
 
   loki:
     build:
@@ -68,7 +67,7 @@ services:
       - 'run'
       - '--server.http.listen-addr=127.0.0.1:12345'
       - '--config.extra-args="-config.expand-env"'
-      - '${ALLOY_CONFIG_PATH}/${ALLOY_CONFIG_FILE}'
+      - '${ALLOY_CONFIG_PATH:-/etc/alloy}/${ALLOY_CONFIG_FILE:-config.alloy}'
 
 volumes:
   loki-data:

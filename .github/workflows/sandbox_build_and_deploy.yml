@@ -32,9 +32,6 @@ jobs:
           echo "DOMAIN=${{env.DOMAIN}}
           GF_SECURITY_ADMIN_PASSWORD=${{secrets.GF_SECURITY_ADMIN_PASSWORD}}
           GF_SECURITY_ADMIN_USER=${{secrets.GF_SECURITY_ADMIN_USER}} 
-          ALLOY_CONFIG_FILE=config.alloy
-          ALLOY_CONFIG_PATH=/etc/alloy
-          ALLOY_CONFIG_PATH_LOCAL=./infra/alloy/config
           ALLOY_API_KEY=${{secrets.ALLOY_API_KEY}}
           ALLOY_HOST=${{env.DOMAIN}}
           FISHJAM_ROOM_VERSION=${{ steps.versions.outputs.fishjam_room }}

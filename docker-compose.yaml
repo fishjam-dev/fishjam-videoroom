@@ -113,7 +113,7 @@ services:
       - 'run'
       - '--server.http.listen-addr=127.0.0.1:12345'
       - '--config.extra-args="-config.expand-env"'
-      - '${ALLOY_CONFIG_PATH}/${ALLOY_CONFIG_FILE}'
+      - '${ALLOY_CONFIG_PATH:-/etc/alloy}/${ALLOY_CONFIG_FILE:-config.alloy}'
 volumes:
   grafana-storage:
   loki-data:
