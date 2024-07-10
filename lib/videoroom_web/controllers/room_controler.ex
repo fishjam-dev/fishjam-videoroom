@@ -86,7 +86,7 @@ defmodule VideoroomWeb.RoomController do
   end
 
   @spec room_exist(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def room_exist(conn, %{"room_name" => name}) do
+  def room_exists(conn, %{"room_name" => name}) do
     Registry.lookup(Videoroom.Registry, name)
 
     case {RoomRegistry.lookup_meeting(name), Registry.lookup(Videoroom.Registry, name)} do
