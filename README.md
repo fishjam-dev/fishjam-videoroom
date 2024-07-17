@@ -1,5 +1,7 @@
 # Videoroom
 
+This project is archieved and ongoing development was moved to organization [fishjam-cloud](https://github.com/fishjam-cloud/fishjam-videoroom)
+
 Videoroom is an open-source, basic video conferencing platform using WebRTC.
 It is based on [fishjam](https://github.com/fishjam-dev/fishjam), a general-purpose media server.
 Videoroom may be a good starting point for building your own real-time communication solution using Elixir and Fishjam.
